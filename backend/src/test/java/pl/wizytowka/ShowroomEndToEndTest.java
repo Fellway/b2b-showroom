@@ -13,8 +13,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import pl.wizytowka.support.LineSheetOutputFakesConfiguration;
-import pl.wizytowka.support.LineSheetOutputFakesConfiguration.RecordingLineSheetMailer;
 import pl.wizytowka.support.TestcontainersConfiguration;
 
 import javax.imageio.ImageIO;
@@ -34,11 +32,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Pełna ścieżka przez wszystkie moduły i prawdziwe adaptery (HTTP → bezpieczeństwo → aplikacja → PostgreSQL),
- * z podmienionym wyłącznie generowaniem PDF i wysyłką e-mail (adaptery Etapu 3).
+ * łącznie z prawdziwym generowaniem PDF.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import({TestcontainersConfiguration.class, LineSheetOutputFakesConfiguration.class})
+@Import({TestcontainersConfiguration.class})
 @TestPropertySource(properties = {
         "showroom.security.jwt.secret=c2hvd3Jvb20tZTJlLXNlY3JldC13aGljaC1pcy1sb25nLWVub3VnaC1mb3ItaHMyNTY=",
         "showroom.security.bootstrap-admin.email=owner@brand.test",
@@ -49,9 +47,6 @@ class ShowroomEndToEndTest {
 
     @Autowired
     MockMvc mvc;
-
-    @Autowired
-    RecordingLineSheetMailer mailer;
 
     @Test
     void adminPublishesProductAndBuyerReceivesLineSheet() throws Exception {
@@ -107,13 +102,13 @@ class ShowroomEndToEndTest {
                 .andExpect(jsonPath("$.name").value("Koszula lniana"))
                 .andExpect(jsonPath("$.colors[0].variants[0].sku").value("LS1-NAV-M"));
 
-        // --- klient B2B: zestawienie z wysyłką e-mail i pobranie PDF
+        // --- klient B2B: zestawienie z danymi kontaktowymi i pobranie PDF (aplikacja nie wysyła e-maili)
         MvcResult created = mvc.perform(post("/api/v1/line-sheets").param("lang", "en")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"items":[{"variantId":"%s","quantity":12}],
                                  "companyName":"Boutique s.r.o.","email":"Buyer@Boutique.cz",
-                                 "privacyAccepted":true,"sendEmail":true}""".formatted(variantId)))
+                                 "privacyAccepted":true}""".formatted(variantId)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.referenceNumber").value(startsWith("LS-")))
                 .andReturn();
@@ -123,10 +118,11 @@ class ShowroomEndToEndTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_PDF))
                 .andExpect(header().string(HttpHeaders.CACHE_CONTROL, org.hamcrest.Matchers.containsString("no-store")))
                 .andReturn().getResponse().getContentAsByteArray();
-        assertThat(pdf).isEqualTo(LineSheetOutputFakesConfiguration.FAKE_PDF);
-        // wysyłka następuje synchronicznie po commicie (asynchroniczność i ponowienia — Etap 3)
-        assertThat(mailer.sent()).singleElement()
-                .satisfies(document -> assertThat(document.recipient().email()).isEqualTo("buyer@boutique.cz"));
+        assertThat(new String(pdf, 0, 5, java.nio.charset.StandardCharsets.US_ASCII)).isEqualTo("%PDF-");
+        mvc.perform(get("/api/v1/admin/line-sheets").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[0].email").value("buyer@boutique.cz"))
+                .andExpect(jsonPath("$.items[0].emailStatus").doesNotExist());
 
         // --- analityka: zdarzenie z przeglądarki + dashboard
         mvc.perform(post("/api/v1/analytics/events")

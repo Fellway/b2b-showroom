@@ -20,13 +20,13 @@ public final class LineSheetFixtures {
     }
 
     public static LineSheet anonymous(SelectedVariant... selections) {
-        return LineSheet.create("LS-2026-000001", CatalogLanguage.PL, Recipient.anonymous(), null, false, false,
+        return LineSheet.create("LS-2026-000001", CatalogLanguage.PL, Recipient.anonymous(), null, false,
                 null, null, List.of(selections), NOW);
     }
 
-    public static LineSheet withEmail(SelectedVariant... selections) {
+    public static LineSheet withContact(SelectedVariant... selections) {
         return LineSheet.create("LS-2026-000002", CatalogLanguage.EN,
                 new Recipient("Boutique s.r.o.", "Jana", "Buyer@Boutique.cz", null, "CZ12345678"),
-                "Please confirm delivery dates", true, true, null, null, List.of(selections), NOW);
+                "Please confirm delivery dates", true, null, null, List.of(selections), NOW);
     }
 }

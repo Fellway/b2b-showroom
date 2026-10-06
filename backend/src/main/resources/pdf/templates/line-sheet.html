@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${doc.languageTag}" lang="pl">
+<head>
+<meta charset="UTF-8"/>
+<title th:text="#{title} + ' ' + ${doc.referenceNumber}">Line sheet</title>
+<meta name="author" th:content="${doc.brand.name}" content=""/>
+<meta name="subject" th:content="#{title}" content=""/>
+<style th:inline="none">
+  @page {
+    size: A4 landscape;
+    margin: 14mm 13mm 16mm 13mm;
+    @bottom-left { content: element(footerLeft); vertical-align: top; }
+    @bottom-right { content: element(footerRight); vertical-align: top; }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans', sans-serif;
+    font-size: 8.4pt;
+    line-height: 1.35;
+    color: #1c1c1c;
+  }
+  .footer-left, .footer-right {
+    font-size: 7pt;
+    color: #707070;
+    padding-top: 3mm;
+  }
+  .footer-left { position: running(footerLeft); }
+  .footer-right { position: running(footerRight); text-align: right; }
+  .footer-left .sep { color: #b8b8b8; padding: 0 1.5mm; }
+  .page-number::after { content: counter(page); }
+  .page-count::after { content: counter(pages); }
+
+  /* ------------------------------------------------------------ nagłówek */
+  .masthead { width: 100%; border-collapse: collapse; margin-bottom: 6mm; }
+  .masthead td { vertical-align: bottom; padding: 0 0 3mm 0; }
+  .masthead .rule td { padding: 0; height: 0; }
+  .wordmark { font-size: 15pt; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; }
+  .logo { max-height: 14mm; max-width: 60mm; }
+  .doc-meta { text-align: right; }
+  .doc-title { font-size: 7.5pt; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #707070; }
+  .doc-ref { font-size: 13pt; font-weight: 600; margin-top: 0.5mm; }
+  .doc-date { font-size: 8pt; color: #707070; margin-top: 0.5mm; }
+
+  /* ------------------------------------------------------------ strony: klient / opiekun / wiadomość */
+  .parties { width: 100%; border-collapse: collapse; margin-bottom: 6mm; }
+  .parties td { vertical-align: top; padding: 0 8mm 0 0; }
+  .parties td.message { padding-right: 0; }
+  .label {
+    font-size: 6.6pt; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+    color: #707070; margin-bottom: 1.2mm;
+  }
+  .party-line { margin: 0 0 0.6mm 0; }
+  .party-line .key { color: #707070; }
+  .party-name { font-weight: 600; }
+  .message-text { white-space: pre-wrap; color: #333333; }
+
+  /* ------------------------------------------------------------ tabela pozycji */
+  table.items {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    -fs-table-paginate: paginate;
+    -fs-border-rendering: no-bevel;
+  }
+  table.items thead { display: table-header-group; }
+  table.items tr { page-break-inside: avoid; }
+  table.items th {
+    font-size: 6.6pt; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    color: #555555; text-align: left; vertical-align: bottom;
+    padding: 0 2mm 1.8mm 0;
+    border-bottom: 0.6pt solid #1c1c1c;
+  }
+  table.items td {
+    vertical-align: middle;
+    padding: 1mm 2mm 1mm 0;
+    border-bottom: 0.4pt solid #dcdcdc;
+  }
+  table.items .num { text-align: right; }
+  table.items th.num { text-align: right; }
+  table.items .last { padding-right: 0; }
+  .mono { font-feature-settings: "tnum"; letter-spacing: 0.02em; }
+  .thumb { width: 9.6mm; height: 12mm; display: block; }
+  .thumb-placeholder { width: 9.6mm; height: 12mm; background-color: #f1f1f1; }
+  .product-name { font-weight: 600; }
+  .style-code { color: #707070; font-size: 7.4pt; margin-top: 0.4mm; }
+  .price { font-weight: 600; }
+  .muted { color: #707070; }
+
+  /* ------------------------------------------------------------ podsumowanie */
+  .summary { width: 100%; border-collapse: collapse; margin-top: 4mm; page-break-inside: avoid; }
+  .summary td { vertical-align: top; padding: 0; }
+  .notes { color: #707070; font-size: 7.2pt; padding-right: 10mm; }
+  .notes p { margin: 0 0 0.8mm 0; }
+  .totals { width: 92mm; border-collapse: collapse; }
+  .totals td { padding: 0.9mm 0; }
+  .totals .value { text-align: right; font-weight: 600; }
+  .totals .grand td { border-top: 0.6pt solid #1c1c1c; padding-top: 1.6mm; font-size: 9.5pt; }
+  .totals .hint { color: #707070; font-size: 7pt; text-align: right; padding-top: 0; }
+</style>
+</head>
+<body>
+
+<div class="footer-left">
+  <span th:each="part, iter : ${doc.brand.footerParts}"><span th:if="${!iter.first}" class="sep">·</span><span th:text="${part}">Brand</span></span>
+</div>
+<div class="footer-right">
+  <span th:text="#{footer.page}">Strona</span> <span class="page-number"></span> <span th:text="#{footer.of}">z</span> <span class="page-count"></span>
+</div>
+
+<table class="masthead">
+  <tr>
+    <td>
+      <img th:if="${doc.brand.logoDataUri != null}" class="logo" th:src="${doc.brand.logoDataUri}" th:alt="${doc.brand.name}" src="" alt=""/>
+      <div th:if="${doc.brand.logoDataUri == null}" class="wordmark" th:text="${doc.brand.name}">Brand</div>
+    </td>
+    <td class="doc-meta">
+      <div class="doc-title" th:text="#{title}" th:style="'color:' + ${doc.brand.accentColor}">Line sheet</div>
+      <div class="doc-ref" th:text="${doc.referenceNumber}">LS-2026-000001</div>
+      <div class="doc-date" th:text="${doc.generatedAt}">date</div>
+    </td>
+  </tr>
+  <tr class="rule">
+    <td colspan="2" th:style="'border-bottom: 1.4pt solid ' + ${doc.brand.accentColor}"></td>
+  </tr>
+</table>
+
+<table class="parties" th:if="${!doc.client.isEmpty() or doc.representative != null or doc.message != null}">
+  <tr>
+    <td th:if="${!doc.client.isEmpty()}" style="width: 34%">
+      <div class="label" th:text="#{client}">Klient</div>
+      <p class="party-line" th:each="field : ${doc.client}">
+        <span class="key" th:text="#{${field.labelKey}} + ':'">Firma:</span>
+        <span th:text="${field.value}">value</span>
+      </p>
+    </td>
+    <td th:if="${doc.representative != null}" style="width: 28%">
+      <div class="label" th:text="#{representative}">Opiekun handlowy</div>
+      <p class="party-line party-name" th:text="${doc.representative.name}">Name</p>
+      <p class="party-line" th:if="${doc.representative.email != null}" th:text="${doc.representative.email}">mail</p>
+      <p class="party-line" th:if="${doc.representative.phone != null}" th:text="${doc.representative.phone}">phone</p>
+    </td>
+    <td th:if="${doc.message != null}" class="message">
+      <div class="label" th:text="#{message}">Wiadomość</div>
+      <div class="message-text" th:text="${doc.message}">message</div>
+    </td>
+  </tr>
+</table>
+
+<table class="items">
+  <colgroup>
+    <col style="width: 13mm"/>
+    <col/>
+    <col style="width: 30mm"/>
+    <col style="width: 21mm"/>
+    <col style="width: 30mm"/>
+    <col style="width: 33mm"/>
+    <col style="width: 16mm"/>
+    <col style="width: 27mm"/>
+    <col style="width: 27mm"/>
+  </colgroup>
+  <thead>
+    <tr>
+      <th><span class="muted" th:text="#{col.image}">Foto</span></th>
+      <th th:text="#{col.model}">Model</th>
+      <th th:text="#{col.color}">Kolor</th>
+      <th th:text="#{col.size}">Rozmiar</th>
+      <th th:text="#{col.ean}">EAN</th>
+      <th th:text="#{col.sku}">SKU</th>
+      <th class="num" th:text="#{col.quantity}">Ilość</th>
+      <th class="num" th:text="#{col.wholesale}">Hurt</th>
+      <th class="num last" th:text="#{col.retail}">SCD</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr th:each="row : ${doc.rows}">
+      <td>
+        <img th:if="${row.thumbnail != null}" class="thumb" th:src="${row.thumbnail}" th:alt="${row.productName}" src="" alt=""/>
+        <div th:if="${row.thumbnail == null}" class="thumb-placeholder"></div>
+      </td>
+      <td>
+        <div class="product-name" th:text="${row.productName}">Product</div>
+        <div class="style-code" th:text="${row.styleCode}">LS-001</div>
+      </td>
+      <td th:text="${row.color}">Color</td>
+      <td th:text="${row.size}">M</td>
+      <td class="mono" th:text="${row.ean}">5901234123457</td>
+      <td class="mono" th:text="${row.sku}">SKU</td>
+      <td class="num mono" th:text="${row.quantity}">1</td>
+      <td class="num price" th:text="${row.wholesalePrice}">0,00</td>
+      <td class="num last" th:text="${row.retailPrice}">0,00</td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="summary">
+  <tr>
+    <td class="notes">
+      <p th:text="#{note.prices}">Ceny hurtowe netto, sugerowane ceny detaliczne brutto.</p>
+      <p th:text="#{note.snapshot}">Stan na dzień wygenerowania.</p>
+    </td>
+    <td style="width: 92mm">
+      <table class="totals">
+        <tr>
+          <td th:text="#{totals.positions}">Pozycje</td>
+          <td class="value" th:text="${doc.totals.positions}">0</td>
+        </tr>
+        <tr th:if="${doc.totals.totalQuantity != null}">
+          <td th:text="#{totals.quantity}">Łączna ilość</td>
+          <td class="value" th:text="${doc.totals.totalQuantity} + ' ' + #{unit.pieces}">0 szt.</td>
+        </tr>
+        <tr th:if="${doc.totals.wholesaleValue != null}" class="grand">
+          <td th:text="#{totals.wholesale}">Wartość hurtowa netto</td>
+          <td class="value" th:text="${doc.totals.wholesaleValue}">0,00</td>
+        </tr>
+        <tr th:if="${doc.totals.partial}">
+          <td colspan="2" class="hint" th:text="#{totals.partial}">dla pozycji z podaną ilością</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

@@ -77,6 +77,12 @@
             <artifactId>imageio-webp</artifactId>
             <version>${twelvemonkeys.version}</version>
         </dependency>
+        <dependency>
+            <!-- JPEG w CMYK/YCCK (częste w eksportach z DTP) — standardowy dekoder ImageIO ich nie czyta -->
+            <groupId>com.twelvemonkeys.imageio</groupId>
+            <artifactId>imageio-jpeg</artifactId>
+            <version>${twelvemonkeys.version}</version>
+        </dependency>
         <!-- rate limiting publicznych endpointów: token bucket per klient, kubełki w ograniczonym cache -->
         <dependency>
             <groupId>com.bucket4j</groupId>

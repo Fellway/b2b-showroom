@@ -10,7 +10,6 @@ import pl.wizytowka.linesheet.application.port.out.LineSheetReadModel;
 import pl.wizytowka.linesheet.application.port.out.LineSheetRepository;
 import pl.wizytowka.linesheet.application.view.LineSheetSummaryView;
 import pl.wizytowka.linesheet.application.view.ProductLineSheetCount;
-import pl.wizytowka.linesheet.domain.EmailDeliveryStatus;
 import pl.wizytowka.linesheet.domain.LineSheet;
 import pl.wizytowka.linesheet.domain.LineSheetItem;
 import pl.wizytowka.linesheet.domain.Recipient;
@@ -98,16 +97,14 @@ class LineSheetPersistenceAdapterTest {
         assertThat(loaded.items().getFirst().wholesalePrice()).isEqualByComparingTo("149.00");
 
         loaded.attachPdf("line-sheets/2026/" + loaded.publicId() + ".pdf", T0);
-        loaded.requestEmailDelivery();
-        loaded.markEmailSent(T0.plusSeconds(5));
         repository.save(loaded);
         em.flush();
         em.clear();
 
-        LineSheet sent = repository.findById(sheet.id()).orElseThrow();
-        assertThat(sent.emailStatus()).isEqualTo(EmailDeliveryStatus.SENT);
-        assertThat(sent.emailAttempts()).isEqualTo(1);
-        assertThat(sent.version()).isEqualTo(1);
+        LineSheet withPdf = repository.findById(sheet.id()).orElseThrow();
+        assertThat(withPdf.pdfStorageKey()).isEqualTo("line-sheets/2026/" + sheet.publicId() + ".pdf");
+        assertThat(withPdf.pdfGeneratedAt()).isEqualTo(T0);
+        assertThat(withPdf.version()).isEqualTo(1);
         assertThatThrownBy(() -> repository.save(loaded)).isInstanceOf(ConcurrentModificationException.class);
     }
 
@@ -127,21 +124,20 @@ class LineSheetPersistenceAdapterTest {
     }
 
     @Test
-    void readModelPagesFiltersAndRanksProducts() {
+    void readModelPagesAndRanksProducts() {
         LineSheet first = sheet(T0, true, item(productA, variantA, "A-NAV-M", null), item(productB, variantB, "B-NAV-M", null));
         first.attachPdf("line-sheets/2026/a.pdf", T0);
-        first.requestEmailDelivery();
         repository.save(first);
         repository.save(sheet(T0.plusSeconds(60), false, item(productA, variantA, "A-NAV-M", null)));
         repository.save(sheet(T0.plusSeconds(7200), false, item(productB, variantB, "B-NAV-M", null)));
         em.flush();
         em.clear();
 
-        PageResult<LineSheetSummaryView> page = readModel.findSummaries(null, new PageQuery(0, 2));
+        PageResult<LineSheetSummaryView> page = readModel.findSummaries(new PageQuery(0, 2));
         assertThat(page.totalItems()).isEqualTo(3);
         assertThat(page.items()).extracting(LineSheetSummaryView::createdAt)
                 .containsExactly(T0.plusSeconds(7200), T0.plusSeconds(60));
-        assertThat(readModel.findSummaries(EmailDeliveryStatus.PENDING, new PageQuery(0, 10)).items())
+        assertThat(readModel.findSummaries(new PageQuery(1, 2)).items())
                 .singleElement().satisfies(s -> {
                     assertThat(s.itemCount()).isEqualTo(2);
                     assertThat(s.email()).isEqualTo("buyer@boutique.cz");
@@ -162,12 +158,12 @@ class LineSheetPersistenceAdapterTest {
 
     private static int counter;
 
-    private static LineSheet sheet(Instant createdAt, boolean withEmail, SelectedVariant... items) {
-        Recipient recipient = withEmail
+    private static LineSheet sheet(Instant createdAt, boolean withContact, SelectedVariant... items) {
+        Recipient recipient = withContact
                 ? new Recipient("Boutique s.r.o.", "Jana", "buyer@boutique.cz", null, "CZ12345678")
                 : Recipient.anonymous();
         return LineSheet.create(LineSheet.formatReference(2026, ++counter), CatalogLanguage.EN, recipient, null,
-                withEmail, false, null, UUID.randomUUID(), List.of(items), createdAt);
+                withContact, null, UUID.randomUUID(), List.of(items), createdAt);
     }
 
     private static SelectedVariant item(UUID product, UUID variant, String sku, Integer quantity) {

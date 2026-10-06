@@ -20,7 +20,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pl.wizytowka.support.LineSheetOutputFakesConfiguration;
 import pl.wizytowka.support.TestcontainersConfiguration;
 
 import java.time.Instant;
@@ -39,12 +38,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import({TestcontainersConfiguration.class, LineSheetOutputFakesConfiguration.class, SecurityIntegrationTest.PingController.class})
+@Import({TestcontainersConfiguration.class, SecurityIntegrationTest.PingController.class})
 @TestPropertySource(properties = {
         "showroom.security.jwt.secret=" + SecurityIntegrationTest.SECRET,
         "showroom.security.bootstrap-admin.email=" + SecurityIntegrationTest.ADMIN_EMAIL,
         "showroom.security.bootstrap-admin.password=" + SecurityIntegrationTest.ADMIN_PASSWORD,
-        "showroom.storage.local-root=target/test-storage"
+        "showroom.storage.local-root=target/test-storage",
+        // test celowo loguje się ~20 razy w kilka sekund; limity sprawdza RateLimitIntegrationTest
+        "showroom.rate-limit.enabled=false"
 })
 class SecurityIntegrationTest {
 

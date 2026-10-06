@@ -18,12 +18,10 @@ import pl.wizytowka.contact.application.view.SalesRepresentativeContact;
 import pl.wizytowka.contact.domain.SalesRepresentativeId;
 import pl.wizytowka.linesheet.application.port.in.CreateLineSheetCommand;
 import pl.wizytowka.linesheet.application.port.out.LineSheetDocumentRenderer;
-import pl.wizytowka.linesheet.application.port.out.LineSheetMailer;
 import pl.wizytowka.linesheet.application.port.out.LineSheetRepository;
 import pl.wizytowka.linesheet.application.view.CreatedLineSheet;
 import pl.wizytowka.linesheet.application.view.LineSheetDocument;
 import pl.wizytowka.linesheet.application.view.LineSheetPdf;
-import pl.wizytowka.linesheet.domain.EmailDeliveryStatus;
 import pl.wizytowka.linesheet.domain.LineSheet;
 import pl.wizytowka.linesheet.domain.LineSheetId;
 import pl.wizytowka.shared.application.port.out.FileStorage;
@@ -61,19 +59,20 @@ class LineSheetServiceTest {
     private final InMemoryLineSheets lineSheets = new InMemoryLineSheets();
     private final InMemoryStorage storage = new InMemoryStorage();
     private final DeferredHooks hooks = new DeferredHooks();
-    private final RecordingMailer mailer = new RecordingMailer();
     private final RecordingAnalytics analytics = new RecordingAnalytics();
     private final List<SalesRepresentativeContact> representatives = new ArrayList<>();
+    private final List<LineSheetDocument> rendered = new ArrayList<>();
     private LineSheetService service;
 
     @BeforeEach
     void setUp() {
         Clock clock = Clock.fixed(NOW, ZoneOffset.UTC);
-        LineSheetDocumentRenderer renderer = document -> PDF;
-        LineSheetDeliveryRecorder recorder = new LineSheetDeliveryRecorder(lineSheets, clock);
-        LineSheetEmailDispatcher dispatcher = new LineSheetEmailDispatcher(mailer, recorder, analytics);
+        LineSheetDocumentRenderer renderer = document -> {
+            rendered.add(document);
+            return PDF;
+        };
         long[] sequence = {41};
-        service = new LineSheetService(lineSheets, () -> ++sequence[0], renderer, dispatcher, new StubCatalog(),
+        service = new LineSheetService(lineSheets, () -> ++sequence[0], renderer, new StubCatalog(),
                 new StubRepresentatives(), analytics, storage, hooks, clock);
     }
 
@@ -82,7 +81,7 @@ class LineSheetServiceTest {
         VariantSnapshot variant = variant("LS100-NAV-M");
         SalesRepresentativeContact rep = representative();
 
-        CreatedLineSheet created = service.create(command(List.of(variant.variantId()), false, null));
+        CreatedLineSheet created = service.create(command(List.of(variant.variantId()), null));
 
         assertThat(created.referenceNumber()).isEqualTo("LS-2026-000042");
         LineSheet saved = lineSheets.findByPublicId(created.publicId()).orElseThrow();
@@ -101,53 +100,29 @@ class LineSheetServiceTest {
             assertThat(e.type()).isEqualTo(AnalyticsEventType.LINE_SHEET_GENERATED);
             assertThat(e.lineSheetId()).isEqualTo(saved.id().value());
         });
-        assertThat(mailer.sent).isEmpty();
     }
 
     @Test
-    void sendsEmailOnlyAfterCommitAndRecordsResult() {
+    void rendersPdfFromSnapshotWithBuyerContactAndSalesRepresentative() {
         VariantSnapshot variant = variant("LS100-NAV-M");
+        SalesRepresentativeContact rep = representative();
 
-        CreatedLineSheet created = service.create(command(List.of(variant.variantId()), true, null));
+        CreatedLineSheet created = service.create(command(List.of(variant.variantId()), null));
 
-        LineSheet pending = lineSheets.findByPublicId(created.publicId()).orElseThrow();
-        assertThat(pending.emailStatus()).isEqualTo(EmailDeliveryStatus.PENDING);
-        assertThat(mailer.sent).isEmpty();
-
-        hooks.commit();
-
-        assertThat(mailer.sent).singleElement().satisfies(document -> {
-            assertThat(document.recipient().email()).isEqualTo("buyer@boutique.cz");
+        assertThat(rendered).singleElement().satisfies(document -> {
+            assertThat(document.publicId()).isEqualTo(created.publicId());
             assertThat(document.language()).isEqualTo(CatalogLanguage.EN);
+            assertThat(document.recipient().email()).as("e-mail klienta to wyłącznie dana kontaktowa")
+                    .isEqualTo("buyer@boutique.cz");
+            assertThat(document.salesRepresentative()).isEqualTo(rep);
+            assertThat(document.items()).extracting(item -> item.sku()).containsExactly("LS100-NAV-M");
         });
-        assertThat(lineSheets.findByPublicId(created.publicId()).orElseThrow().emailStatus()).isEqualTo(EmailDeliveryStatus.SENT);
-        assertThat(analytics.serverEvents).extracting(ServerEvent::type)
-                .containsExactlyInAnyOrder(AnalyticsEventType.LINE_SHEET_GENERATED, AnalyticsEventType.LINE_SHEET_EMAILED);
-    }
-
-    @Test
-    void recordsFailedDeliveryAndAllowsResend() {
-        VariantSnapshot variant = variant("LS100-NAV-M");
-        mailer.failNext = true;
-        CreatedLineSheet created = service.create(command(List.of(variant.variantId()), true, null));
-        hooks.commit();
-        LineSheet failed = lineSheets.findByPublicId(created.publicId()).orElseThrow();
-        assertThat(failed.emailStatus()).isEqualTo(EmailDeliveryStatus.FAILED);
-        assertThat(failed.emailLastError()).contains("SMTP down");
-
-        storage.files.clear();
-        service.resend(failed.id());
-        hooks.commit();
-
-        assertThat(storage.files).as("brakujący PDF wygenerowany ponownie").hasSize(1);
-        assertThat(lineSheets.findById(failed.id()).orElseThrow().emailStatus()).isEqualTo(EmailDeliveryStatus.SENT);
-        assertThat(mailer.sent).hasSize(1);
     }
 
     @Test
     void removesStoredPdfWhenTransactionRollsBack() {
         VariantSnapshot variant = variant("LS100-NAV-M");
-        service.create(command(List.of(variant.variantId()), false, null));
+        service.create(command(List.of(variant.variantId()), null));
 
         hooks.rollback();
 
@@ -157,12 +132,12 @@ class LineSheetServiceTest {
     @Test
     void rejectsDuplicatesUnknownRepresentativeAndUnavailableVariants() {
         VariantSnapshot variant = variant("LS100-NAV-M");
-        assertThatThrownBy(() -> service.create(command(List.of(variant.variantId(), variant.variantId()), false, null)))
+        assertThatThrownBy(() -> service.create(command(List.of(variant.variantId(), variant.variantId()), null)))
                 .hasFieldOrPropertyWithValue("code", "linesheet.items.duplicate");
-        assertThatThrownBy(() -> service.create(command(List.of(variant.variantId()), false, UUID.randomUUID())))
+        assertThatThrownBy(() -> service.create(command(List.of(variant.variantId()), UUID.randomUUID())))
                 .isInstanceOf(InvalidValueException.class)
                 .hasFieldOrPropertyWithValue("code", "linesheet.sales-representative.unknown");
-        assertThatThrownBy(() -> service.create(command(List.of(VariantId.newId()), false, null)))
+        assertThatThrownBy(() -> service.create(command(List.of(VariantId.newId()), null)))
                 .isInstanceOf(BusinessRuleViolationException.class);
         assertThat(lineSheets.store).isEmpty();
     }
@@ -170,7 +145,7 @@ class LineSheetServiceTest {
     @Test
     void servesPdfByPublicIdOnly() throws IOException {
         VariantSnapshot variant = variant("LS100-NAV-M");
-        CreatedLineSheet created = service.create(command(List.of(variant.variantId()), false, null));
+        CreatedLineSheet created = service.create(command(List.of(variant.variantId()), null));
 
         try (LineSheetPdf pdf = service.pdf(created.publicId())) {
             assertThat(pdf.content().readAllBytes()).isEqualTo(PDF);
@@ -196,10 +171,10 @@ class LineSheetServiceTest {
         return contact;
     }
 
-    private static CreateLineSheetCommand command(List<VariantId> variants, boolean sendEmail, UUID representativeId) {
+    private static CreateLineSheetCommand command(List<VariantId> variants, UUID representativeId) {
         return new CreateLineSheetCommand(CatalogLanguage.EN,
                 variants.stream().map(v -> new CreateLineSheetCommand.Selection(v.value(), 6)).toList(),
-                "Boutique s.r.o.", "Jana", "Buyer@Boutique.cz", null, null, null, true, sendEmail,
+                "Boutique s.r.o.", "Jana", "Buyer@Boutique.cz", null, null, null, true,
                 representativeId, UUID.randomUUID());
     }
 
@@ -308,20 +283,6 @@ class LineSheetServiceTest {
             onCommit.clear();
             onRollback.clear();
             actions.forEach(Runnable::run);
-        }
-    }
-
-    static final class RecordingMailer implements LineSheetMailer {
-        final List<LineSheetDocument> sent = new ArrayList<>();
-        boolean failNext;
-
-        @Override
-        public void send(LineSheetDocument document, byte[] pdf) {
-            if (failNext) {
-                failNext = false;
-                throw new IllegalStateException("SMTP down");
-            }
-            sent.add(document);
         }
     }
 

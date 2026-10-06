@@ -1,7 +1,6 @@
 package pl.wizytowka.linesheet.application.view;
 
 import pl.wizytowka.contact.application.view.SalesRepresentativeContact;
-import pl.wizytowka.linesheet.domain.EmailDeliveryStatus;
 import pl.wizytowka.linesheet.domain.LineSheetItem;
 import pl.wizytowka.linesheet.domain.Recipient;
 import pl.wizytowka.shared.domain.CatalogLanguage;
@@ -26,10 +25,6 @@ public record LineSheetDetailView(UUID id,
                                   SalesRepresentativeContact salesRepresentative,
                                   boolean pdfAvailable,
                                   Instant pdfGeneratedAt,
-                                  EmailDeliveryStatus emailStatus,
-                                  int emailAttempts,
-                                  Instant emailSentAt,
-                                  String emailLastError,
                                   Instant createdAt,
                                   List<LineSheetItem> items,
                                   BigDecimal wholesaleTotal,

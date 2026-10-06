@@ -3,14 +3,11 @@ package pl.wizytowka.linesheet.adapter.out.persistence;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-import pl.wizytowka.linesheet.domain.EmailDeliveryStatus;
 import pl.wizytowka.shared.domain.CatalogLanguage;
 
 import java.time.Instant;
@@ -69,19 +66,6 @@ class LineSheetJpaEntity {
 
     @Column(name = "pdf_generated_at")
     Instant pdfGeneratedAt;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "email_status", nullable = false, length = 16)
-    EmailDeliveryStatus emailStatus;
-
-    @Column(name = "email_attempts", nullable = false)
-    int emailAttempts;
-
-    @Column(name = "email_sent_at")
-    Instant emailSentAt;
-
-    @Column(name = "email_last_error", length = 500)
-    String emailLastError;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     Instant createdAt;

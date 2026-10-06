@@ -17,15 +17,14 @@ import java.util.regex.Pattern;
 
 /**
  * Zestawienie ofertowe (line sheet) wygenerowane przez klienta B2B. Treść jest niezmienna od chwili
- * utworzenia; zmienia się wyłącznie stan techniczny (plik PDF, wysyłka e-mail).
+ * utworzenia; zmienia się wyłącznie stan techniczny (dołączony plik PDF). Aplikacja nie wysyła e-maili —
+ * klient pobiera PDF, a adres e-mail jest wyłącznie opcjonalną daną kontaktową.
  *
- * <p>Zgoda na przetwarzanie danych (RODO) jest wymagana, gdy klient podał jakiekolwiek dane kontaktowe
- * lub zlecił wysyłkę e-mailem; wysyłka wymaga adresu e-mail.</p>
+ * <p>Zgoda na przetwarzanie danych (RODO) jest wymagana, gdy klient podał jakiekolwiek dane kontaktowe.</p>
  */
 public final class LineSheet {
 
     public static final int MAX_ITEMS = 200;
-    private static final int MAX_ERROR_LENGTH = 500;
     private static final Pattern REFERENCE = Pattern.compile("^LS-\\d{4}-\\d{6,16}$");
 
     private final LineSheetId id;
@@ -42,10 +41,6 @@ public final class LineSheet {
     private final Instant createdAt;
     private String pdfStorageKey;
     private Instant pdfGeneratedAt;
-    private EmailDeliveryStatus emailStatus;
-    private int emailAttempts;
-    private Instant emailSentAt;
-    private String emailLastError;
     private final long version;
 
     private LineSheet(Builder b) {
@@ -63,21 +58,15 @@ public final class LineSheet {
         this.createdAt = Objects.requireNonNull(b.createdAt, "createdAt");
         this.pdfStorageKey = b.pdfStorageKey;
         this.pdfGeneratedAt = b.pdfGeneratedAt;
-        this.emailStatus = Objects.requireNonNull(b.emailStatus, "emailStatus");
-        this.emailAttempts = b.emailAttempts;
-        this.emailSentAt = b.emailSentAt;
-        this.emailLastError = b.emailLastError;
         this.version = b.version;
     }
 
     /**
      * Tworzy zestawienie z wybranych wariantów (w kolejności prezentacji).
      * @param referenceNumber numer nadany przez generator, np. LS-2026-000042
-     * @param sendEmail       czy klient zlecił wysyłkę — weryfikowane są wtedy e-mail i zgoda; samą wysyłkę
-     *                        zleca {@link #requestEmailDelivery()} po dołączeniu PDF
      */
     public static LineSheet create(String referenceNumber, CatalogLanguage language, Recipient recipient, String message,
-                                   boolean privacyAccepted, boolean sendEmail, UUID salesRepresentativeId,
+                                   boolean privacyAccepted, UUID salesRepresentativeId,
                                    UUID visitorId, List<SelectedVariant> selections, Instant now) {
         Objects.requireNonNull(now, "now");
         Recipient effectiveRecipient = Objects.requireNonNullElseGet(recipient, Recipient::anonymous);
@@ -97,11 +86,8 @@ public final class LineSheet {
         if (selections.stream().anyMatch(s -> !s.pricing().currency().equals(currency))) {
             throw new BusinessRuleViolationException("linesheet.items.mixed-currency", "All items must share one currency");
         }
-        if (sendEmail && !effectiveRecipient.hasEmail()) {
-            throw new InvalidValueException("linesheet.email.required", "E-mail address is required to send the line sheet");
-        }
         String trimmedMessage = Guard.optionalText(message, 2000, "linesheet.message");
-        if ((effectiveRecipient.hasAnyData() || sendEmail) && !privacyAccepted) {
+        if (effectiveRecipient.hasAnyData() && !privacyAccepted) {
             throw new InvalidValueException("linesheet.privacy.consent-required",
                     "Consent to personal data processing is required when contact details are provided");
         }
@@ -125,7 +111,6 @@ public final class LineSheet {
         b.visitorId = visitorId;
         b.items = items;
         b.createdAt = now;
-        b.emailStatus = EmailDeliveryStatus.NOT_REQUESTED;
         return new LineSheet(b);
     }
 
@@ -142,48 +127,6 @@ public final class LineSheet {
 
     public boolean hasPdf() {
         return pdfStorageKey != null;
-    }
-
-    // ------------------------------------------------------------------ e-mail
-
-    /** Zleca (ponowną) wysyłkę: NOT_REQUESTED / FAILED / SENT → PENDING. */
-    public void requestEmailDelivery() {
-        if (!recipient.hasEmail()) {
-            throw new BusinessRuleViolationException("linesheet.email.no-recipient", "Line sheet has no recipient e-mail");
-        }
-        if (privacyAcceptedAt == null) {
-            throw new BusinessRuleViolationException("linesheet.privacy.consent-required", "Recipient did not accept the privacy notice");
-        }
-        if (!hasPdf()) {
-            throw new BusinessRuleViolationException("linesheet.pdf.missing", "PDF must be generated before sending");
-        }
-        if (emailStatus == EmailDeliveryStatus.PENDING) {
-            throw new BusinessRuleViolationException("linesheet.email.already-pending", "E-mail delivery is already in progress");
-        }
-        emailStatus = EmailDeliveryStatus.PENDING;
-    }
-
-    public void markEmailSent(Instant sentAt) {
-        requirePending();
-        emailAttempts++;
-        emailStatus = EmailDeliveryStatus.SENT;
-        emailSentAt = Objects.requireNonNull(sentAt, "sentAt");
-        emailLastError = null;
-    }
-
-    public void markEmailFailed(String error) {
-        requirePending();
-        emailAttempts++;
-        emailStatus = EmailDeliveryStatus.FAILED;
-        String safeError = error == null || error.isBlank() ? "Unknown error" : error.strip();
-        emailLastError = safeError.substring(0, Math.min(safeError.length(), MAX_ERROR_LENGTH));
-    }
-
-    private void requirePending() {
-        if (emailStatus != EmailDeliveryStatus.PENDING) {
-            throw new BusinessRuleViolationException("linesheet.email.not-pending",
-                    "No e-mail delivery in progress, status: " + emailStatus);
-        }
     }
 
     private static String requireReference(String referenceNumber) {
@@ -215,10 +158,6 @@ public final class LineSheet {
         private Instant createdAt;
         private String pdfStorageKey;
         private Instant pdfGeneratedAt;
-        private EmailDeliveryStatus emailStatus = EmailDeliveryStatus.NOT_REQUESTED;
-        private int emailAttempts;
-        private Instant emailSentAt;
-        private String emailLastError;
         private long version;
 
         private Builder() {
@@ -237,13 +176,6 @@ public final class LineSheet {
         public Builder items(List<LineSheetItem> items) { this.items = items; return this; }
         public Builder createdAt(Instant createdAt) { this.createdAt = createdAt; return this; }
         public Builder pdf(String storageKey, Instant generatedAt) { this.pdfStorageKey = storageKey; this.pdfGeneratedAt = generatedAt; return this; }
-        public Builder emailDelivery(EmailDeliveryStatus status, int attempts, Instant sentAt, String lastError) {
-            this.emailStatus = status;
-            this.emailAttempts = attempts;
-            this.emailSentAt = sentAt;
-            this.emailLastError = lastError;
-            return this;
-        }
         public Builder version(long version) { this.version = version; return this; }
 
         public LineSheet build() {
@@ -267,9 +199,5 @@ public final class LineSheet {
     public Instant createdAt() { return createdAt; }
     public String pdfStorageKey() { return pdfStorageKey; }
     public Instant pdfGeneratedAt() { return pdfGeneratedAt; }
-    public EmailDeliveryStatus emailStatus() { return emailStatus; }
-    public int emailAttempts() { return emailAttempts; }
-    public Instant emailSentAt() { return emailSentAt; }
-    public String emailLastError() { return emailLastError; }
     public long version() { return version; }
 }

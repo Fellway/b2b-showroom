@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Dane potrzebne do złożenia dokumentu PDF i wiadomości e-mail.
+ * Dane potrzebne do złożenia dokumentu PDF.
  * @param salesRepresentative opiekun handlowy do kontaktu lub {@code null}, gdy nie przypisano
  */
 public record LineSheetDocument(UUID publicId,

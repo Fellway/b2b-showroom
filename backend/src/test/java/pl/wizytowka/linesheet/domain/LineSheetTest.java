@@ -21,7 +21,7 @@ class LineSheetTest {
 
     @Test
     void createsSnapshotItemsInSelectionOrder() {
-        LineSheet sheet = LineSheetFixtures.withEmail(selection("A-1", 12), selection("A-2", null));
+        LineSheet sheet = LineSheetFixtures.withContact(selection("A-1", 12), selection("A-2", null));
 
         assertThat(sheet.items()).extracting(LineSheetItem::position, LineSheetItem::sku).containsExactly(
                 org.assertj.core.groups.Tuple.tuple(1, "A-1"), org.assertj.core.groups.Tuple.tuple(2, "A-2"));
@@ -30,7 +30,6 @@ class LineSheetTest {
         assertThat(sheet.currency()).isEqualTo(Currency.getInstance("PLN"));
         assertThat(sheet.recipient().email()).isEqualTo("buyer@boutique.cz");
         assertThat(sheet.privacyAcceptedAt()).isEqualTo(NOW);
-        assertThat(sheet.emailStatus()).isEqualTo(EmailDeliveryStatus.NOT_REQUESTED);
         assertThat(sheet.publicId().version()).as("publiczny identyfikator losowy (v4)").isEqualTo(4);
         assertThat(sheet.id().value().version()).isEqualTo(7);
     }
@@ -44,17 +43,10 @@ class LineSheetTest {
     @Test
     void requiresConsentWhenContactDataProvided() {
         assertThatThrownBy(() -> LineSheet.create("LS-2026-000001", CatalogLanguage.PL,
-                new Recipient("Firma", null, null, null, null), null, false, false, null, null,
+                new Recipient("Firma", null, null, null, null), null, false, null, null,
                 List.of(selection("A-1", null)), NOW))
                 .isInstanceOf(InvalidValueException.class)
                 .hasFieldOrPropertyWithValue("code", "linesheet.privacy.consent-required");
-    }
-
-    @Test
-    void requiresEmailWhenSendingRequested() {
-        assertThatThrownBy(() -> LineSheet.create("LS-2026-000001", CatalogLanguage.PL, Recipient.anonymous(), null,
-                true, true, null, null, List.of(selection("A-1", null)), NOW))
-                .hasFieldOrPropertyWithValue("code", "linesheet.email.required");
     }
 
     @Test
@@ -74,36 +66,18 @@ class LineSheetTest {
     }
 
     @Test
+    void contactEmailIsOnlyContactDataAndStillRequiresConsent() {
+        assertThatThrownBy(() -> LineSheet.create("LS-2026-000001", CatalogLanguage.PL,
+                new Recipient(null, null, "buyer@boutique.cz", null, null), null, false, null, null,
+                List.of(selection("A-1", null)), NOW))
+                .hasFieldOrPropertyWithValue("code", "linesheet.privacy.consent-required");
+
+        LineSheet anonymous = LineSheetFixtures.anonymous(selection("A-1", null));
+        assertThat(anonymous.privacyAcceptedAt()).as("bez danych kontaktowych zgoda nie jest potrzebna").isNull();
+    }
+
+    @Test
     void rejectsNonPositiveQuantity() {
         assertThatThrownBy(() -> selection("A-1", 0)).isInstanceOf(InvalidValueException.class);
-    }
-
-    @Test
-    void emailDeliveryStateMachine() {
-        LineSheet sheet = LineSheetFixtures.withEmail(selection("A-1", null));
-        assertThatThrownBy(sheet::requestEmailDelivery).hasFieldOrPropertyWithValue("code", "linesheet.pdf.missing");
-
-        sheet.attachPdf("line-sheets/2026/x.pdf", NOW);
-        sheet.requestEmailDelivery();
-        assertThatThrownBy(sheet::requestEmailDelivery).hasFieldOrPropertyWithValue("code", "linesheet.email.already-pending");
-
-        sheet.markEmailFailed("SMTP timeout " + "x".repeat(600));
-        assertThat(sheet.emailStatus()).isEqualTo(EmailDeliveryStatus.FAILED);
-        assertThat(sheet.emailLastError()).hasSize(500);
-
-        sheet.requestEmailDelivery();
-        sheet.markEmailSent(NOW.plusSeconds(60));
-        assertThat(sheet.emailStatus()).isEqualTo(EmailDeliveryStatus.SENT);
-        assertThat(sheet.emailAttempts()).isEqualTo(2);
-        assertThat(sheet.emailLastError()).isNull();
-        assertThatThrownBy(() -> sheet.markEmailSent(NOW)).hasFieldOrPropertyWithValue("code", "linesheet.email.not-pending");
-    }
-
-    @Test
-    void cannotRequestEmailWithoutRecipientEmail() {
-        LineSheet sheet = LineSheetFixtures.anonymous(selection("A-1", null));
-        sheet.attachPdf("line-sheets/2026/x.pdf", NOW);
-
-        assertThatThrownBy(sheet::requestEmailDelivery).hasFieldOrPropertyWithValue("code", "linesheet.email.no-recipient");
     }
 }

@@ -1,6 +1,5 @@
 package pl.wizytowka.linesheet.application.view;
 
-import pl.wizytowka.linesheet.domain.EmailDeliveryStatus;
 import pl.wizytowka.shared.domain.CatalogLanguage;
 
 import java.time.Instant;
@@ -14,6 +13,5 @@ public record LineSheetSummaryView(UUID id,
                                    String contactName,
                                    String email,
                                    int itemCount,
-                                   EmailDeliveryStatus emailStatus,
                                    Instant createdAt) {
 }

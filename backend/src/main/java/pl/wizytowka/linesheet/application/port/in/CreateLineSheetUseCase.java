@@ -5,7 +5,7 @@ import pl.wizytowka.linesheet.application.view.CreatedLineSheet;
 public interface CreateLineSheetUseCase {
 
     /**
-     * Tworzy zestawienie, generuje i zapisuje PDF, a na życzenie klienta wysyła go e-mailem po zatwierdzeniu transakcji.
+     * Tworzy zestawienie oraz generuje i zapisuje jego PDF (do pobrania przez klienta).
      * @throws pl.wizytowka.shared.domain.BusinessRuleViolationException gdy wybrany wariant nie jest już dostępny
      */
     CreatedLineSheet create(CreateLineSheetCommand command);

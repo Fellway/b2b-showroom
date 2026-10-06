@@ -9,7 +9,6 @@ import pl.wizytowka.linesheet.application.port.out.LineSheetReadModel;
 import pl.wizytowka.linesheet.application.port.out.LineSheetRepository;
 import pl.wizytowka.linesheet.application.view.LineSheetSummaryView;
 import pl.wizytowka.linesheet.application.view.ProductLineSheetCount;
-import pl.wizytowka.linesheet.domain.EmailDeliveryStatus;
 import pl.wizytowka.linesheet.domain.LineSheet;
 import pl.wizytowka.linesheet.domain.LineSheetId;
 import pl.wizytowka.linesheet.domain.Recipient;
@@ -54,19 +53,12 @@ class LineSheetPersistenceAdapter implements LineSheetRepository, LineSheetReadM
         }
         entity.pdfStorageKey = sheet.pdfStorageKey();
         entity.pdfGeneratedAt = sheet.pdfGeneratedAt();
-        entity.emailStatus = sheet.emailStatus();
-        entity.emailAttempts = sheet.emailAttempts();
-        entity.emailSentAt = sheet.emailSentAt();
-        entity.emailLastError = sheet.emailLastError();
         repository.save(entity);
     }
 
     @Override
-    public PageResult<LineSheetSummaryView> findSummaries(EmailDeliveryStatus emailStatus, PageQuery page) {
-        PageRequest pageable = PageRequest.of(page.page(), page.size());
-        Page<LineSheetSummaryView> result = emailStatus == null
-                ? repository.findSummaries(pageable)
-                : repository.findSummaries(emailStatus, pageable);
+    public PageResult<LineSheetSummaryView> findSummaries(PageQuery page) {
+        Page<LineSheetSummaryView> result = repository.findSummaries(PageRequest.of(page.page(), page.size()));
         return new PageResult<>(result.getContent(), page.page(), page.size(), result.getTotalElements());
     }
 
@@ -121,7 +113,6 @@ class LineSheetPersistenceAdapter implements LineSheetRepository, LineSheetReadM
                 .items(e.items.stream().map(LineSheetItemJpaEntity::toDomain).toList())
                 .createdAt(e.createdAt)
                 .pdf(e.pdfStorageKey, e.pdfGeneratedAt)
-                .emailDelivery(e.emailStatus, e.emailAttempts, e.emailSentAt, e.emailLastError)
                 .version(e.version)
                 .build();
     }

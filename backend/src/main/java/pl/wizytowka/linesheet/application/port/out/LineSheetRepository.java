@@ -14,7 +14,7 @@ public interface LineSheetRepository {
 
     /**
      * Nowe zestawienie zapisywane jest w całości; dla istniejącego aktualizowany jest wyłącznie stan techniczny
-     * (PDF, wysyłka e-mail) — pozycje są niezmienne.
+     * (dołączony PDF) — pozycje są niezmienne.
      * @throws pl.wizytowka.shared.domain.ConcurrentModificationException przy niezgodności wersji
      */
     void save(LineSheet lineSheet);

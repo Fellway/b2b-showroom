@@ -6,7 +6,6 @@ public enum AnalyticsEventType {
     SELECTION_ADDED(true),
     SELECTION_REMOVED(true),
     LINE_SHEET_GENERATED(false),
-    LINE_SHEET_EMAILED(false),
     CONTACT_CLICKED(true);
 
     private final boolean clientReportable;

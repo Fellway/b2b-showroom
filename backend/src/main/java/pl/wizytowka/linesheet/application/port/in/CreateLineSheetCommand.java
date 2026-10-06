@@ -19,7 +19,6 @@ public record CreateLineSheetCommand(CatalogLanguage language,
                                      String taxId,
                                      String message,
                                      boolean privacyAccepted,
-                                     boolean sendEmail,
                                      UUID salesRepresentativeId,
                                      UUID visitorId) {
 

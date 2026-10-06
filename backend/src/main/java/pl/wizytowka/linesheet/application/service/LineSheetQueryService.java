@@ -11,7 +11,6 @@ import pl.wizytowka.linesheet.application.port.out.LineSheetRepository;
 import pl.wizytowka.linesheet.application.view.LineSheetDetailView;
 import pl.wizytowka.linesheet.application.view.LineSheetSummaryView;
 import pl.wizytowka.linesheet.application.view.ProductLineSheetCount;
-import pl.wizytowka.linesheet.domain.EmailDeliveryStatus;
 import pl.wizytowka.linesheet.domain.LineSheet;
 import pl.wizytowka.linesheet.domain.LineSheetId;
 import pl.wizytowka.linesheet.domain.LineSheetItem;
@@ -44,8 +43,8 @@ class LineSheetQueryService implements AdminLineSheetQuery, LineSheetStatisticsQ
     }
 
     @Override
-    public PageResult<LineSheetSummaryView> lineSheets(EmailDeliveryStatus emailStatus, PageQuery page) {
-        return readModel.findSummaries(emailStatus, page);
+    public PageResult<LineSheetSummaryView> lineSheets(PageQuery page) {
+        return readModel.findSummaries(page);
     }
 
     @Override
@@ -62,8 +61,7 @@ class LineSheetQueryService implements AdminLineSheetQuery, LineSheetStatisticsQ
                 .orElse(null);
         return new LineSheetDetailView(sheet.id().value(), sheet.publicId(), sheet.referenceNumber(), sheet.language(),
                 sheet.currency().getCurrencyCode(), sheet.recipient(), sheet.message(), sheet.privacyAcceptedAt(),
-                salesRepresentative, sheet.hasPdf(), sheet.pdfGeneratedAt(), sheet.emailStatus(), sheet.emailAttempts(),
-                sheet.emailSentAt(), sheet.emailLastError(), sheet.createdAt(), sheet.items(), wholesaleTotal,
+                salesRepresentative, sheet.hasPdf(), sheet.pdfGeneratedAt(), sheet.createdAt(), sheet.items(), wholesaleTotal,
                 sheet.version());
     }
 

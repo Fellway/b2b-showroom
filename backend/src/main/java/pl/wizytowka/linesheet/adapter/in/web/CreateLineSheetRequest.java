@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * @param privacyAccepted zgoda na przetwarzanie danych — wymagana, gdy podano dane kontaktowe lub zlecono wysyłkę
+ * @param privacyAccepted zgoda na przetwarzanie danych — wymagana, gdy podano dane kontaktowe
  * @param visitorId       anonimowe id przeglądarki; frontend przekazuje je tylko po zgodzie na analitykę
  */
 record CreateLineSheetRequest(@NotEmpty @Size(max = LineSheet.MAX_ITEMS) List<@Valid @NotNull Item> items,
@@ -25,7 +25,6 @@ record CreateLineSheetRequest(@NotEmpty @Size(max = LineSheet.MAX_ITEMS) List<@V
                               @Size(max = 32) String taxId,
                               @Size(max = 2000) String message,
                               boolean privacyAccepted,
-                              boolean sendEmail,
                               UUID salesRepresentativeId,
                               UUID visitorId) {
 
@@ -35,7 +34,7 @@ record CreateLineSheetRequest(@NotEmpty @Size(max = LineSheet.MAX_ITEMS) List<@V
     CreateLineSheetCommand toCommand(CatalogLanguage language) {
         return new CreateLineSheetCommand(language,
                 items.stream().map(i -> new CreateLineSheetCommand.Selection(i.variantId(), i.quantity())).toList(),
-                companyName, contactName, email, phone, taxId, message, privacyAccepted, sendEmail,
+                companyName, contactName, email, phone, taxId, message, privacyAccepted,
                 salesRepresentativeId, visitorId);
     }
 }

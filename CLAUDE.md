@@ -2,7 +2,8 @@
 
 Interaktywna wizytówka i katalog B2B marki odzieżowej. **To NIE jest sklep**: brak koszyka, płatności i stanów
 magazynowych. Klient hurtowy przegląda katalog/lookbook, zaznacza warianty i generuje spersonalizowane
-zestawienie PDF (line sheet), opcjonalnie wysyłane na jego e-mail, oraz kontaktuje się z opiekunem handlowym.
+zestawienie PDF (line sheet) do pobrania, oraz kontaktuje się z opiekunem handlowym (widoczny e-mail/telefon).
+**Aplikacja nie wysyła żadnych e-maili** (decyzja użytkownika, Etap 3).
 
 Projekt prywatny, **całkowicie niezależny od Empiku** — patrz „Środowisko”.
 
@@ -14,8 +15,8 @@ Szczegóły techniczne, tabela API i instrukcja uruchomienia: [`backend/README.m
 |---|---|---|
 | 1 | Model danych PostgreSQL + Flyway | ✅ |
 | 2 | Backend heksagonalny, REST API (katalog, panel, zestawienia, analityka), JWT | ✅ 232 testy |
-| 3 | Adapter PDF (HTML → PDF), JavaMailSender (async + ponowienia), rate limiting publicznych POST-ów | ⏭ następny |
-| 4 | Frontend Next.js: lookbook, pasek wyboru pozycji, modal zestawienia/PDF, panel admina | — |
+| 3 | Adapter PDF (Thymeleaf → HTML → OpenHTMLtoPDF), usunięcie wysyłki e-mail (migracja V2), rate limiting | ✅ 258 testów |
+| 4 | Frontend Next.js: lookbook, pasek wyboru pozycji, modal zestawienia/PDF, panel admina | ⏭ następny |
 
 Pracujemy etapami — nie piszemy całego systemu naraz. Przed startem etapu zadajemy pytania doprecyzowujące,
 jeśli decyzja zmienia kształt rozwiązania.
@@ -29,7 +30,8 @@ jeśli decyzja zmienia kształt rozwiązania.
 - **Cykl życia produktu:** `DRAFT` → `PUBLISHED` ⇄ `HIDDEN`, `ARCHIVED` (przywracany do `DRAFT`). Publikacja wymaga ≥1 aktywnego wariantu i opublikowany produkt zawsze go zachowuje. Usunięcie jest trwałe — historyczne zestawienia zachowują migawki.
 - **Brak śledzenia stanów magazynowych.**
 - **Języki:** `pl` (bazowy i fallback), `en`, `cs`, `uk` — interfejs i treści produktów. Język żądania: `?lang=` → `Accept-Language` → `pl`.
-- **Zestawienie PDF:** 1–200 różnych wariantów, opcjonalna ilość orientacyjna, kody EAN, zdjęcia, ceny hurtowe i sugerowane. Pozycje to **migawki** z chwili generowania. Podanie danych kontaktowych lub wysyłka e-mail wymagają zgody RODO; wysyłka wymaga adresu e-mail. Domyślnie przypisywany pierwszy aktywny opiekun handlowy.
+- **Zestawienie PDF:** 1–200 różnych wariantów, opcjonalna ilość orientacyjna, kody EAN, zdjęcia, ceny hurtowe i sugerowane. Pozycje to **migawki** z chwili generowania. Klient tylko pobiera PDF (bez wysyłki e-mail). Podanie jakichkolwiek danych kontaktowych wymaga zgody RODO.
+  Układ PDF: kompaktowa tabela (wiersz na wariant z miniaturą); dane marki to placeholdery w `showroom.brand.*` do dopracowania w Etapie 4. Domyślnie przypisywany pierwszy aktywny opiekun handlowy.
 - **Analityka:** odwiedziny (unikalni odwiedzający), najczęściej oglądane produkty, najczęściej dodawane do wyboru, najczęściej występujące w zestawieniach, liczba zestawień. Bez IP i User-Agenta. Zdarzenia z przeglądarki: paczki ≤50, czas nadaje serwer; typy `LINE_SHEET_*` tylko z serwera. Dashboard: domyślnie 30 dni, max 366.
 
 ## Stos technologiczny
@@ -46,7 +48,7 @@ jeśli decyzja zmienia kształt rozwiązania.
 pl.wizytowka.<moduł>            moduły: catalog, linesheet, analytics, contact, identity (+ shared, config)
 ├── domain/                     czysta Java — ZERO Springa, JPA, Jacksona, jakarta.*
 ├── application/port/in/        przypadki użycia = publiczne API modułu
-├── application/port/out/       repozytoria, storage, PDF, mail, tokeny…
+├── application/port/out/       repozytoria, storage, PDF, tokeny…
 ├── application/service/        implementacje (wolno: @Service, @Transactional, java.time.Clock)
 ├── application/view/           widoki odczytu (CQRS-light)
 └── adapter/in/web | adapter/out/<technologia>
@@ -75,19 +77,20 @@ Konwencje:
 - Hasła: PBKDF2-HMAC-SHA256 600k iteracji, 12–128 znaków; blokada po 5 nieudanych logowaniach na 15 min; logowanie nie zdradza istnienia konta.
 - Ścieżki spoza listy → `denyAll`. Publiczny endpoint mediów serwuje wyłącznie `products/**` (PDF-y z danymi klientów nigdy).
 - Upload zdjęć: format rozpoznawany po magic bytes (JPEG/PNG/WebP/AVIF), max 10 MB, klucz generuje serwer.
-- **Do zrobienia w Etapie 3:** rate limiting `POST /api/v1/line-sheets` (ryzyko wysyłki spamu na dowolne adresy) i `POST /api/v1/analytics/events`.
+- **Rate limiting** (Bucket4j, per IP, IPv6 per /64, filtr przed Spring Security): zestawienia 5/min i 30/h (generowanie PDF jest kosztowne), analityka 60/min, logowanie 10/min i 50/h, refresh 30/min. Za proxy: `server.forward-headers-strategy=native`. Testy pełnego kontekstu z wieloma logowaniami ustawiają `showroom.rate-limit.enabled=false`.
+- **PDF:** dane użytkownika tylko przez `th:text`; renderer nie pobiera zasobów zewnętrznych (tylko `data:` URI i fonty z classpath).
 
 ## Środowisko i polecenia
 
 - **Nie używamy infrastruktury Empiku** (Artifactory, certyfikaty, rejestry Dockera, `~/.m2/settings.xml`). Maven idzie przez `backend/.mvn/settings.xml` (tylko Maven Central, repozytorium `~/.m2/b2b-showroom-repository`), podpięte w `.mvn/maven.config`. Obrazy Dockera z publicznego Docker Huba.
 - Polecenia Maven zawsze przez wrapper z katalogu `backend/`: `./mvnw test`, `./mvnw spring-boot:run` (Maven 3.9.16).
 - Baza lokalnie: `docker compose up -d` (port 5433). Konfiguracja: `.env.example` → `.env` (`SHOWROOM_JWT_SECRET` wymagany: `openssl rand -base64 48`).
-- Testy wymagają Dockera (Testcontainers). Slice JPA: `@PersistenceTest`; pełny kontekst: `@SpringBootTest` + `TestcontainersConfiguration` + `LineSheetOutputFakesConfiguration` (fake PDF/mail do czasu Etapu 3) + właściwości `showroom.security.jwt.secret` i `showroom.storage.local-root`.
+- Testy wymagają Dockera (Testcontainers). Slice JPA: `@PersistenceTest`; pełny kontekst: `@SpringBootTest` + `TestcontainersConfiguration` + właściwości `showroom.security.jwt.secret` i `showroom.storage.local-root`.
 - Nie tworzyć `src/test/resources/application.yml` (przesłania główny plik konfiguracyjny).
 - Git: lokalna tożsamość repozytorium to `Mateusz Skrzypczyk <33421875+Fellway@users.noreply.github.com>` (GitHub: [Fellway](https://github.com/Fellway)). **Nigdy nie używać maila z Empiku.**
 
 ## Otwarte tematy
 
-- Etap 3: adaptery `LineSheetDocumentRenderer` i `LineSheetMailer` — bez nich aplikacja nie startuje poza testami.
 - Adapter S3 dla `FileStorage`.
+- Identyfikacja marki (nazwa, logo, kolory, typografia) — dziś placeholdery w `showroom.brand.*`; ustalimy w Etapie 4 (`/impeccable init`) i przeniesiemy też do PDF.
 - Ewentualny dostęp klientów przez token w URL (świadomie odłożony).

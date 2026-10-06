@@ -12,12 +12,9 @@ import pl.wizytowka.linesheet.application.port.in.AdminLineSheetQuery;
 import pl.wizytowka.linesheet.application.port.in.CreateLineSheetCommand;
 import pl.wizytowka.linesheet.application.port.in.CreateLineSheetUseCase;
 import pl.wizytowka.linesheet.application.port.in.GetLineSheetPdfUseCase;
-import pl.wizytowka.linesheet.application.port.in.ResendLineSheetEmailUseCase;
 import pl.wizytowka.linesheet.application.view.CreatedLineSheet;
 import pl.wizytowka.linesheet.application.view.LineSheetPdf;
 import pl.wizytowka.linesheet.application.view.LineSheetSummaryView;
-import pl.wizytowka.linesheet.domain.EmailDeliveryStatus;
-import pl.wizytowka.linesheet.domain.LineSheetId;
 import pl.wizytowka.shared.application.PageQuery;
 import pl.wizytowka.shared.application.PageResult;
 import pl.wizytowka.shared.domain.BusinessRuleViolationException;
@@ -57,9 +54,6 @@ class LineSheetControllersTest {
     @MockitoBean
     AdminLineSheetQuery adminQuery;
 
-    @MockitoBean
-    ResendLineSheetEmailUseCase resendEmail;
-
     @Test
     void createsLineSheetInRequestedLanguage() throws Exception {
         UUID publicId = UUID.randomUUID();
@@ -68,7 +62,7 @@ class LineSheetControllersTest {
 
         mvc.perform(post("/api/v1/line-sheets?lang=cs").contentType(MediaType.APPLICATION_JSON).content("""
                         {"items":[{"variantId":"%s","quantity":6}],"email":"buyer@boutique.cz",
-                         "privacyAccepted":true,"sendEmail":true}""".formatted(variantId)))
+                         "privacyAccepted":true}""".formatted(variantId)))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/api/v1/line-sheets/" + publicId + "/pdf"))
                 .andExpect(jsonPath("$.referenceNumber").value("LS-2026-000042"))
@@ -78,7 +72,8 @@ class LineSheetControllersTest {
         verify(createLineSheet).create(command.capture());
         assertThat(command.getValue().language()).isEqualTo(CatalogLanguage.CS);
         assertThat(command.getValue().selections()).containsExactly(new CreateLineSheetCommand.Selection(variantId, 6));
-        assertThat(command.getValue().sendEmail()).isTrue();
+        assertThat(command.getValue().email()).isEqualTo("buyer@boutique.cz");
+        assertThat(command.getValue().privacyAccepted()).isTrue();
     }
 
     @Test
@@ -116,20 +111,21 @@ class LineSheetControllersTest {
     }
 
     @Test
-    void listsLineSheetsForAdminAndResendsEmail() throws Exception {
+    void listsLineSheetsForAdminAndHasNoEmailResend() throws Exception {
         UUID id = UUID.randomUUID();
-        given(adminQuery.lineSheets(eq(EmailDeliveryStatus.FAILED), eq(new PageQuery(0, 20)))).willReturn(new PageResult<>(
+        given(adminQuery.lineSheets(eq(new PageQuery(0, 20)))).willReturn(new PageResult<>(
                 List.of(new LineSheetSummaryView(id, UUID.randomUUID(), "LS-2026-000001", CatalogLanguage.PL, "Firma",
-                        null, "a@b.pl", 3, EmailDeliveryStatus.FAILED, Instant.parse("2026-10-01T10:00:00Z"))),
+                        null, "a@b.pl", 3, Instant.parse("2026-10-01T10:00:00Z"))),
                 0, 20, 1));
 
-        mvc.perform(get("/api/v1/admin/line-sheets?emailStatus=FAILED"))
+        mvc.perform(get("/api/v1/admin/line-sheets"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[0].referenceNumber").value("LS-2026-000001"))
                 .andExpect(jsonPath("$.totalItems").value(1))
                 .andExpect(jsonPath("$.totalPages").value(1));
 
-        mvc.perform(post("/api/v1/admin/line-sheets/{id}/resend-email", id)).andExpect(status().isAccepted());
-        verify(resendEmail).resend(LineSheetId.of(id));
+        // wysyłka e-mail została usunięta z aplikacji — endpoint nie istnieje
+        mvc.perform(post("/api/v1/admin/line-sheets/{id}/resend-email", id))
+                .andExpect(status().is4xxClientError());
     }
 }

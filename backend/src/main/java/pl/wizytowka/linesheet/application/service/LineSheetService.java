@@ -13,7 +13,6 @@ import pl.wizytowka.contact.application.view.SalesRepresentativeContact;
 import pl.wizytowka.linesheet.application.port.in.CreateLineSheetCommand;
 import pl.wizytowka.linesheet.application.port.in.CreateLineSheetUseCase;
 import pl.wizytowka.linesheet.application.port.in.GetLineSheetPdfUseCase;
-import pl.wizytowka.linesheet.application.port.in.ResendLineSheetEmailUseCase;
 import pl.wizytowka.linesheet.application.port.out.LineSheetDocumentRenderer;
 import pl.wizytowka.linesheet.application.port.out.LineSheetNumberGenerator;
 import pl.wizytowka.linesheet.application.port.out.LineSheetRepository;
@@ -21,7 +20,6 @@ import pl.wizytowka.linesheet.application.view.CreatedLineSheet;
 import pl.wizytowka.linesheet.application.view.LineSheetDocument;
 import pl.wizytowka.linesheet.application.view.LineSheetPdf;
 import pl.wizytowka.linesheet.domain.LineSheet;
-import pl.wizytowka.linesheet.domain.LineSheetId;
 import pl.wizytowka.linesheet.domain.Recipient;
 import pl.wizytowka.linesheet.domain.SelectedVariant;
 import pl.wizytowka.shared.application.port.out.FileStorage;
@@ -30,26 +28,22 @@ import pl.wizytowka.shared.domain.InvalidValueException;
 import pl.wizytowka.shared.domain.ResourceNotFoundException;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
-class LineSheetService implements CreateLineSheetUseCase, GetLineSheetPdfUseCase, ResendLineSheetEmailUseCase {
+class LineSheetService implements CreateLineSheetUseCase, GetLineSheetPdfUseCase {
 
     private static final String PDF_CONTENT_TYPE = "application/pdf";
 
     private final LineSheetRepository lineSheets;
     private final LineSheetNumberGenerator numbers;
     private final LineSheetDocumentRenderer renderer;
-    private final LineSheetEmailDispatcher emailDispatcher;
     private final VariantSnapshotQuery variantSnapshots;
     private final SalesRepresentativeQuery salesRepresentatives;
     private final RecordAnalyticsEventsUseCase analytics;
@@ -58,13 +52,12 @@ class LineSheetService implements CreateLineSheetUseCase, GetLineSheetPdfUseCase
     private final Clock clock;
 
     LineSheetService(LineSheetRepository lineSheets, LineSheetNumberGenerator numbers, LineSheetDocumentRenderer renderer,
-                     LineSheetEmailDispatcher emailDispatcher, VariantSnapshotQuery variantSnapshots,
+                     VariantSnapshotQuery variantSnapshots,
                      SalesRepresentativeQuery salesRepresentatives, RecordAnalyticsEventsUseCase analytics,
                      FileStorage fileStorage, TransactionalHooks transactionalHooks, Clock clock) {
         this.lineSheets = lineSheets;
         this.numbers = numbers;
         this.renderer = renderer;
-        this.emailDispatcher = emailDispatcher;
         this.variantSnapshots = variantSnapshots;
         this.salesRepresentatives = salesRepresentatives;
         this.analytics = analytics;
@@ -84,19 +77,13 @@ class LineSheetService implements CreateLineSheetUseCase, GetLineSheetPdfUseCase
                 command.phone(), command.taxId());
 
         LineSheet sheet = LineSheet.create(referenceNumber, command.language(), recipient, command.message(),
-                command.privacyAccepted(), command.sendEmail(),
+                command.privacyAccepted(),
                 salesRepresentative == null ? null : salesRepresentative.id(), command.visitorId(), selections, now);
         LineSheetDocument document = LineSheetDocuments.of(sheet, salesRepresentative);
-        byte[] pdf = storePdf(sheet, document);
+        storePdf(sheet, document);
         sheet.attachPdf(LineSheetDocuments.storageKey(sheet), now);
-        if (command.sendEmail()) {
-            sheet.requestEmailDelivery();
-        }
         lineSheets.save(sheet);
 
-        if (command.sendEmail()) {
-            transactionalHooks.afterCommit(() -> emailDispatcher.deliver(sheet.id(), document, pdf));
-        }
         transactionalHooks.afterCommit(() -> analytics.recordServerEvent(new ServerEvent(
                 AnalyticsEventType.LINE_SHEET_GENERATED, command.visitorId(), command.language(), null, null,
                 sheet.id().value(), Map.of("items", String.valueOf(sheet.items().size())))));
@@ -112,20 +99,6 @@ class LineSheetService implements CreateLineSheetUseCase, GetLineSheetPdfUseCase
         }
         FileStorage.StoredFile file = fileStorage.open(sheet.pdfStorageKey()).orElseThrow(LineSheetService::pdfNotFound);
         return new LineSheetPdf(file.content(), file.sizeBytes(), sheet.referenceNumber() + ".pdf");
-    }
-
-    @Override
-    @Transactional
-    public void resend(LineSheetId id) {
-        LineSheet sheet = lineSheets.findById(id).orElseThrow(LineSheetService::notFound);
-        sheet.requestEmailDelivery();
-        SalesRepresentativeContact salesRepresentative = Optional.ofNullable(sheet.salesRepresentativeId())
-                .flatMap(salesRepresentatives::findContact)
-                .orElse(null);
-        LineSheetDocument document = LineSheetDocuments.of(sheet, salesRepresentative);
-        byte[] pdf = readPdf(sheet).orElseGet(() -> storePdf(sheet, document));
-        lineSheets.save(sheet);
-        transactionalHooks.afterCommit(() -> emailDispatcher.deliver(sheet.id(), document, pdf));
     }
 
     private List<SelectedVariant> resolveSelections(CreateLineSheetCommand command) {
@@ -165,24 +138,11 @@ class LineSheetService implements CreateLineSheetUseCase, GetLineSheetPdfUseCase
     }
 
     /** Renderuje i zapisuje PDF; przy wycofaniu transakcji plik zostanie usunięty. */
-    private byte[] storePdf(LineSheet sheet, LineSheetDocument document) {
+    private void storePdf(LineSheet sheet, LineSheetDocument document) {
         byte[] pdf = renderer.render(document);
         String key = LineSheetDocuments.storageKey(sheet);
         fileStorage.store(key, new ByteArrayInputStream(pdf), pdf.length, PDF_CONTENT_TYPE);
         transactionalHooks.afterRollback(() -> fileStorage.delete(key));
-        return pdf;
-    }
-
-    private Optional<byte[]> readPdf(LineSheet sheet) {
-        Optional<FileStorage.StoredFile> stored = fileStorage.open(sheet.pdfStorageKey());
-        if (stored.isEmpty()) {
-            return Optional.empty();
-        }
-        try (FileStorage.StoredFile file = stored.get()) {
-            return Optional.of(file.content().readAllBytes());
-        } catch (IOException e) {
-            throw new UncheckedIOException("Cannot read line sheet PDF", e);
-        }
     }
 
     private static ResourceNotFoundException notFound() {

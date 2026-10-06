@@ -24,6 +24,10 @@ spring:
     enabled: true
     locations: classpath:db/migration
 
+server:
+  # Za reverse proxy: adres klienta z X-Forwarded-For, ale tylko od zaufanych (wewnętrznych) proxy — Tomcat RemoteIpValve
+  forward-headers-strategy: native
+
 management:
   endpoints:
     web:
@@ -46,3 +50,39 @@ showroom:
     bootstrap-admin:
       email: ${SHOWROOM_ADMIN_EMAIL:}
       password: ${SHOWROOM_ADMIN_PASSWORD:}
+  rate-limit:
+    enabled: ${SHOWROOM_RATE_LIMIT_ENABLED:true}
+    max-tracked-clients: 100000
+    rules:
+      - name: line-sheets             # generowanie PDF jest kosztowne
+        method: POST
+        path: /api/v1/line-sheets
+        limits:
+          - { capacity: 5, period: 1m }
+          - { capacity: 30, period: 1h }
+      - name: analytics-events
+        method: POST
+        path: /api/v1/analytics/events
+        limits:
+          - { capacity: 60, period: 1m }
+      - name: admin-login             # uzupełnia blokadę konta: ogranicza credential stuffing z jednego adresu
+        method: POST
+        path: /api/v1/admin/auth/login
+        limits:
+          - { capacity: 10, period: 1m }
+          - { capacity: 50, period: 1h }
+      - name: admin-refresh
+        method: POST
+        path: /api/v1/admin/auth/refresh
+        limits:
+          - { capacity: 30, period: 1m }
+  brand:                              # dane marki w zestawieniach PDF — placeholdery do czasu identyfikacji (Etap 4)
+    name: ${SHOWROOM_BRAND_NAME:Brand Name}
+    legal-name: ${SHOWROOM_BRAND_LEGAL_NAME:}
+    address-lines: []
+    website: ${SHOWROOM_BRAND_WEBSITE:}
+    email: ${SHOWROOM_BRAND_EMAIL:}
+    phone: ${SHOWROOM_BRAND_PHONE:}
+    accent-color: "#1F2A37"
+    # logo: pdf/brand/logo.png          # opcjonalne logo PNG/JPEG z classpath; brak = wordmark z nazwy
+    time-zone: Europe/Warsaw
