@@ -22,6 +22,9 @@
         <!-- 11.20+: oficjalne wsparcie PostgreSQL 18 (Boot 3.5 domyślnie dostarcza 11.7) -->
         <flyway.version>11.20.3</flyway.version>
         <archunit.version>1.5.1</archunit.version>
+        <openhtmltopdf.version>1.1.87</openhtmltopdf.version>
+        <twelvemonkeys.version>3.15.2</twelvemonkeys.version>
+        <bucket4j.version>8.21.0</bucket4j.version>
     </properties>
 
     <dependencies>
@@ -57,6 +60,32 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+        <!-- PDF zestawień: szablon HTML (Thymeleaf, bez integracji z MVC) renderowany do PDF przez PDFBox -->
+        <dependency>
+            <groupId>org.thymeleaf</groupId>
+            <artifactId>thymeleaf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openhtmltopdf</groupId>
+            <artifactId>openhtmltopdf-pdfbox</artifactId>
+            <version>${openhtmltopdf.version}</version>
+        </dependency>
+        <dependency>
+            <!-- dekodowanie WebP przez ImageIO (miniatury zdjęć w PDF) -->
+            <groupId>com.twelvemonkeys.imageio</groupId>
+            <artifactId>imageio-webp</artifactId>
+            <version>${twelvemonkeys.version}</version>
+        </dependency>
+        <!-- rate limiting publicznych endpointów: token bucket per klient, kubełki w ograniczonym cache -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk17-core</artifactId>
+            <version>${bucket4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
