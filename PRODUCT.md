@@ -26,7 +26,7 @@ niedostępnych modeli, podgląd zestawień i statystyk.
 
 ## Product Purpose
 
-Interaktywna wizytówka i katalog B2B marki **fabian's style**. Kupiec przegląda kolekcję (lookbook), zaznacza
+Interaktywna wizytówka i katalog B2B marki **Fabian's Style**. Kupiec przegląda kolekcję (lookbook), zaznacza
 interesujące warianty (model × kolor × rozmiar) i pobiera spersonalizowane zestawienie PDF z kodami EAN, zdjęciami,
 cenami hurtowymi i sugerowanymi cenami detalicznymi, a potem kontaktuje się z opiekunem handlowym.
 
@@ -67,20 +67,34 @@ Potwierdzone wyróżniki marki — tylko te, bez dopowiadania szczegółów:
 
 ## Brand Commitments
 
-- Nazwa marki: **fabian's style** (pisownia z apostrofem; potwierdzić zapis wielkimi/małymi literami z logo).
+- Nazwa marki: **Fabian's Style** (zapis z logo i banera: wielkie litery, apostrof). Logo kaligraficzne — używać
+  wyłącznie dostarczonego pliku, nie odtwarzać fontem.
+- Istniejący kanał hurtowy: grupa na Facebooku „Klienci hurtowi Fabian's Style”.
 - Kanały: [Facebook](https://www.facebook.com/fabiansstyle) i [Instagram](https://www.instagram.com/fabiansstyle/)
   (bez logowania nie udostępniają treści — informacje o marce pochodzą wyłącznie od użytkownika).
 - Asortyment: odzież damska.
 - Ton: profesjonalny, bezpośredni.
+- **Kierunek wizualny (decyzja 2026-10-06):** standard kategorii — dopracowany katalog hurtowy bez eksperymentów
+  formalnych, wykonany na poziomie **COS / Arket** (poprzeczka jakości: duże zdjęcia, dużo powietrza, precyzyjna
+  typografia). Kupiec ma czuć się jak w znajomym narzędziu, nie w sklepie detalicznym ani w arkuszu kalkulacyjnym.
 
 ## Evidence on Hand
 
-Istnieją (potwierdzone), ale **nie zostały jeszcze dostarczone do repozytorium** — ścieżki do uzupełnienia:
+Dostarczone do `brand-assets/` (katalog poza gitem — zdjęcia i dane marki nie trafiają do repozytorium):
 
-- logo marki,
-- sesje lookbookowe (stylizacje na modelkach),
-- packshoty produktów,
-- opisy i dane produktów (nazwy, składy, rozmiarówki, EAN, ceny).
+- `logo.png` — logo kaligraficzne (pismo odręczne, czarne na białym), 936×936 px, tylko raster bez przezroczystości;
+  brak wersji wektorowej (SVG) — do uzyskania od marki.
+- `facebook-zdj-w-tle.png` — baner Facebooka (820×360): modelka w czarnej sukience, logo, odnośniki do
+  **grupy hurtowej na Facebooku „Klienci hurtowi Fabian's Style”** i profilu @fabiansstyle.
+- `zdj-sesja/` — 13 zdjęć z sesji studyjnych (11 × 1100×1650 px, 2 × 393×590 px): jasny loft z białą cegłą i dużym
+  oknem, drewniana boazeria, biała zasłona, kremowe meble bouclé, rośliny. Modelki w sukienkach midi i sukienkach
+  koszulowych z wyrazistymi printami (abstrakcyjne pociągnięcia pędzla, duże kwiaty) — m.in. brąz, kobalt, czerń,
+  zieleń, bordo z akcentami złota.
+- `modelki-ai/` — 10 zdjęć **wygenerowanych przez AI** (modelki w miejskim, jesiennym plenerze, 688–896 px szerokości).
+  **Decyzja marki (2026-10-06):** zdjęcia AI są używane na równi ze zdjęciami z sesji, także przy produktach.
+
+Zapowiedziane, ale jeszcze niedostarczone: packshoty produktów, dane produktów (nazwy, składy, rozmiarówki, EAN, ceny)
+— do czasu ich dostarczenia katalog działa na danych demonstracyjnych oznaczonych jako przykładowe.
 
 Brak: opinii klientów, case studies, danych o sprzedaży, liczby sklepów partnerskich, nagród, certyfikatów materiałowych.
 Niczego z tej listy nie wolno wymyślać w treściach.

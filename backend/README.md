@@ -37,6 +37,22 @@ pobiera Maven 3.9.16. Polecenia Maven uruchamiaj z katalogu `backend/`.
 | `SHOWROOM_BRAND_NAME`, `_LEGAL_NAME`, `_WEBSITE`, `_EMAIL`, `_PHONE` | nie | dane marki w nagłówku i stopce PDF (placeholdery do czasu identyfikacji); logo: `showroom.brand.logo` (PNG/JPEG z classpath) |
 | `SHOWROOM_RATE_LIMIT_ENABLED` | nie | domyślnie `true`; wyłączać tylko w testach |
 
+## Dane demonstracyjne
+
+Do czasu importu prawdziwych danych marki katalog można wypełnić **danymi przykładowymi** zbudowanymi z prawdziwych
+zdjęć z `brand-assets/` (katalog poza repozytorium):
+
+```bash
+scripts/dev-up.sh --seed     # baza + backend + dane demo (wymaga .env z SHOWROOM_ADMIN_EMAIL/PASSWORD)
+scripts/dev-up.sh stop
+```
+
+`scripts/seed-demo.mjs` (Node 22, bez zależności) korzysta wyłącznie z REST API i jest idempotentny. Tworzy 3 kategorie,
+15 kolorów nazwanych od printów, rozmiary 36–46, 9 modeli sukienek (7 opublikowanych, 1 ukryty, 1 szkic) z wariantami
+i zdjęciami oraz przykładowego opiekuna handlowego. **Nazwy, opisy, ceny, SKU i EAN są ilustracyjne** — EAN-y leżą
+w puli GS1 „restricted circulation” (prefiks 29), więc nie kolidują z prawdziwymi produktami; opisy mówią tylko o tym,
+co widać na zdjęciach.
+
 ## Architektura heksagonalna
 
 Moduły (bounded contexts): `catalog`, `linesheet`, `analytics`, `contact`, `identity` + `shared` (kernel).

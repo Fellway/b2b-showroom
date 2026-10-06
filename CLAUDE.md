@@ -17,7 +17,8 @@ Szczegóły techniczne, tabela API i instrukcja uruchomienia: [`backend/README.m
 | 1 | Model danych PostgreSQL + Flyway | ✅ |
 | 2 | Backend heksagonalny, REST API (katalog, panel, zestawienia, analityka), JWT | ✅ 232 testy |
 | 3 | Adapter PDF (Thymeleaf → HTML → OpenHTMLtoPDF), usunięcie wysyłki e-mail (migracja V2), rate limiting | ✅ 258 testów |
-| 4 | Frontend Next.js: lookbook, pasek wyboru pozycji, modal zestawienia/PDF, panel admina | ⏭ następny |
+| 4a | Frontend: publiczny katalog, karta produktu, zestawienie PDF, kontakt (Impeccable: kanon na poziomie COS / Arket) | ✅ |
+| 4b | Frontend: panel administracyjny (dziedziczy `DESIGN.md`, tryb Operate) | ⏭ następny |
 
 Pracujemy etapami — nie piszemy całego systemu naraz. Przed startem etapu zadajemy pytania doprecyzowujące,
 jeśli decyzja zmienia kształt rozwiązania.
@@ -40,7 +41,7 @@ jeśli decyzja zmienia kształt rozwiązania.
 - **Backend** (`backend/`): Java 21, Spring Boot 3.5.x (zostajemy na 3.x), Spring Data JPA/Hibernate 6, Spring Security + OAuth2 Resource Server (JWT), Bean Validation, Actuator.
 - **Baza:** PostgreSQL 18 (`postgres:18.4-alpine`), migracje Flyway 11.20.x, Hibernate wyłącznie waliduje schemat (`ddl-auto=validate`).
 - **Pliki:** port `FileStorage` — dziś dysk lokalny, docelowo S3.
-- **Frontend (Etap 4):** Next.js (App Router, TypeScript), Tailwind CSS, shadcn/ui, next-intl. **UI/UX projektujemy wtyczką `/impeccable`** — `PRODUCT.md` gotowy (init ✅); kierunek wizualny ustala `new-work` i zapisuje w `DESIGN.md`.
+- **Frontend** (`frontend/`): Next.js 16 (App Router, TypeScript; middleware nazywa się tu `src/proxy.ts`, `params`/`searchParams` są asynchroniczne — przed pisaniem kodu czytaj `frontend/node_modules/next/dist/docs/`), Tailwind CSS 4, shadcn/ui (Radix, przestylowane tokenami), next-intl 4, zustand. Node 22 (`frontend/.nvmrc`, przez nvm). **UI/UX projektujemy wtyczką `/impeccable`**: `PRODUCT.md` (produkt), `DESIGN.md` + `.impeccable/design.json` (system wizualny — kanon kategorii na poziomie COS / Arket, wybrany przez użytkownika), kontrakt kierunku w `.impeccable/surfaces/`. Szczegóły: `frontend/README.md`.
 - **Wdrożenie:** frontend i API na **tej samej domenie** za reverse proxy (`/api` → Spring Boot). Brak CORS.
 
 ## Architektura backendu — heksagonalna z czystą domeną
@@ -90,8 +91,19 @@ Konwencje:
 - Nie tworzyć `src/test/resources/application.yml` (przesłania główny plik konfiguracyjny).
 - Git: lokalna tożsamość repozytorium to `Mateusz Skrzypczyk <33421875+Fellway@users.noreply.github.com>` (GitHub: [Fellway](https://github.com/Fellway)). **Nigdy nie używać maila z Empiku.**
 
+## Środowisko deweloperskie (frontend + backend)
+
+- `docker compose up` nie działa na tej maszynie (Dockerowi skończyły się pule adresów sieci) — `scripts/dev-up.sh` stawia bazę na sieci `bridge` i backend; `--seed` ładuje dane demonstracyjne (`scripts/seed-demo.mjs`, zdjęcia z `brand-assets/`). Niczego nie usuwać w Dockerze bez zgody użytkownika.
+- Frontend: `cd frontend && nvm use && npm run dev` (rewrite `/api` → `API_INTERNAL_URL`, domyślnie :8080). `NEXT_PUBLIC_DEMO_NOTICE=true` oznacza dane jako przykładowe — wymagane, dopóki katalog nie ma prawdziwych danych.
+- `brand-assets/` (zdjęcia, logo marki) jest poza gitem.
+
 ## Otwarte tematy
+
+- **Na start Etapu 4b (dług z przeglądu 4a):** kontrast krawędzi kontrolek w spoczynku (`line` ≈ 1,3:1 — WCAG 1.4.11 wymaga 3:1; dotyczy pól, przycisków rozmiarów, stepperów), wyrównanie prymitywów shadcn (`ui/button.tsx`, `ui/popover.tsx`) do `DESIGN.md`, jedna wartość cienia dla menu, kolor scrollbara jako token, strzałki „← →” jako ikony Lucide. Po zmianach zaktualizować `DESIGN.md`.
 
 - Adapter S3 dla `FileStorage`.
 - Identyfikacja marki (nazwa, logo, kolory, typografia) — dziś placeholdery w `showroom.brand.*`; ustalimy w Etapie 4 (`/impeccable init`) i przeniesiemy też do PDF.
 - Ewentualny dostęp klientów przez token w URL (świadomie odłożony).
+- Import prawdziwych danych produktów (nazwy, składy, rozmiarówki, EAN, ceny) i packshoty — dziś dane demonstracyjne.
+- Adres grupy hurtowej na Facebooku („Klienci hurtowi Fabian's Style”) do stopki; logo w wersji wektorowej (SVG).
+- Trwały identyfikator odwiedzającego w analityce wymaga decyzji o zgodzie (ePrivacy) — dziś tylko identyfikator sesji.

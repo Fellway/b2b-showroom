@@ -3,3 +3,7 @@ backend/target/
 *.iml
 .env
 backend/data/
+brand-assets/
+.impeccable/review/
+.impeccable/questions/
+.impeccable/build/

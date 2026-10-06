@@ -1,0 +1,137 @@
+{
+  "meta": {
+    "title": "Fabian's Style — katalog hurtowy",
+    "description": "Katalog hurtowy odzieży damskiej Fabian's Style. Autorski design, szyte w Polsce. Ceny hurtowe, sugerowane ceny detaliczne i kody EAN."
+  },
+  "site": {
+    "context": "Kolekcja hurtowa · Szyte w Polsce",
+    "priceNote": "Ceny hurtowe netto, sugerowane ceny detaliczne brutto",
+    "allProducts": "Wszystkie",
+    "skipToContent": "Przejdź do treści",
+    "language": "Język",
+    "selection": "Zestawienie",
+    "home": "Strona główna Fabian's Style",
+    "demoNotice": "Katalog demonstracyjny: produkty, ceny i kody EAN są przykładowe.",
+    "footer": {
+      "contactTitle": "Kontakt handlowy",
+      "contactLead": "Zadzwoń lub napisz — przygotujemy warunki współpracy, terminy dostaw i próbki.",
+      "social": "Marka w mediach społecznościowych",
+      "rights": "© {year} Fabian's Style"
+    }
+  },
+  "catalog": {
+    "title": "Kolekcja hurtowa",
+    "lead": "Autorski design, szyte w Polsce.",
+    "results": "{count, plural, one {# model} few {# modele} many {# modeli} other {# modelu}}",
+    "filters": "Filtry",
+    "category": "Kategoria",
+    "color": "Kolor",
+    "size": "Rozmiar",
+    "sort": "Sortuj",
+    "sortOptions": {
+      "RECOMMENDED": "Polecane",
+      "NEWEST": "Najnowsze",
+      "PRICE_ASC": "Cena hurtowa: rosnąco",
+      "PRICE_DESC": "Cena hurtowa: malejąco"
+    },
+    "search": "Szukaj modelu lub kodu",
+    "searchSubmit": "Szukaj",
+    "clearFilters": "Wyczyść filtry",
+    "selected": "{count, plural, one {# wybrany} few {# wybrane} many {# wybranych} other {# wybranego}}",
+    "empty": "Żaden model nie pasuje do wybranych filtrów.",
+    "emptyCatalog": "Kolekcja jest właśnie przygotowywana. Skontaktuj się z nami, aby poznać ofertę.",
+    "wholesale": "Hurt",
+    "retail": "MSRP",
+    "markup": "Mnożnik",
+    "colorsCount": "{count, plural, one {# kolor} few {# kolory} many {# kolorów} other {# koloru}}",
+    "pagination": "Strony katalogu",
+    "previous": "Poprzednia",
+    "next": "Następna",
+    "pageOf": "Strona {page} z {total}",
+    "inSelection": "W zestawieniu: {count}"
+  },
+  "product": {
+    "back": "Wróć do katalogu",
+    "styleCode": "Model {code}",
+    "wholesale": "Cena hurtowa netto",
+    "retail": "Sugerowana cena detaliczna brutto",
+    "markup": "Mnożnik detaliczny",
+    "color": "Kolor",
+    "sizes": "Rozmiary",
+    "allSizes": "Zaznacz wszystkie",
+    "noneSizes": "Odznacz",
+    "quantityHint": "Ilość orientacyjna jest opcjonalna — trafi do zestawienia PDF.",
+    "quantity": "Ilość dla rozmiaru {size}",
+    "add": "{count, plural, =0 {Wybierz rozmiary} one {Dodaj # rozmiar do zestawienia} few {Dodaj # rozmiary do zestawienia} many {Dodaj # rozmiarów do zestawienia} other {Dodaj # rozmiaru do zestawienia}}",
+    "update": "Zaktualizuj zestawienie",
+    "added": "Dodano do zestawienia",
+    "inSelection": "W zestawieniu: {sizes}",
+    "description": "Opis",
+    "composition": "Skład",
+    "care": "Pielęgnacja",
+    "codes": "Kody EAN i SKU",
+    "codesSize": "Rozmiar",
+    "image": "{name}, kolor {color}, zdjęcie {index}"
+  },
+  "selection": {
+    "title": "Zestawienie",
+    "open": "Otwórz zestawienie",
+    "close": "Zamknij",
+    "empty": "Zestawienie jest puste. Wybierz rozmiary na karcie produktu, aby przygotować arkusz z cenami i kodami EAN.",
+    "browse": "Przeglądaj kolekcję",
+    "summary": {
+      "lines": "Pozycje",
+      "units": "Sztuki",
+      "value": "Wartość hurtowa netto",
+      "partial": "Wartość liczona tylko dla pozycji z podaną ilością."
+    },
+    "quantity": "Ilość",
+    "decrease": "Zmniejsz ilość {size}",
+    "increase": "Zwiększ ilość {size}",
+    "remove": "Usuń {name} {color} {size}",
+    "removeGroup": "Usuń model",
+    "clear": "Wyczyść zestawienie",
+    "continue": "Dalej: utwórz PDF",
+    "limit": "Zestawienie może zawierać najwyżej {max} pozycji.",
+    "form": {
+      "title": "Dane do zestawienia",
+      "lead": "Wszystkie pola są opcjonalne. Jeśli je wypełnisz, pojawią się w nagłówku PDF i pomogą opiekunowi handlowemu przygotować ofertę.",
+      "company": "Nazwa sklepu lub firmy",
+      "contactName": "Imię i nazwisko",
+      "email": "E-mail",
+      "phone": "Telefon",
+      "taxId": "NIP / VAT UE",
+      "message": "Wiadomość do opiekuna",
+      "consent": "Zgadzam się na przetwarzanie podanych danych przez Fabian's Style w celu przygotowania zestawienia i kontaktu handlowego.",
+      "consentRequired": "Zaznacz zgodę, aby dołączyć swoje dane — albo usuń dane z formularza.",
+      "back": "Wróć do pozycji",
+      "submit": "Utwórz zestawienie PDF",
+      "submitting": "Tworzę zestawienie…"
+    },
+    "done": {
+      "title": "Zestawienie <ref>{reference}</ref> gotowe",
+      "lead": "Pobierz PDF i prześlij go do swojego zespołu. Masz pytania o terminy lub warunki? Skontaktuj się z opiekunem.",
+      "download": "Pobierz PDF",
+      "newSheet": "Zacznij nowe zestawienie",
+      "keep": "Wróć do katalogu"
+    }
+  },
+  "errors": {
+    "generic": "Coś poszło nie tak. Spróbuj ponownie za chwilę.",
+    "network": "Brak połączenia z serwerem. Sprawdź internet i spróbuj ponownie.",
+    "rateLimited": "Za dużo prób w krótkim czasie. Spróbuj ponownie za {seconds} s.",
+    "notSelectable": "Część wybranych wariantów nie jest już dostępna. Usuń je z zestawienia i spróbuj ponownie.",
+    "invalidEmail": "Podaj poprawny adres e-mail.",
+    "privacyRequired": "Zaznacz zgodę na przetwarzanie danych.",
+    "validation": "Sprawdź pola formularza.",
+    "notFoundTitle": "Nie znaleźliśmy tej strony",
+    "notFoundLead": "Model mógł zostać wycofany z kolekcji.",
+    "notFoundBack": "Przejdź do katalogu"
+  },
+  "languages": {
+    "pl": "Polski",
+    "en": "English",
+    "cs": "Čeština",
+    "uk": "Українська"
+  }
+}

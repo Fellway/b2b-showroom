@@ -1,0 +1,144 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/*
+ * Fabian's Style — katalog hurtowy.
+ * Biel jako tło, ciepłoszary podkład pod zdjęcia, czerń logo jako jedyny kolor interfejsu.
+ * Kolor na stronie należy do kolekcji (printy sukienek), nie do interfejsu.
+ */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-well: var(--well);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-danger: var(--danger);
+
+  /* aliasy oczekiwane przez komponenty shadcn/ui */
+  --color-card: var(--background);
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--background);
+  --color-popover-foreground: var(--foreground);
+  --color-primary: var(--foreground);
+  --color-primary-foreground: var(--background);
+  --color-secondary: var(--well);
+  --color-secondary-foreground: var(--foreground);
+  --color-muted: var(--well);
+  --color-muted-foreground: var(--ink-3);
+  --color-accent: var(--well);
+  --color-accent-foreground: var(--foreground);
+  --color-destructive: var(--danger);
+  --color-border: var(--line);
+  --color-input: var(--line);
+  --color-ring: var(--foreground);
+
+  --font-sans: var(--font-golos), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-golos), ui-sans-serif, system-ui, sans-serif;
+
+  /* kwadratowe narożniki: zdjęcia, pola i przyciski bez zaokrągleń */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+
+  --text-meta: 0.75rem;
+  --text-meta--line-height: 1.1rem;
+  --text-small: 0.8125rem;
+  --text-small--line-height: 1.25rem;
+  --text-body: 0.9375rem;
+  --text-body--line-height: 1.5rem;
+  --text-title: 1.375rem;
+  --text-title--line-height: 1.8rem;
+  --text-display: 2rem;
+  --text-display--line-height: 2.4rem;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #111111;
+  --well: #f2f1ef;
+  --ink-2: #474644;
+  --ink-3: #6b6965;
+  --line: #e3e1dd;
+  --danger: #a1271c;
+  --radius: 0px;
+  --header-height: 4rem;
+  color-scheme: light;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    caret-color: var(--foreground);
+  }
+
+  ::selection {
+    background: var(--foreground);
+    color: var(--background);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--foreground);
+    outline-offset: 2px;
+  }
+
+  a {
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+  }
+
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  ::placeholder {
+    color: var(--ink-3);
+    opacity: 1;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #c9c6c1 transparent;
+  }
+}
+
+@layer utilities {
+  /* kwoty, EAN, rozmiary i ilości: cyfry tej samej szerokości, wyrównane w kolumnach */
+  .tabular {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

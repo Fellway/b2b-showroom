@@ -1,0 +1,137 @@
+{
+  "meta": {
+    "title": "Fabian's Style — velkoobchodní katalog",
+    "description": "Velkoobchodní katalog dámského oblečení Fabian's Style. Autorský design, šito v Polsku. Velkoobchodní ceny, doporučené maloobchodní ceny a kódy EAN."
+  },
+  "site": {
+    "context": "Velkoobchodní kolekce · Šito v Polsku",
+    "priceNote": "Velkoobchodní ceny bez DPH, doporučené maloobchodní ceny s DPH",
+    "allProducts": "Vše",
+    "skipToContent": "Přejít na obsah",
+    "language": "Jazyk",
+    "selection": "Výběr",
+    "home": "Úvodní stránka Fabian's Style",
+    "demoNotice": "Ukázkový katalog: produkty, ceny a kódy EAN jsou ilustrativní.",
+    "footer": {
+      "contactTitle": "Obchodní kontakt",
+      "contactLead": "Zavolejte nebo napište — připravíme podmínky spolupráce, termíny dodání a vzorky.",
+      "social": "Značka na sociálních sítích",
+      "rights": "© {year} Fabian's Style"
+    }
+  },
+  "catalog": {
+    "title": "Velkoobchodní kolekce",
+    "lead": "Autorský design, šito v Polsku.",
+    "results": "{count, plural, one {# model} few {# modely} many {# modelu} other {# modelů}}",
+    "filters": "Filtry",
+    "category": "Kategorie",
+    "color": "Barva",
+    "size": "Velikost",
+    "sort": "Řadit",
+    "sortOptions": {
+      "RECOMMENDED": "Doporučené",
+      "NEWEST": "Nejnovější",
+      "PRICE_ASC": "Velkoobchodní cena: vzestupně",
+      "PRICE_DESC": "Velkoobchodní cena: sestupně"
+    },
+    "search": "Hledat model nebo kód",
+    "searchSubmit": "Hledat",
+    "clearFilters": "Zrušit filtry",
+    "selected": "{count, plural, one {# vybraný} few {# vybrané} many {# vybraného} other {# vybraných}}",
+    "empty": "Vybraným filtrům neodpovídá žádný model.",
+    "emptyCatalog": "Kolekci právě připravujeme. Kontaktujte nás a seznamte se s nabídkou.",
+    "wholesale": "VO",
+    "retail": "MOC",
+    "markup": "Násobek",
+    "colorsCount": "{count, plural, one {# barva} few {# barvy} many {# barvy} other {# barev}}",
+    "pagination": "Stránky katalogu",
+    "previous": "Předchozí",
+    "next": "Další",
+    "pageOf": "Strana {page} z {total}",
+    "inSelection": "Ve výběru: {count}"
+  },
+  "product": {
+    "back": "Zpět do katalogu",
+    "styleCode": "Model {code}",
+    "wholesale": "Velkoobchodní cena bez DPH",
+    "retail": "Doporučená maloobchodní cena s DPH",
+    "markup": "Maloobchodní násobek",
+    "color": "Barva",
+    "sizes": "Velikosti",
+    "allSizes": "Vybrat vše",
+    "noneSizes": "Zrušit výběr",
+    "quantityHint": "Orientační množství je nepovinné — objeví se ve výběru v PDF.",
+    "quantity": "Množství pro velikost {size}",
+    "add": "{count, plural, =0 {Vyberte velikosti} one {Přidat # velikost do výběru} few {Přidat # velikosti do výběru} many {Přidat # velikosti do výběru} other {Přidat # velikostí do výběru}}",
+    "update": "Aktualizovat výběr",
+    "added": "Přidáno do výběru",
+    "inSelection": "Ve výběru: {sizes}",
+    "description": "Popis",
+    "composition": "Složení",
+    "care": "Údržba",
+    "codes": "Kódy EAN a SKU",
+    "codesSize": "Velikost",
+    "image": "{name}, barva {color}, fotografie {index}"
+  },
+  "selection": {
+    "title": "Výběr",
+    "open": "Otevřít výběr",
+    "close": "Zavřít",
+    "empty": "Výběr je prázdný. Na kartě produktu zvolte velikosti a připravte přehled s cenami a kódy EAN.",
+    "browse": "Prohlížet kolekci",
+    "summary": {
+      "lines": "Položky",
+      "units": "Kusy",
+      "value": "Velkoobchodní hodnota bez DPH",
+      "partial": "Hodnota zahrnuje pouze položky s uvedeným množstvím."
+    },
+    "quantity": "Množství",
+    "decrease": "Snížit množství {size}",
+    "increase": "Zvýšit množství {size}",
+    "remove": "Odebrat {name} {color} {size}",
+    "removeGroup": "Odebrat model",
+    "clear": "Vyprázdnit výběr",
+    "continue": "Dále: vytvořit PDF",
+    "limit": "Výběr může obsahovat nejvýše {max} položek.",
+    "form": {
+      "title": "Údaje do výběru",
+      "lead": "Všechna pole jsou nepovinná. Pokud je vyplníte, objeví se v záhlaví PDF a pomohou obchodnímu zástupci připravit nabídku.",
+      "company": "Název obchodu nebo firmy",
+      "contactName": "Jméno a příjmení",
+      "email": "E-mail",
+      "phone": "Telefon",
+      "taxId": "IČ / DIČ",
+      "message": "Zpráva pro obchodního zástupce",
+      "consent": "Souhlasím se zpracováním uvedených údajů společností Fabian's Style za účelem přípravy výběru a obchodního kontaktu.",
+      "consentRequired": "Zaškrtněte souhlas, abyste mohli připojit své údaje — nebo údaje z formuláře odstraňte.",
+      "back": "Zpět k položkám",
+      "submit": "Vytvořit PDF",
+      "submitting": "Vytvářím výběr…"
+    },
+    "done": {
+      "title": "Výběr <ref>{reference}</ref> je připraven",
+      "lead": "Stáhněte si PDF a sdílejte ho se svým týmem. Máte dotazy k termínům nebo podmínkám? Kontaktujte obchodního zástupce.",
+      "download": "Stáhnout PDF",
+      "newSheet": "Začít nový výběr",
+      "keep": "Zpět do katalogu"
+    }
+  },
+  "errors": {
+    "generic": "Něco se pokazilo. Zkuste to prosím za chvíli znovu.",
+    "network": "Nelze se spojit se serverem. Zkontrolujte připojení a zkuste to znovu.",
+    "rateLimited": "Příliš mnoho pokusů v krátké době. Zkuste to znovu za {seconds} s.",
+    "notSelectable": "Některé vybrané varianty již nejsou dostupné. Odeberte je z výběru a zkuste to znovu.",
+    "invalidEmail": "Zadejte platnou e-mailovou adresu.",
+    "privacyRequired": "Zaškrtněte souhlas se zpracováním údajů.",
+    "validation": "Zkontrolujte pole formuláře.",
+    "notFoundTitle": "Tuto stránku jsme nenašli",
+    "notFoundLead": "Model mohl být z kolekce stažen.",
+    "notFoundBack": "Přejít do katalogu"
+  },
+  "languages": {
+    "pl": "Polski",
+    "en": "English",
+    "cs": "Čeština",
+    "uk": "Українська"
+  }
+}

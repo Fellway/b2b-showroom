@@ -1,0 +1,137 @@
+{
+  "meta": {
+    "title": "Fabian's Style — wholesale catalogue",
+    "description": "Wholesale catalogue of Fabian's Style womenswear. Original design, made in Poland. Wholesale prices, recommended retail prices and EAN codes."
+  },
+  "site": {
+    "context": "Wholesale collection · Made in Poland",
+    "priceNote": "Wholesale prices excl. VAT, recommended retail prices incl. VAT",
+    "allProducts": "All",
+    "skipToContent": "Skip to content",
+    "language": "Language",
+    "selection": "Line sheet",
+    "home": "Fabian's Style home",
+    "demoNotice": "Demo catalogue: products, prices and EAN codes are illustrative.",
+    "footer": {
+      "contactTitle": "Sales contact",
+      "contactLead": "Call or write — we will prepare terms, delivery dates and samples.",
+      "social": "The brand on social media",
+      "rights": "© {year} Fabian's Style"
+    }
+  },
+  "catalog": {
+    "title": "Wholesale collection",
+    "lead": "Original design, made in Poland.",
+    "results": "{count, plural, one {# style} other {# styles}}",
+    "filters": "Filters",
+    "category": "Category",
+    "color": "Colour",
+    "size": "Size",
+    "sort": "Sort",
+    "sortOptions": {
+      "RECOMMENDED": "Recommended",
+      "NEWEST": "Newest",
+      "PRICE_ASC": "Wholesale price: low to high",
+      "PRICE_DESC": "Wholesale price: high to low"
+    },
+    "search": "Search style name or code",
+    "searchSubmit": "Search",
+    "clearFilters": "Clear filters",
+    "selected": "{count} selected",
+    "empty": "No styles match the selected filters.",
+    "emptyCatalog": "The collection is being prepared. Contact us to learn about the offer.",
+    "wholesale": "Wholesale",
+    "retail": "RRP",
+    "markup": "Markup",
+    "colorsCount": "{count, plural, one {# colour} other {# colours}}",
+    "pagination": "Catalogue pages",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {page} of {total}",
+    "inSelection": "On line sheet: {count}"
+  },
+  "product": {
+    "back": "Back to catalogue",
+    "styleCode": "Style {code}",
+    "wholesale": "Wholesale price excl. VAT",
+    "retail": "Recommended retail price incl. VAT",
+    "markup": "Retail markup",
+    "color": "Colour",
+    "sizes": "Sizes",
+    "allSizes": "Select all",
+    "noneSizes": "Clear",
+    "quantityHint": "Indicative quantity is optional — it is printed on the PDF line sheet.",
+    "quantity": "Quantity for size {size}",
+    "add": "{count, plural, =0 {Choose sizes} one {Add # size to line sheet} other {Add # sizes to line sheet}}",
+    "update": "Update line sheet",
+    "added": "Added to line sheet",
+    "inSelection": "On your line sheet: {sizes}",
+    "description": "Description",
+    "composition": "Composition",
+    "care": "Care",
+    "codes": "EAN and SKU codes",
+    "codesSize": "Size",
+    "image": "{name}, colour {color}, photo {index}"
+  },
+  "selection": {
+    "title": "Line sheet",
+    "open": "Open line sheet",
+    "close": "Close",
+    "empty": "Your line sheet is empty. Choose sizes on a product page to prepare a sheet with prices and EAN codes.",
+    "browse": "Browse the collection",
+    "summary": {
+      "lines": "Lines",
+      "units": "Units",
+      "value": "Wholesale value excl. VAT",
+      "partial": "Value counts only lines with a quantity."
+    },
+    "quantity": "Quantity",
+    "decrease": "Decrease quantity of {size}",
+    "increase": "Increase quantity of {size}",
+    "remove": "Remove {name} {color} {size}",
+    "removeGroup": "Remove style",
+    "clear": "Clear line sheet",
+    "continue": "Next: create PDF",
+    "limit": "A line sheet can hold at most {max} lines.",
+    "form": {
+      "title": "Line sheet details",
+      "lead": "All fields are optional. If you fill them in, they appear in the PDF header and help your sales contact prepare an offer.",
+      "company": "Store or company name",
+      "contactName": "Full name",
+      "email": "Email",
+      "phone": "Phone",
+      "taxId": "Tax ID / EU VAT",
+      "message": "Message to your sales contact",
+      "consent": "I agree to Fabian's Style processing the data provided to prepare the line sheet and for sales contact.",
+      "consentRequired": "Tick the consent to include your details — or remove the details from the form.",
+      "back": "Back to lines",
+      "submit": "Create PDF line sheet",
+      "submitting": "Creating line sheet…"
+    },
+    "done": {
+      "title": "Line sheet <ref>{reference}</ref> is ready",
+      "lead": "Download the PDF and share it with your team. Questions about dates or terms? Contact your sales representative.",
+      "download": "Download PDF",
+      "newSheet": "Start a new line sheet",
+      "keep": "Back to catalogue"
+    }
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again in a moment.",
+    "network": "Cannot reach the server. Check your connection and try again.",
+    "rateLimited": "Too many attempts in a short time. Try again in {seconds} s.",
+    "notSelectable": "Some selected variants are no longer available. Remove them from the line sheet and try again.",
+    "invalidEmail": "Enter a valid email address.",
+    "privacyRequired": "Tick the data processing consent.",
+    "validation": "Check the form fields.",
+    "notFoundTitle": "We could not find this page",
+    "notFoundLead": "The style may have been withdrawn from the collection.",
+    "notFoundBack": "Go to the catalogue"
+  },
+  "languages": {
+    "pl": "Polski",
+    "en": "English",
+    "cs": "Čeština",
+    "uk": "Українська"
+  }
+}
