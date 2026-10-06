@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:18.4-alpine
+    environment:
+      POSTGRES_DB: showroom
+      POSTGRES_USER: showroom
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-showroom-dev}
+    ports:
+      - "5433:5432"
+    volumes:
+      # PostgreSQL 18+ trzyma dane w podkatalogu wersji, dlatego montujemy /var/lib/postgresql
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U showroom -d showroom"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

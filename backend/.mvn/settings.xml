@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Ustawienia Maven projektu — zastępują ~/.m2/settings.xml (podpinane w .mvn/maven.config).
+  Projekt jest niezależny od infrastruktury firmowej: wszystkie artefakty pochodzą wyłącznie
+  z Maven Central i trafiają do osobnego repozytorium lokalnego.
+-->
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+    <localRepository>${user.home}/.m2/b2b-showroom-repository</localRepository>
+    <mirrors>
+        <mirror>
+            <id>central-only</id>
+            <name>Maven Central</name>
+            <url>https://repo.maven.apache.org/maven2</url>
+            <mirrorOf>*</mirrorOf>
+        </mirror>
+    </mirrors>
+</settings>
