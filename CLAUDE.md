@@ -1,6 +1,7 @@
 # B2B Showroom — kontekst projektu
 
-Interaktywna wizytówka i katalog B2B marki odzieżowej. **To NIE jest sklep**: brak koszyka, płatności i stanów
+Interaktywna wizytówka i katalog B2B marki odzieży damskiej **fabian's style** (produkcja w Polsce, autorski design).
+Kontekst produktowy dla projektowania UI (użytkownicy, sytuacje, pozycjonowanie, zasady): [`PRODUCT.md`](PRODUCT.md). **To NIE jest sklep**: brak koszyka, płatności i stanów
 magazynowych. Klient hurtowy przegląda katalog/lookbook, zaznacza warianty i generuje spersonalizowane
 zestawienie PDF (line sheet) do pobrania, oraz kontaktuje się z opiekunem handlowym (widoczny e-mail/telefon).
 **Aplikacja nie wysyła żadnych e-maili** (decyzja użytkownika, Etap 3).
@@ -39,7 +40,7 @@ jeśli decyzja zmienia kształt rozwiązania.
 - **Backend** (`backend/`): Java 21, Spring Boot 3.5.x (zostajemy na 3.x), Spring Data JPA/Hibernate 6, Spring Security + OAuth2 Resource Server (JWT), Bean Validation, Actuator.
 - **Baza:** PostgreSQL 18 (`postgres:18.4-alpine`), migracje Flyway 11.20.x, Hibernate wyłącznie waliduje schemat (`ddl-auto=validate`).
 - **Pliki:** port `FileStorage` — dziś dysk lokalny, docelowo S3.
-- **Frontend (Etap 4):** Next.js (App Router, TypeScript), Tailwind CSS, shadcn/ui, next-intl. **UI/UX projektujemy wtyczką `/impeccable`** (zacząć od `/impeccable init` → PRODUCT.md).
+- **Frontend (Etap 4):** Next.js (App Router, TypeScript), Tailwind CSS, shadcn/ui, next-intl. **UI/UX projektujemy wtyczką `/impeccable`** — `PRODUCT.md` gotowy (init ✅); kierunek wizualny ustala `new-work` i zapisuje w `DESIGN.md`.
 - **Wdrożenie:** frontend i API na **tej samej domenie** za reverse proxy (`/api` → Spring Boot). Brak CORS.
 
 ## Architektura backendu — heksagonalna z czystą domeną
