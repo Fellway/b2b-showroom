@@ -8,7 +8,12 @@ zestawienie PDF (line sheet) do pobrania, oraz kontaktuje się z opiekunem handl
 
 Projekt prywatny, **całkowicie niezależny od Empiku** — patrz „Środowisko”.
 
-Szczegóły techniczne, tabela API i instrukcja uruchomienia: [`backend/README.md`](backend/README.md).
+Pełna dokumentacja: [`docs/`](docs/README.md) — **decyzje i ich uzasadnienia** (`docs/decisions.md`), architektura
+i przepływy, praca deweloperska i pułapki środowiska, status i plan (`docs/roadmap.md`), proces projektowy.
+Szczegóły techniczne, tabela API i uruchomienie: [`backend/README.md`](backend/README.md), [`frontend/README.md`](frontend/README.md).
+
+**Utrzymanie wiedzy:** nowa decyzja → `docs/decisions.md`; zmiana statusu lub planu → `docs/roadmap.md` i tabela
+etapów niżej; zmiana systemu wizualnego → `DESIGN.md`. Po zakończeniu etapu zaktualizuj dokumentację w tym samym commicie.
 
 ## Plan etapów
 
@@ -97,14 +102,6 @@ Konwencje:
 - Frontend: `cd frontend && nvm use && npm run dev` (rewrite `/api` → `API_INTERNAL_URL`, domyślnie :8080). `NEXT_PUBLIC_DEMO_NOTICE=true` oznacza dane jako przykładowe — wymagane, dopóki katalog nie ma prawdziwych danych.
 - `brand-assets/` (zdjęcia, logo marki) jest poza gitem.
 
-## Otwarte tematy
+## Otwarte tematy i następne kroki
 
-
-- Adapter S3 dla `FileStorage`.
-- Identyfikacja marki (nazwa, logo, kolory, typografia) — dziś placeholdery w `showroom.brand.*`; ustalimy w Etapie 4 (`/impeccable init`) i przeniesiemy też do PDF.
-- Ewentualny dostęp klientów przez token w URL (świadomie odłożony).
-- Import prawdziwych danych produktów (nazwy, składy, rozmiarówki, EAN, ceny) i packshoty — dziś dane demonstracyjne.
-- Adres grupy hurtowej na Facebooku („Klienci hurtowi Fabian's Style”) do stopki; logo w wersji wektorowej (SVG).
-- Strona polityki prywatności (link z banera zgody) — wymaga od marki danych administratora danych osobowych.
-- Pomysł z przeglądu 4b: licznik nowych zestawień (leadów) od ostatniej wizyty w nawigacji panelu.
-- Wersja mobilna katalogu i panelu oraz aplikacja mobilna (logika w REST API, układy do przeskładania).
+Aktualna lista: [`docs/roadmap.md`](docs/roadmap.md) (następne kroki, lista kontrolna przed produkcją, na co czekamy od marki).
