@@ -71,7 +71,13 @@
     "care": "Догляд",
     "codes": "Коди EAN і SKU",
     "codesSize": "Розмір",
-    "image": "{name}, колір {color}, фото {index}"
+    "image": "{name}, колір {color}, фото {index}",
+    "pack": {
+      "title": "Повний розмірний ряд",
+      "sizes": "{range} · {count, plural, one {# розмір} few {# розміри} many {# розмірів} other {# розміру}}",
+      "count": "Кількість пакунків",
+      "add": "{count, plural, one {Додати пакунок} few {Додати # пакунки} many {Додати # пакунків} other {Додати # пакунка}}"
+    }
   },
   "selection": {
     "title": "Добірка",
@@ -114,7 +120,9 @@
       "download": "Завантажити PDF",
       "newSheet": "Почати нову добірку",
       "keep": "Назад до каталогу"
-    }
+    },
+    "allSizesShort": "Усі",
+    "allSizesLabel": "усі розміри"
   },
   "errors": {
     "generic": "Щось пішло не так. Спробуйте ще раз за хвилину.",

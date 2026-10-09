@@ -88,3 +88,12 @@ można je rewidować, jeśli zmienią się okoliczności. Nowe decyzje dopisuj n
 - Równorzędne „Akceptuję / Odrzucam”, nieblokujący, decyzja ważna 12 miesięcy, zmiana z linku w stopce; wycofanie lub wygaśnięcie usuwa identyfikatory.
 - Identyfikator nazywamy „losowym”, nie „anonimowym” (jest pseudonimowy — ważne dla świadomej zgody).
 - Statystyki liczą unikalnych odwiedzających tylko wśród osób ze zgodą.
+
+## D21. Paczki rozmiarowe: automatyczna pełna rozmiarówka, tylko jako skrót *(użytkownik, 2026-10-09)*
+- Na karcie produktu wiersz „Pełna rozmiarówka (np. 36–46)” z liczbą paczek: jedno kliknięcie dodaje każdy dostępny
+  rozmiar koloru w ilości = liczba paczek. Bez konfiguracji w panelu (bez szablonów proporcji typu 1-2-2-1).
+- Pojedyncze rozmiary i ilości nadal dostępne — paczka nie jest minimum zamówienia.
+- W zestawieniu przy każdym modelu i kolorze „Wszystkie” ustawia jedną ilość dla wszystkich rozmiarów.
+- Tylko frontend: zestawienie i PDF już przechowują ilość przy wariancie, więc backend bez zmian.
+- **Możliwe rozszerzenie:** szablony proporcji (np. 1-2-2-1) definiowane w panelu.
+

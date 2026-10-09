@@ -71,7 +71,13 @@
     "care": "Pielęgnacja",
     "codes": "Kody EAN i SKU",
     "codesSize": "Rozmiar",
-    "image": "{name}, kolor {color}, zdjęcie {index}"
+    "image": "{name}, kolor {color}, zdjęcie {index}",
+    "pack": {
+      "title": "Pełna rozmiarówka",
+      "sizes": "{range} · {count, plural, one {# rozmiar} few {# rozmiary} many {# rozmiarów} other {# rozmiaru}}",
+      "count": "Liczba paczek",
+      "add": "{count, plural, one {Dodaj paczkę} few {Dodaj # paczki} many {Dodaj # paczek} other {Dodaj # paczki}}"
+    }
   },
   "selection": {
     "title": "Zestawienie",
@@ -114,7 +120,9 @@
       "download": "Pobierz PDF",
       "newSheet": "Zacznij nowe zestawienie",
       "keep": "Wróć do katalogu"
-    }
+    },
+    "allSizesShort": "Wszystkie",
+    "allSizesLabel": "wszystkie rozmiary"
   },
   "errors": {
     "generic": "Coś poszło nie tak. Spróbuj ponownie za chwilę.",

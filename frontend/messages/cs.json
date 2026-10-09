@@ -71,7 +71,13 @@
     "care": "Údržba",
     "codes": "Kódy EAN a SKU",
     "codesSize": "Velikost",
-    "image": "{name}, barva {color}, fotografie {index}"
+    "image": "{name}, barva {color}, fotografie {index}",
+    "pack": {
+      "title": "Celá velikostní řada",
+      "sizes": "{range} · {count, plural, one {# velikost} few {# velikosti} many {# velikosti} other {# velikostí}}",
+      "count": "Počet balíčků",
+      "add": "{count, plural, one {Přidat balíček} few {Přidat # balíčky} many {Přidat # balíčku} other {Přidat # balíčků}}"
+    }
   },
   "selection": {
     "title": "Výběr",
@@ -114,7 +120,9 @@
       "download": "Stáhnout PDF",
       "newSheet": "Začít nový výběr",
       "keep": "Zpět do katalogu"
-    }
+    },
+    "allSizesShort": "Vše",
+    "allSizesLabel": "všechny velikosti"
   },
   "errors": {
     "generic": "Něco se pokazilo. Zkuste to prosím za chvíli znovu.",

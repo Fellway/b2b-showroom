@@ -49,6 +49,7 @@ export function ProductView({
   }, [lines, product.id, color?.id]);
 
   const [picked, setPicked] = useState<Picked>({});
+  const [packCount, setPackCount] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
 
   // po hydratacji i przy zmianie koloru formularz pokazuje to, co już jest w zestawieniu
@@ -98,11 +99,12 @@ export function ProductView({
     setPicked((current) => ({ ...current, [variantId]: quantity }));
   }
 
-  function commit() {
+  function commit(source: Picked = picked) {
     const cover = images[0]?.url ?? null;
+    const sourceIds = Object.keys(source);
     const next: SelectionLine[] = color.variants
       .map((variant, index) => ({ variant, index }))
-      .filter(({ variant }) => variant.id in picked)
+      .filter(({ variant }) => variant.id in source)
       .map(({ variant, index }) => ({
         variantId: variant.id,
         productId: product.id,
@@ -119,17 +121,29 @@ export function ProductView({
         wholesale: product.price.wholesale,
         retail: product.price.retail,
         currency: product.price.currency,
-        quantity: picked[variant.id] ?? null,
+        quantity: source[variant.id] ?? null,
       }));
-    for (const id of pickedIds.filter((id) => !(id in savedForColor))) {
+    for (const id of sourceIds.filter((id) => !(id in savedForColor))) {
       track({ type: "SELECTION_ADDED", language: locale, productId: product.id, variantId: id });
     }
-    for (const id of savedIds.filter((id) => !(id in picked))) {
+    for (const id of savedIds.filter((id) => !(id in source))) {
       track({ type: "SELECTION_REMOVED", language: locale, productId: product.id, variantId: id });
     }
     replaceColor(product.id, color.id, next);
     setJustAdded(true);
   }
+
+  /** Paczka = pełna rozmiarówka koloru, każdy rozmiar w liczbie paczek — od razu w zestawieniu. */
+  function addPack() {
+    const pack: Picked = Object.fromEntries(color.variants.map((variant) => [variant.id, packCount]));
+    setPicked(pack);
+    commit(pack);
+  }
+
+  const sizeRange =
+    color.variants.length > 1
+      ? `${color.variants[0].size}–${color.variants[color.variants.length - 1].size}`
+      : (color.variants[0]?.size ?? "");
 
   const allPicked = color.variants.length > 0 && color.variants.every((v) => v.id in picked);
   const savedSizes = color.variants.filter((v) => v.id in savedForColor).map((v) => v.size);
@@ -226,6 +240,29 @@ export function ProductView({
             })}
           </div>
 
+          {color.variants.length > 1 && (
+            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 bg-well px-4 py-3">
+              <div className="mr-auto min-w-0">
+                <p className="text-small font-medium">{t("pack.title")}</p>
+                <p className="tabular text-meta text-ink-3">
+                  {t("pack.sizes", { range: sizeRange, count: color.variants.length })}
+                </p>
+              </div>
+              <QuantityStepper
+                value={packCount}
+                label={t("pack.count")}
+                onChange={(q) => setPackCount(Math.max(1, q ?? 1))}
+              />
+              <button
+                type="button"
+                onClick={addPack}
+                className="flex h-9 items-center border border-edge bg-background px-4 text-small transition-colors hover:border-foreground"
+              >
+                {t("pack.add", { count: packCount })}
+              </button>
+            </div>
+          )}
+
           {pickedIds.length > 0 && (
             <div className="mt-4 border-t border-line pt-3">
               <p className="text-meta text-ink-3">{t("quantityHint")}</p>
@@ -250,7 +287,7 @@ export function ProductView({
         <div className="mt-6 flex flex-col gap-3">
           <button
             type="button"
-            onClick={commit}
+            onClick={() => commit()}
             disabled={!changed}
             className={cn(
               "flex h-12 items-center justify-center gap-2 px-6 text-small font-medium transition-colors",

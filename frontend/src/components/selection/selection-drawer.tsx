@@ -149,10 +149,20 @@ function LinesStep({ lines, onContinue }: { lines: SelectionLine[]; onContinue: 
                   {t("removeGroup")}
                 </button>
               </div>
+              {group.lines.length > 1 && (
+                <div className="mt-3 flex items-center gap-3 border-b border-line pb-2">
+                  <span className="w-16 shrink-0 text-meta text-ink-3">{t("allSizesShort")}</span>
+                  <MiniStepper
+                    value={commonQuantity(group.lines)}
+                    label={t("allSizesLabel")}
+                    onChange={(q) => group.lines.forEach((line) => setQuantity(line.variantId, q))}
+                  />
+                </div>
+              )}
               <ul className="mt-3 flex flex-col gap-1.5">
                 {group.lines.map((line) => (
                   <li key={line.variantId} className="flex items-center gap-3">
-                    <span className="tabular w-9 text-small">{line.size}</span>
+                    <span className="tabular w-16 shrink-0 text-small">{line.size}</span>
                     <MiniStepper
                       value={line.quantity}
                       label={line.size}
@@ -450,4 +460,10 @@ function MiniStepper({
       </button>
     </div>
   );
+}
+
+/** Wspólna ilość wszystkich rozmiarów grupy albo `null`, gdy rozmiary mają różne ilości. */
+function commonQuantity(lines: SelectionLine[]): number | null {
+  const first = lines[0]?.quantity ?? null;
+  return lines.every((line) => (line.quantity ?? null) === first) ? first : null;
 }

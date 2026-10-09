@@ -31,7 +31,7 @@ i zapisz decyzje w `decisions.md`.
 
 ### Dla kupców
 - **Eksport zestawienia do Excela/CSV** obok PDF — do wklejenia w systemy zamówień sklepów.
-- **Paczki rozmiarowe** (np. 36–44 w proporcji 1-2-2-1) — dodanie modelu jednym kliknięciem zamiast pojedynczych rozmiarów. *W realizacji.*
+- ~~Paczki rozmiarowe~~ — zrobione jako pełna rozmiarówka × liczba paczek (D21). Rozszerzenie: szablony proporcji (np. 1-2-2-1) w panelu.
 - **Kolekcje i sezony** — strony kolekcji z sesją zdjęciową, oznaczenie nowości.
 - **Termin dostępności przy modelu** (np. „wysyłka od 15.11”) — bez stanów magazynowych.
 - **Udostępnianie zestawienia linkiem** (wspólnik, drugi sklep).

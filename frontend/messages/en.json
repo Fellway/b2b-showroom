@@ -71,7 +71,13 @@
     "care": "Care",
     "codes": "EAN and SKU codes",
     "codesSize": "Size",
-    "image": "{name}, colour {color}, photo {index}"
+    "image": "{name}, colour {color}, photo {index}",
+    "pack": {
+      "title": "Full size run",
+      "sizes": "{range} · {count, plural, one {# size} other {# sizes}}",
+      "count": "Number of packs",
+      "add": "{count, plural, one {Add pack} other {Add # packs}}"
+    }
   },
   "selection": {
     "title": "Line sheet",
@@ -114,7 +120,9 @@
       "download": "Download PDF",
       "newSheet": "Start a new line sheet",
       "keep": "Back to catalogue"
-    }
+    },
+    "allSizesShort": "All",
+    "allSizesLabel": "all sizes"
   },
   "errors": {
     "generic": "Something went wrong. Please try again in a moment.",

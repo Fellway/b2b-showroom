@@ -327,6 +327,9 @@ Kwadratowe pole wyboru z kodem rozmiaru: obrys `edge`, wysokość 44 px (karta p
 ### Próbka koloru
 W wierszu danych: kwadrat 10 px z krawędzią `swatch-edge`. Jako przycisk wyboru: 40 px, obrys 1 px `edge` (aktywny `ink`), wewnętrzny odstęp 4 px, próbka z krawędzią 10%. Kropka stanu w prawym górnym rogu oznacza kolor obecny w zestawieniu.
 
+### Wiersz paczki (pełna rozmiarówka)
+Pod siatką rozmiarów na karcie produktu: płaszczyzna `well` (padding 12 × 16 px), po lewej tytuł Small 500 i zakres rozmiarów w Meta `ink-3` (tabular), po prawej stepper liczby paczek (minimum 1) i akcja `secondary` „Dodaj N paczki” (h-36, tło `paper`, obrys `edge`). To skrót obok akcji głównej, nigdy druga czarna akcja. W szufladzie zestawienia odpowiada mu wiersz „Wszystkie” nad rozmiarami grupy (ta sama kolumna 64 px co kody rozmiarów), oddzielony linią `line`.
+
 ### Stepper ilości
 Obrys `edge` wokół całości, przyciski −/+ 32–36 px z ikonami 14 px w `ink-2`, pole liczby 44–48 px szerokości oddzielone wewnętrznymi liniami `line`, Data wyśrodkowana. Minus wyłączony przy zerze (`line`). Puste pole oznacza „bez ilości”, nie zero.
 
