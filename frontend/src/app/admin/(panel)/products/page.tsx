@@ -1,12 +1,13 @@
-import { PageBody, PageHeader } from "@/components/admin/ui/page-header";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { ProductsView } from "@/components/admin/product-list/products-view";
 
-export default function Placeholder() {
+export const metadata: Metadata = { title: "Modele" };
+
+export default function ProductsPage() {
   return (
-    <>
-      <PageHeader title="products" />
-      <PageBody>
-        <p className="text-ink-3">W przygotowaniu.</p>
-      </PageBody>
-    </>
+    <Suspense>
+      <ProductsView />
+    </Suspense>
   );
 }

@@ -1,12 +1,8 @@
-import { PageBody, PageHeader } from "@/components/admin/ui/page-header";
+import type { Metadata } from "next";
+import { ColorsView } from "@/components/admin/dictionaries/colors-view";
 
-export default function Placeholder() {
-  return (
-    <>
-      <PageHeader title="colors" />
-      <PageBody>
-        <p className="text-ink-3">W przygotowaniu.</p>
-      </PageBody>
-    </>
-  );
+export const metadata: Metadata = { title: "Kolory" };
+
+export default function Page() {
+  return <ColorsView />;
 }

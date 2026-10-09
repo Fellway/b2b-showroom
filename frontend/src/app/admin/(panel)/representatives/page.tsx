@@ -1,12 +1,8 @@
-import { PageBody, PageHeader } from "@/components/admin/ui/page-header";
+import type { Metadata } from "next";
+import { RepresentativesPage } from "@/components/admin/representatives/representatives-page";
 
-export default function Placeholder() {
-  return (
-    <>
-      <PageHeader title="representatives" />
-      <PageBody>
-        <p className="text-ink-3">W przygotowaniu.</p>
-      </PageBody>
-    </>
-  );
+export const metadata: Metadata = { title: "Opiekunowie handlowi" };
+
+export default function Page() {
+  return <RepresentativesPage />;
 }

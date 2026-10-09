@@ -18,7 +18,7 @@ Szczegóły techniczne, tabela API i instrukcja uruchomienia: [`backend/README.m
 | 2 | Backend heksagonalny, REST API (katalog, panel, zestawienia, analityka), JWT | ✅ 232 testy |
 | 3 | Adapter PDF (Thymeleaf → HTML → OpenHTMLtoPDF), usunięcie wysyłki e-mail (migracja V2), rate limiting | ✅ 258 testów |
 | 4a | Frontend: publiczny katalog, karta produktu, zestawienie PDF, kontakt (Impeccable: kanon na poziomie COS / Arket) | ✅ |
-| 4b | Frontend: panel administracyjny (dziedziczy `DESIGN.md`, tryb Operate) | ⏭ następny |
+| 4b | Frontend: panel administracyjny (`/admin`: modele, słowniki, zestawienia, statystyki, opiekunowie, konta) | ✅ |
 
 Pracujemy etapami — nie piszemy całego systemu naraz. Przed startem etapu zadajemy pytania doprecyzowujące,
 jeśli decyzja zmienia kształt rozwiązania.
@@ -99,11 +99,12 @@ Konwencje:
 
 ## Otwarte tematy
 
-- **Na start Etapu 4b (dług z przeglądu 4a):** kontrast krawędzi kontrolek w spoczynku (`line` ≈ 1,3:1 — WCAG 1.4.11 wymaga 3:1; dotyczy pól, przycisków rozmiarów, stepperów), wyrównanie prymitywów shadcn (`ui/button.tsx`, `ui/popover.tsx`) do `DESIGN.md`, jedna wartość cienia dla menu, kolor scrollbara jako token, strzałki „← →” jako ikony Lucide. Po zmianach zaktualizować `DESIGN.md`.
 
 - Adapter S3 dla `FileStorage`.
 - Identyfikacja marki (nazwa, logo, kolory, typografia) — dziś placeholdery w `showroom.brand.*`; ustalimy w Etapie 4 (`/impeccable init`) i przeniesiemy też do PDF.
 - Ewentualny dostęp klientów przez token w URL (świadomie odłożony).
 - Import prawdziwych danych produktów (nazwy, składy, rozmiarówki, EAN, ceny) i packshoty — dziś dane demonstracyjne.
 - Adres grupy hurtowej na Facebooku („Klienci hurtowi Fabian's Style”) do stopki; logo w wersji wektorowej (SVG).
-- Trwały identyfikator odwiedzającego w analityce wymaga decyzji o zgodzie (ePrivacy) — dziś tylko identyfikator sesji.
+- Trwały identyfikator odwiedzającego w analityce wymaga decyzji o zgodzie (ePrivacy) — dziś tylko identyfikator sesji, więc statystyki nie liczą unikalnych odwiedzających.
+- Pomysł z przeglądu 4b: licznik nowych zestawień (leadów) od ostatniej wizyty w nawigacji panelu.
+- Wersja mobilna katalogu i panelu oraz aplikacja mobilna (logika w REST API, układy do przeskładania).

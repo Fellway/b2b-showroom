@@ -100,8 +100,9 @@ export function AdminShell({ admin, children }: { admin: AdminIdentity; children
         </nav>
         <div className="hidden border-t border-line px-6 py-4 lg:block">
           <p className="truncate font-medium">{admin.displayName}</p>
-          <p className="truncate text-meta text-ink-3">
-            {ROLE_LABEL[admin.role]} · {admin.email}
+          {admin.displayName !== ROLE_LABEL[admin.role] && <p className="text-meta text-ink-3">{ROLE_LABEL[admin.role]}</p>}
+          <p className="truncate text-meta text-ink-3" title={admin.email}>
+            {admin.email}
           </p>
           <div className="mt-3 flex flex-col items-start gap-1">
             <a href="/" target="_blank" rel="noopener" className="inline-flex items-center gap-2 py-1 text-ink-2 hover:text-foreground">

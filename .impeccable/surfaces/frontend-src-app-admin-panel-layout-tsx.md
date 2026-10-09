@@ -39,6 +39,13 @@ FORM: sekcje + pełnoekranowy edytor (struktura wybrana przez użytkownika z roz
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
+## Decision record
+
+Losowanie struktury: `concept-seed --scope surface --mode operate`, klucz 767993ca, rozdane pozycje 5, 2, 1 listy
+(pulpit dnia / sekcje + pełny edytor / lista + edytor obok). Strona decyzyjna (klucz 4307abf8) została zamknięta bez
+odpowiedzi; to samo pytanie zadano narzędziem pytań i użytkownik wybrał „Sekcje + pełny edytor” (2026-10-09).
+
 ## Unresolved
 
 - Wersja mobilna panelu (później).
+- Unikalni odwiedzający w statystykach — wymaga decyzji o identyfikatorze odwiedzającego i zgodzie (ePrivacy).

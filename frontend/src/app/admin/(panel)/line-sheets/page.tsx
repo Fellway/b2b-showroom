@@ -1,12 +1,13 @@
-import { PageBody, PageHeader } from "@/components/admin/ui/page-header";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { LineSheetList } from "@/components/admin/line-sheets/line-sheet-list";
 
-export default function Placeholder() {
+export const metadata: Metadata = { title: "Zestawienia" };
+
+export default function LineSheetsPage() {
   return (
-    <>
-      <PageHeader title="line-sheets" />
-      <PageBody>
-        <p className="text-ink-3">W przygotowaniu.</p>
-      </PageBody>
-    </>
+    <Suspense>
+      <LineSheetList />
+    </Suspense>
   );
 }

@@ -1,12 +1,13 @@
-import { PageBody, PageHeader } from "@/components/admin/ui/page-header";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { AnalyticsDashboard } from "@/components/admin/analytics/analytics-dashboard";
 
-export default function Placeholder() {
+export const metadata: Metadata = { title: "Statystyki" };
+
+export default function AnalyticsPage() {
   return (
-    <>
-      <PageHeader title="analytics" />
-      <PageBody>
-        <p className="text-ink-3">W przygotowaniu.</p>
-      </PageBody>
-    </>
+    <Suspense>
+      <AnalyticsDashboard />
+    </Suspense>
   );
 }

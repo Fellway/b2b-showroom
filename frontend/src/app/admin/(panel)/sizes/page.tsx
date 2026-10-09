@@ -1,12 +1,8 @@
-import { PageBody, PageHeader } from "@/components/admin/ui/page-header";
+import type { Metadata } from "next";
+import { SizesView } from "@/components/admin/dictionaries/sizes-view";
 
-export default function Placeholder() {
-  return (
-    <>
-      <PageHeader title="sizes" />
-      <PageBody>
-        <p className="text-ink-3">W przygotowaniu.</p>
-      </PageBody>
-    </>
-  );
+export const metadata: Metadata = { title: "Rozmiary" };
+
+export default function Page() {
+  return <SizesView />;
 }

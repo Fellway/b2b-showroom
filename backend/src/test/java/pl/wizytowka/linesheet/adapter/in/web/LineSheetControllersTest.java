@@ -115,7 +115,7 @@ class LineSheetControllersTest {
         UUID id = UUID.randomUUID();
         given(adminQuery.lineSheets(eq(new PageQuery(0, 20)))).willReturn(new PageResult<>(
                 List.of(new LineSheetSummaryView(id, UUID.randomUUID(), "LS-2026-000001", CatalogLanguage.PL, "Firma",
-                        null, "a@b.pl", 3, Instant.parse("2026-10-01T10:00:00Z"))),
+                        null, "a@b.pl", "+48 600 100 200", 3, Instant.parse("2026-10-01T10:00:00Z"))),
                 0, 20, 1));
 
         mvc.perform(get("/api/v1/admin/line-sheets"))

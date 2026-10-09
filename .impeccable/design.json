@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-06T18:08:01+00:00",
+  "generatedAt": "2026-10-09T11:42:46+00:00",
   "title": "Design System: Fabian's Style — showroom hurtowy",
   "extensions": {
     "colorMeta": {
@@ -79,10 +79,40 @@
           "#f2f1ef"
         ]
       },
+      "edge": {
+        "role": "neutral",
+        "displayName": "Krawędź kontrolki",
+        "canonical": "#8a8782",
+        "tonalRamp": [
+          "#22211f",
+          "#383734",
+          "#53514e",
+          "#6d6b67",
+          "#8a8782",
+          "#aaa7a2",
+          "#cfccc7",
+          "#f2f1ef"
+        ]
+      },
       "line": {
         "role": "neutral",
         "displayName": "Włoskowata linia",
         "canonical": "#e3e1dd",
+        "tonalRamp": [
+          "#252421",
+          "#3e3c39",
+          "#5a5854",
+          "#7a7772",
+          "#9e9b95",
+          "#c9c6c1",
+          "#e3e1dd",
+          "#f7f6f4"
+        ]
+      },
+      "scrollbar": {
+        "role": "neutral",
+        "displayName": "Suwak",
+        "canonical": "#c9c6c1",
         "tonalRamp": [
           "#252421",
           "#3e3c39",
@@ -126,41 +156,36 @@
       },
       "body": {
         "displayName": "Body",
-        "purpose": "Tekst bazowy, lead, tytuł panelu (500), cena hurtowa na karcie produktu (500)."
+        "purpose": "Tekst bazowy, lead, cena hurtowa na karcie produktu (500), tytuł panelu bocznego, nagłówka strony panelu, sekcji edytora i dialogu (500)."
       },
       "small": {
         "displayName": "Small",
-        "purpose": "Domyślny rozmiar interfejsu: nawigacja, filtry, przyciski, wiersze danych, pola."
+        "purpose": "Domyślny rozmiar interfejsu: nawigacja, filtry, przyciski, wiersze danych i tabel, pola."
       },
       "meta": {
         "displayName": "Meta",
-        "purpose": "Etykiety pól, kody, liczniki, chipy, linki pomocnicze, nota."
+        "purpose": "Etykiety i podpowiedzi pól, nagłówki kolumn, etykiety grup nawigacji, kody, liczniki, chipy, akcja nieodwracalna, linki pomocnicze, nota."
       },
       "data": {
         "displayName": "Data",
-        "purpose": "Kwoty, mnożnik, rozmiary, EAN, SKU, ilości — cyfry tabelaryczne."
+        "purpose": "Kwoty, mnożnik, rozmiary, EAN, SKU, ilości, daty i liczniki panelu — cyfry tabelaryczne."
       }
     },
     "shadows": [
       {
-        "name": "overlay-menu",
+        "name": "shadow-menu",
         "value": "0 12px 32px -16px rgb(17 17 17 / 0.3)",
-        "purpose": "Popover filtrów i sortowania."
+        "purpose": "Jedyny cień warstw małych: popover filtrów i sortowania, przełącznik języka, dialog potwierdzenia, potwierdzenie „Zapisano”."
       },
       {
-        "name": "overlay-menu-small",
-        "value": "0 8px 24px -12px rgb(17 17 17 / 0.25)",
-        "purpose": "Przełącznik języka."
-      },
-      {
-        "name": "overlay-panel",
+        "name": "shadow-panel",
         "value": "-24px 0 48px -32px rgb(17 17 17 / 0.35)",
-        "purpose": "Panel boczny zestawienia, cień w lewo."
+        "purpose": "Szuflada zestawienia i panel formularza w panelu administracyjnym, cień w lewo."
       },
       {
         "name": "scrim",
         "value": "rgb(0 0 0 / 0.25)",
-        "purpose": "Zaciemnienie strony pod panelem bocznym (tło, nie cień)."
+        "purpose": "Zaciemnienie strony pod panelem bocznym i dialogiem (tło, nie cień)."
       }
     ],
     "motion": [
@@ -172,7 +197,7 @@
       {
         "name": "duration-state",
         "value": "300ms",
-        "purpose": "Podkreślenie aktywnej kategorii, obrót plusa w akordeonie, zoom-in licznika i ikony potwierdzenia."
+        "purpose": "Podkreślenie aktywnej kategorii, obrót plusa w akordeonie, zoom-in licznika i ikony potwierdzenia, wjazd paska zapisu i potwierdzenia „Zapisano”."
       },
       {
         "name": "duration-image",
@@ -218,9 +243,9 @@
       "name": "Akcja tekstowa",
       "kind": "button",
       "refersTo": "button-text",
-      "description": "Akcje drugorzędne i linki pomocnicze: tekst, podkreślenie przy hover lub w spoczynku.",
-      "html": "<button class=\"ds-btn-text\">Sortuj: Polecane</button> <button class=\"ds-link-meta\">Wszystkie rozmiary</button>",
-      "css": ".ds-btn-text { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; height: 40px; padding: 0 12px; border: 0; background: none; color: var(--ink-2, #474644); font-size: 0.8125rem; cursor: pointer; text-underline-offset: 4px; text-decoration-thickness: 1px; transition: color 150ms; } .ds-btn-text:hover { color: var(--foreground, #111111); text-decoration: underline; } .ds-btn-text:focus-visible, .ds-link-meta:focus-visible { outline: 2px solid var(--foreground, #111111); outline-offset: 2px; } .ds-link-meta { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; border: 0; background: none; padding: 0; color: var(--foreground, #111111); font-size: 0.75rem; line-height: 1.1rem; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; cursor: pointer; } .ds-link-meta:hover { text-decoration: none; }"
+      "description": "Akcje drugorzędne, linki pomocnicze i akcja nieodwracalna (podkreślony tekst Meta ink-2, nigdy czerwony).",
+      "html": "<button class=\"ds-btn-text\">Sortuj: Polecane</button> <button class=\"ds-link-meta\">Wszystkie rozmiary</button> <button class=\"ds-btn-danger\">Usuń model</button>",
+      "css": ".ds-btn-text { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; height: 40px; padding: 0 12px; border: 0; background: none; color: var(--ink-2, #474644); font-size: 0.8125rem; cursor: pointer; text-underline-offset: 4px; text-decoration-thickness: 1px; transition: color 150ms; } .ds-btn-text:hover { color: var(--foreground, #111111); text-decoration: underline; } .ds-btn-text:focus-visible, .ds-link-meta:focus-visible { outline: 2px solid var(--foreground, #111111); outline-offset: 2px; } .ds-link-meta { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; border: 0; background: none; padding: 0; color: var(--foreground, #111111); font-size: 0.75rem; line-height: 1.1rem; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; cursor: pointer; } .ds-link-meta:hover { text-decoration: none; } .ds-btn-danger { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; height: 40px; padding: 0 12px; border: 0; background: none; color: var(--ink-2, #474644); font-size: 0.75rem; line-height: 1.1rem; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; cursor: pointer; transition: color 150ms; } .ds-btn-danger:hover { color: var(--foreground, #111111); } .ds-btn-danger:focus-visible { outline: 2px solid var(--foreground, #111111); outline-offset: 2px; } .ds-btn-danger:disabled { color: var(--ink-3, #6b6965); text-decoration: none; }"
     },
     {
       "name": "Pole rozmiaru",
@@ -228,7 +253,7 @@
       "refersTo": "toggle-box",
       "description": "Kwadratowy przełącznik krótkiej wartości; wybrany jako negatyw.",
       "html": "<div class=\"ds-sizes\"><button class=\"ds-size\" aria-pressed=\"false\">36</button><button class=\"ds-size\" aria-pressed=\"true\">38</button><button class=\"ds-size\" aria-pressed=\"true\">40</button><button class=\"ds-size\" aria-pressed=\"false\">42</button></div>",
-      "css": ".ds-sizes { display: grid; grid-template-columns: repeat(4, 56px); gap: 6px; } .ds-size { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; height: 44px; border: 1px solid var(--line, #e3e1dd); border-radius: 0; background: var(--background, #ffffff); color: var(--foreground, #111111); font-size: 0.8125rem; font-variant-numeric: tabular-nums lining-nums; cursor: pointer; transition: border-color 150ms, background-color 150ms, color 150ms; } .ds-size:hover { border-color: var(--foreground, #111111); } .ds-size:focus-visible { outline: 2px solid var(--foreground, #111111); outline-offset: 2px; } .ds-size[aria-pressed=\"true\"] { background: var(--foreground, #111111); border-color: var(--foreground, #111111); color: var(--background, #ffffff); }"
+      "css": ".ds-sizes { display: grid; grid-template-columns: repeat(4, 56px); gap: 6px; } .ds-size { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; height: 44px; border: 1px solid var(--edge, #8a8782); border-radius: 0; background: var(--background, #ffffff); color: var(--foreground, #111111); font-size: 0.8125rem; font-variant-numeric: tabular-nums lining-nums; cursor: pointer; transition: border-color 150ms, background-color 150ms, color 150ms; } .ds-size:hover { border-color: var(--foreground, #111111); } .ds-size:focus-visible { outline: 2px solid var(--foreground, #111111); outline-offset: 2px; } .ds-size[aria-pressed=\"true\"] { background: var(--foreground, #111111); border-color: var(--foreground, #111111); color: var(--background, #ffffff); }"
     },
     {
       "name": "Pole tekstowe",
@@ -236,7 +261,7 @@
       "refersTo": "input-text",
       "description": "Pole formularza z etykietą Meta nad polem; fokus zmienia obrys na czerń.",
       "html": "<label class=\"ds-field\"><span>E-mail</span><input type=\"email\" placeholder=\"\" /></label>",
-      "css": ".ds-field { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; display: grid; gap: 6px; width: 280px; } .ds-field span { font-size: 0.75rem; line-height: 1.1rem; color: var(--ink-3, #6b6965); } .ds-field input { font: inherit; height: 44px; padding: 0 12px; border: 1px solid var(--line, #e3e1dd); border-radius: 0; background: transparent; color: var(--foreground, #111111); font-size: 0.8125rem; outline: none; } .ds-field input:focus-visible { border-color: var(--foreground, #111111); } .ds-field input:user-invalid { border-color: var(--danger, #a1271c); }"
+      "css": ".ds-field { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; display: grid; gap: 6px; width: 280px; } .ds-field span { font-size: 0.75rem; line-height: 1.1rem; color: var(--ink-3, #6b6965); } .ds-field input { font: inherit; height: 44px; padding: 0 12px; border: 1px solid var(--edge, #8a8782); border-radius: 0; background: transparent; color: var(--foreground, #111111); font-size: 0.8125rem; outline: none; } .ds-field input:focus-visible { border-color: var(--foreground, #111111); } .ds-field input:user-invalid { border-color: var(--danger, #a1271c); } .ds-field input:hover { border-color: var(--foreground, #111111); }"
     },
     {
       "name": "Chip filtra",
@@ -244,7 +269,7 @@
       "refersTo": "chip-filter",
       "description": "Aktywny filtr do usunięcia jednym kliknięciem.",
       "html": "<button class=\"ds-chip\">Kobalt <svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M18 6 6 18\"/><path d=\"m6 6 12 12\"/></svg></button>",
-      "css": ".ds-chip { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border: 1px solid var(--line, #e3e1dd); border-radius: 0; background: var(--background, #ffffff); color: var(--foreground, #111111); font-size: 0.75rem; cursor: pointer; } .ds-chip:hover { border-color: var(--foreground, #111111); } .ds-chip:focus-visible { outline: 2px solid var(--foreground, #111111); outline-offset: 2px; }"
+      "css": ".ds-chip { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border: 1px solid var(--edge, #8a8782); border-radius: 0; background: var(--background, #ffffff); color: var(--foreground, #111111); font-size: 0.75rem; cursor: pointer; } .ds-chip:hover { border-color: var(--foreground, #111111); } .ds-chip:focus-visible { outline: 2px solid var(--foreground, #111111); outline-offset: 2px; }"
     },
     {
       "name": "Nawigacja kategorii",
@@ -268,7 +293,7 @@
       "refersTo": "stepper",
       "description": "Ilość orientacyjna: −/pole/+ w jednym obrysie; puste pole = bez ilości.",
       "html": "<div class=\"ds-stepper\"><button aria-label=\"mniej\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/></svg></button><input type=\"number\" value=\"6\" aria-label=\"Ilość\" /><button aria-label=\"więcej\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg></button></div>",
-      "css": ".ds-stepper { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; border: 1px solid var(--line, #e3e1dd); } .ds-stepper button { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 0; background: none; color: var(--ink-2, #474644); cursor: pointer; } .ds-stepper button:hover { color: var(--foreground, #111111); } .ds-stepper button:focus-visible { outline: 2px solid var(--foreground, #111111); outline-offset: 2px; } .ds-stepper input { width: 48px; height: 36px; border: 0; border-left: 1px solid var(--line, #e3e1dd); border-right: 1px solid var(--line, #e3e1dd); background: transparent; text-align: center; font: inherit; font-size: 0.8125rem; font-variant-numeric: tabular-nums lining-nums; outline: none; -moz-appearance: textfield; } .ds-stepper input::-webkit-inner-spin-button { -webkit-appearance: none; } .ds-stepper input:focus-visible { background: var(--well, #f2f1ef); }"
+      "css": ".ds-stepper { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; border: 1px solid var(--edge, #8a8782); } .ds-stepper button { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 0; background: none; color: var(--ink-2, #474644); cursor: pointer; } .ds-stepper button:hover { color: var(--foreground, #111111); } .ds-stepper button:focus-visible { outline: 2px solid var(--foreground, #111111); outline-offset: 2px; } .ds-stepper input { width: 48px; height: 36px; border: 0; border-left: 1px solid var(--line, #e3e1dd); border-right: 1px solid var(--line, #e3e1dd); background: transparent; text-align: center; font: inherit; font-size: 0.8125rem; font-variant-numeric: tabular-nums lining-nums; outline: none; -moz-appearance: textfield; } .ds-stepper input::-webkit-inner-spin-button { -webkit-appearance: none; } .ds-stepper input:focus-visible { background: var(--well, #f2f1ef); }"
     },
     {
       "name": "Wiersz danych",
@@ -282,21 +307,70 @@
       "name": "Menu rozwijane",
       "kind": "custom",
       "refersTo": "menu-item",
-      "description": "Popover filtra: ostry panel z linią i miękkim cieniem, pozycje z checkiem po prawej.",
-      "html": "<button class=\"ds-trigger\">Kolor <svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#6b6965\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m6 9 6 6 6-6\"/></svg></button><ul class=\"ds-menu\"><li><button>Brąz w liście <span>✓</span></button></li><li><button>Kobalt <span></span></button></li></ul>",
-      "css": ".ds-trigger { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px; border: 0; background: none; color: var(--foreground, #111111); font-size: 0.8125rem; cursor: pointer; } .ds-trigger:focus-visible { outline: 2px solid var(--foreground, #111111); outline-offset: 2px; } .ds-menu { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; list-style: none; margin: 6px 0 0; padding: 4px 0; width: 288px; background: var(--background, #ffffff); border: 1px solid var(--line, #e3e1dd); box-shadow: 0 12px 32px -16px rgb(17 17 17 / 0.3); } .ds-menu button { display: flex; width: 100%; justify-content: space-between; padding: 8px 12px; border: 0; background: none; font: inherit; font-size: 0.8125rem; text-align: left; cursor: pointer; } .ds-menu button:hover { background: var(--well, #f2f1ef); } .ds-menu button:focus-visible { outline: 2px solid var(--foreground, #111111); outline-offset: 2px; }"
+      "description": "Popover filtra: ostry panel z linią i cieniem „Menu”, pozycje z ikoną check po prawej.",
+      "html": "<button class=\"ds-trigger\">Kolor <svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#6b6965\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m6 9 6 6 6-6\"/></svg></button><ul class=\"ds-menu\"><li><button>Brąz w liście <span><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg></span></button></li><li><button>Kobalt <span></span></button></li></ul>",
+      "css": ".ds-trigger { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px; border: 0; background: none; color: var(--foreground, #111111); font-size: 0.8125rem; cursor: pointer; } .ds-trigger:focus-visible { outline: 2px solid var(--foreground, #111111); outline-offset: 2px; } .ds-menu { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; list-style: none; margin: 6px 0 0; padding: 4px 0; width: 288px; background: var(--background, #ffffff); border: 1px solid var(--line, #e3e1dd); box-shadow: 0 12px 32px -16px rgb(17 17 17 / 0.3); } .ds-menu button { display: flex; width: 100%; justify-content: space-between; padding: 8px 12px; border: 0; background: none; font: inherit; font-size: 0.8125rem; text-align: left; cursor: pointer; } .ds-menu span { display: inline-flex; width: 16px; } .ds-menu button:hover { background: var(--well, #f2f1ef); } .ds-menu button:focus-visible { outline: 2px solid var(--foreground, #111111); outline-offset: 2px; }"
+    },
+    {
+      "name": "Akcja z obrysem",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Akcja równorzędna obok głównej: obrys edge, hover ink, 40 px.",
+      "html": "<button class=\"ds-btn-secondary\">Pokaż</button> <button class=\"ds-btn-secondary\" disabled>Pokaż</button>",
+      "css": ".ds-btn-secondary { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border: 1px solid var(--edge, #8a8782); border-radius: 0; background: var(--background, #ffffff); color: var(--foreground, #111111); font-size: 0.8125rem; line-height: 1.25rem; cursor: pointer; transition: border-color 150ms, color 150ms; } .ds-btn-secondary:hover { border-color: var(--foreground, #111111); } .ds-btn-secondary:focus-visible { outline: 2px solid var(--foreground, #111111); outline-offset: 2px; } .ds-btn-secondary:disabled { border-color: var(--line, #e3e1dd); color: var(--ink-3, #6b6965); cursor: not-allowed; }"
+    },
+    {
+      "name": "Nawigacja panelu",
+      "kind": "nav",
+      "refersTo": "admin-nav-item",
+      "description": "Kolumna 232 px: pozycje z ikoną, aktywna w negatywie, grupy z etykietą Meta ink-3.",
+      "html": "<nav class=\"ds-side\"><a href=\"#\" aria-current=\"page\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"/><path d=\"M14 2v4a2 2 0 0 0 2 2h4\"/></svg>Zestawienia</a><a href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 3v16a2 2 0 0 0 2 2h16\"/><path d=\"M18 17V9\"/><path d=\"M13 17V5\"/><path d=\"M8 17v-3\"/></svg>Statystyki</a><p>Słowniki</p><a href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z\"/><circle cx=\"7.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\"/></svg>Kategorie</a></nav>",
+      "css": ".ds-side { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; display: flex; flex-direction: column; gap: 4px; width: 232px; box-sizing: border-box; padding: 24px; border-right: 1px solid var(--line, #e3e1dd); background: var(--background, #ffffff); font-size: 0.8125rem; } .ds-side p { margin: 20px 0 0; padding: 0 8px 4px; font-size: 0.75rem; line-height: 1.1rem; color: var(--ink-3, #6b6965); } .ds-side a { display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 8px; color: var(--ink-2, #474644); text-decoration: none; transition: background-color 150ms, color 150ms; } .ds-side a:hover { background: var(--well, #f2f1ef); color: var(--foreground, #111111); } .ds-side a[aria-current] { background: var(--foreground, #111111); color: var(--background, #ffffff); } .ds-side a:focus-visible { outline: 2px solid var(--foreground, #111111); outline-offset: 2px; }"
+    },
+    {
+      "name": "Tabela panelu ze statusem",
+      "kind": "custom",
+      "refersTo": "admin-table-cell",
+      "description": "Nagłówki Meta ink-3 bez tła, wiersze z linią, miniatura 2:3 32×48, liczby do prawej, status tekst + kropka, hover wiersza well/60.",
+      "html": "<table class=\"ds-table\"><thead><tr><th><span class=\"ds-sr\">Zdjęcie</span></th><th>Model</th><th>Status</th><th class=\"ds-num\">Cena hurtowa</th><th>Braki</th></tr></thead><tbody><tr><td><span class=\"ds-thumb\"></span></td><td><b>Sukienka midi Klara</b><small>FS-2601</small></td><td><span class=\"ds-status ds-on\"><i></i>Opublikowany</span></td><td class=\"ds-num\">159,00 zł</td><td class=\"ds-gap ds-ok\">komplet</td></tr><tr><td><span class=\"ds-thumb\"></span></td><td><b>Szkic bez zdjęć</b><small>FS-TMP-1</small></td><td><span class=\"ds-status\"><i></i>Szkic</span></td><td class=\"ds-num\">99,00 zł</td><td class=\"ds-gap\">brak: tłumaczenia: EN, CS, UK<br>brak: zdjęcia</td></tr></tbody></table>",
+      "css": ".ds-table { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; width: 640px; border-collapse: collapse; font-size: 0.8125rem; line-height: 1.25rem; color: var(--foreground, #111111); } .ds-table th { padding: 4px 12px 8px; text-align: left; font-size: 0.75rem; font-weight: 400; color: var(--ink-3, #6b6965); white-space: nowrap; } .ds-table td { padding: 12px; vertical-align: middle; border-top: 1px solid var(--line, #e3e1dd); } .ds-table th:first-child, .ds-table td:first-child { padding-left: 0; } .ds-table th:last-child, .ds-table td:last-child { padding-right: 0; } .ds-table tbody tr { cursor: pointer; transition: background-color 150ms; } .ds-table tbody tr:hover { background: rgb(242 241 239 / 0.6); } .ds-table .ds-num { text-align: right; font-variant-numeric: tabular-nums lining-nums; } .ds-table b { font-weight: 500; display: block; } .ds-table small { display: block; font-size: 0.75rem; color: var(--ink-3, #6b6965); font-variant-numeric: tabular-nums; } .ds-thumb { display: block; width: 32px; height: 48px; background: var(--well, #f2f1ef); } .ds-status { display: inline-flex; align-items: center; gap: 8px; color: var(--ink-2, #474644); white-space: nowrap; } .ds-status i { width: 8px; height: 8px; border-radius: 9999px; border: 1px solid var(--foreground, #111111); box-sizing: border-box; } .ds-status.ds-on { color: var(--foreground, #111111); } .ds-status.ds-on i { background: var(--foreground, #111111); } .ds-gap { font-size: 0.75rem; line-height: 1.1rem; color: var(--ink-3, #6b6965); } .ds-gap.ds-ok { color: var(--ink-2, #474644); } .ds-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }"
+    },
+    {
+      "name": "Pole panelu",
+      "kind": "input",
+      "refersTo": "input-admin",
+      "description": "Etykieta Meta ink-3 nad polem, obrys edge, 40 px, podpowiedź lub błąd pod polem.",
+      "html": "<div class=\"ds-afield\"><label for=\"ds-p\">Cena hurtowa netto</label><input id=\"ds-p\" value=\"159,00\" aria-describedby=\"ds-ph\" /><p id=\"ds-ph\">Kwota w PLN, bez VAT.</p></div> <div class=\"ds-afield\"><label for=\"ds-e\">Kod modelu</label><input id=\"ds-e\" value=\"FS 2601\" aria-invalid=\"true\" aria-describedby=\"ds-ee\" /><p id=\"ds-ee\" role=\"alert\" class=\"ds-err\">Kod może zawierać litery, cyfry i myślnik.</p></div>",
+      "css": ".ds-afield { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; display: inline-flex; flex-direction: column; gap: 6px; width: 260px; vertical-align: top; } .ds-afield label, .ds-afield p { margin: 0; font-size: 0.75rem; line-height: 1.1rem; color: var(--ink-3, #6b6965); } .ds-afield input { font: inherit; font-size: 0.8125rem; height: 40px; padding: 0 12px; border: 1px solid var(--edge, #8a8782); border-radius: 0; background: var(--background, #ffffff); color: var(--foreground, #111111); outline: none; transition: border-color 150ms; } .ds-afield input:hover, .ds-afield input:focus-visible { border-color: var(--foreground, #111111); } .ds-afield input[aria-invalid=\"true\"] { border-color: var(--danger, #a1271c); } .ds-afield .ds-err { color: var(--danger, #a1271c); }"
+    },
+    {
+      "name": "Potwierdzenie „Zapisano”",
+      "kind": "custom",
+      "refersTo": "flash",
+      "description": "Czarny prostokąt w prawym dolnym rogu, ikona check, cień Menu, aria-live.",
+      "html": "<p class=\"ds-flash\" aria-live=\"polite\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg>Zapisano</p>",
+      "css": ".ds-flash { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; gap: 8px; margin: 0; padding: 12px 16px; background: var(--foreground, #111111); color: var(--background, #ffffff); font-size: 0.8125rem; line-height: 1.25rem; box-shadow: 0 12px 32px -16px rgb(17 17 17 / 0.3); }"
+    },
+    {
+      "name": "Pasek rankingu",
+      "kind": "custom",
+      "refersTo": "ranking-bar",
+      "description": "Ranking w statystykach: numer ink-3, nazwa + kod, pasek ink na torze line 2 px, wartość do prawej.",
+      "html": "<ol class=\"ds-rank\"><li><span class=\"ds-n\">1</span><span class=\"ds-m\"><b>Sukienka koszulowa Wiktoria</b><small>FS-2602</small><span class=\"ds-track\"><span style=\"width:100%\"></span></span></span><span class=\"ds-v\">16</span></li><li><span class=\"ds-n\">2</span><span class=\"ds-m\"><b>Sukienka dopasowana Iga</b><small>FS-2605</small><span class=\"ds-track\"><span style=\"width:75%\"></span></span></span><span class=\"ds-v\">12</span></li></ol>",
+      "css": ".ds-rank { font-family: 'Golos Text', ui-sans-serif, system-ui, sans-serif; list-style: none; margin: 0; padding: 0; width: 360px; font-size: 0.8125rem; line-height: 1.25rem; font-variant-numeric: tabular-nums lining-nums; } .ds-rank li { display: grid; grid-template-columns: 32px 1fr auto; align-items: start; padding: 12px 0; border-top: 1px solid var(--line, #e3e1dd); } .ds-n { color: var(--ink-3, #6b6965); } .ds-m b { display: block; font-weight: 500; } .ds-m small { display: block; font-size: 0.75rem; color: var(--ink-3, #6b6965); } .ds-track { display: block; margin-top: 6px; height: 2px; background: var(--line, #e3e1dd); } .ds-track span { display: block; height: 100%; background: var(--foreground, #111111); } .ds-v { font-weight: 500; text-align: right; padding-left: 24px; }"
     }
   ],
   "narrative": {
     "northStar": "Cicha witryna kolekcji",
-    "overview": "Interfejs jest białą ścianą galerii, na której wiszą printy kolekcji. Biel jest tłem, ciepłoszary podkład trzyma miejsce pod zdjęciem, a czerń logo jest jedynym kolorem interfejsu: tekst, stany aktywne i akcja główna. Każdy inny kolor na ekranie należy do produktu (zdjęcia, próbki kolorów). Poprzeczka wykonania to COS / Arket: duże zdjęcia 2:3, dużo powietrza między rzędami, precyzyjna drobna typografia jednej groteski.\n\nGęstość jest dwubiegunowa i to jest cecha systemu, nie kompromis. Warstwa obrazu (siatka, galeria) oddycha szerokimi odstępami; warstwa danych (ceny, mnożnik, rozmiary, EAN, ilości) jest zwarta, wyrównana cyframi tabelarycznymi i oddzielona włoskowatymi liniami. Ta sama gramatyka danych — etykieta w `ink-3`, wartość w `ink`, linia `line` między wierszami — przenosi się bez zmian do gęstych widoków panelu administracyjnego.\n\nSystem odrzuca chrom sklepu detalicznego (banery promocji, plakietki „nowość/-30%”, koszyk) i wygląd arkusza kalkulacyjnego (siatki z obramowaniem każdej komórki, kolorowe nagłówki tabel). Kontrolki są płaskie, kwadratowe i tekstowe.",
+    "overview": "Interfejs jest białą ścianą galerii, na której wiszą printy kolekcji. Biel jest tłem, ciepłoszary podkład trzyma miejsce pod zdjęciem, a czerń logo jest jedynym kolorem interfejsu: tekst, stany aktywne i akcja główna. Każdy inny kolor na ekranie należy do produktu (zdjęcia, próbki kolorów). Poprzeczka wykonania to COS / Arket: duże zdjęcia 2:3, dużo powietrza między rzędami, precyzyjna drobna typografia jednej groteski.\n\nGęstość jest dwubiegunowa i to jest cecha systemu, nie kompromis. Warstwa obrazu (siatka, galeria) oddycha szerokimi odstępami; warstwa danych (ceny, mnożnik, rozmiary, EAN, ilości) jest zwarta, wyrównana cyframi tabelarycznymi i oddzielona włoskowatymi liniami. Ta sama gramatyka danych — etykieta w `ink-3`, wartość w `ink`, linia `line` między wierszami — przenosi się bez zmian do gęstych widoków panelu administracyjnego.\n\nPanel administracyjny to ten sam świat odwrócony na zaplecze, nie drugi system: nawigacja boczna z aktywną pozycją w negatywie, ciche tabele, status jako tekst z kropką, formularze w panelu bocznym i edytor modelu na pełnej stronie. System odrzuca chrom sklepu detalicznego (banery promocji, plakietki „nowość/-30%”, koszyk), wygląd arkusza kalkulacyjnego (siatki z obramowaniem każdej komórki, kolorowe nagłówki tabel) i dashboardowy chrom panelu (kafelki metryk, kolorowe statusy, karty z cieniem). Kontrolki są płaskie, kwadratowe i tekstowe.",
     "keyCharacteristics": [
       "Jeden kolor interfejsu (`ink` #111111) na bieli; kolor należy do kolekcji.",
       "Zero zaokrągleń: zdjęcia, pola, przyciski, panele, menu. Jedyny wyjątek to kropka stanu.",
-      "Jedna groteska (Golos Text, łacina + cyrylica), wagi 400 i 500, pięć stopni skali od 12 do 32 px.",
+      "Jedna groteska (Golos Text, łacina + cyrylica), ładowane i używane wyłącznie wagi 400 i 500, pięć stopni skali od 12 do 32 px.",
       "Cyfry tabelaryczne we wszystkich danych handlowych.",
+      "Dwie krawędzie: `edge` obrysowuje kontrolki, `line` dzieli treść.",
       "Głębia przez linię i podkład, nie przez cień; cień tylko na warstwach nakładanych.",
-      "Ikony liniowe Lucide o grubości kreski 1.5, rozmiar 14–16 px."
+      "Ikony liniowe Lucide o grubości kreski 1.5, rozmiar 14–16 px; strzałki też są ikonami, nie znakami tekstu."
     ],
     "rules": [
       {
@@ -306,12 +380,17 @@
       },
       {
         "name": "The Negatyw-aktywnego Rule",
-        "body": "Stan wybrany to odwrócenie: tło `ink`, tekst `paper` (pole rozmiaru, licznik filtrów, licznik zestawienia). Nie wprowadzamy drugiego koloru do oznaczania wyboru.",
+        "body": "Stan wybrany to odwrócenie: tło `ink`, tekst `paper` (pole rozmiaru, licznik filtrów, licznik zestawienia, przełącznik zakresu, aktywna pozycja nawigacji panelu). Nie wprowadzamy drugiego koloru do oznaczania wyboru.",
+        "section": "colors"
+      },
+      {
+        "name": "The Krawędź-czy-linia Rule",
+        "body": "Jeśli element da się kliknąć lub wpisać w niego wartość, jego obrys w spoczynku to `edge`; jeśli tylko dzieli treść, to `line`. Hover i fokus podnoszą obrys kontrolki do `ink`; wyłączenie opuszcza go do `line`.",
         "section": "colors"
       },
       {
         "name": "The Dwie-wagi Rule",
-        "body": "Używamy wyłącznie 400 i 500. Waga 600 jest ładowana, ale nieużywana; pogrubienie nie jest narzędziem hierarchii.",
+        "body": "Ładujemy i używamy wyłącznie 400 i 500. Pogrubienie nie jest narzędziem hierarchii.",
         "section": "typography"
       },
       {
@@ -326,7 +405,7 @@
       },
       {
         "name": "The Płasko-w-spoczynku Rule",
-        "body": "Element osadzony w stronie nie ma cienia. Cień dostaje tylko warstwa nałożona na stronę.",
+        "body": "Element osadzony w stronie nie ma cienia. Cień dostaje tylko warstwa nałożona na stronę, i tylko jeden z dwóch tokenów.",
         "section": "elevation"
       },
       {
@@ -336,21 +415,28 @@
       }
     ],
     "dos": [
-      "**Do** trzymaj każdy element interfejsu w skali `paper` / `well` / `line` / `ink-3` / `ink-2` / `ink`; kolor wnoszą tylko zdjęcia i próbki produktu.",
-      "**Do** oznaczaj wybór negatywem (`ink` tło, `paper` tekst) i obrysem `ink`, a stan „już dodane” kropką `ink`.",
+      "**Do** trzymaj każdy element interfejsu w skali `paper` / `well` / `line` / `edge` / `ink-3` / `ink-2` / `ink`; kolor wnoszą tylko zdjęcia i próbki produktu.",
+      "**Do** obrysowuj każdą kontrolkę w spoczynku kolorem `edge` (3.6:1), a `line` zostaw dla separatorów treści.",
+      "**Do** oznaczaj wybór negatywem (`ink` tło, `paper` tekst) i obrysem `ink`, a stan „już dodane” lub „widoczny” kropką `ink`.",
+      "**Do** pokazuj status jako tekst z kropką (pełna = widoczny, pusta = niewidoczny).",
       "**Do** dawaj `.tabular` każdej liczbie handlowej i wyrównuj kwoty w kolumnach do prawej.",
       "**Do** oddzielaj grupy danych linią 1 px `line`, nie ramką ani tłem.",
-      "**Do** używaj jednej czarnej akcji głównej 48 px na widok; pozostałe akcje jako tekst lub tekst z podkreśleniem.",
-      "**Do** pokazuj zdjęcia w 2:3 na podkładzie `well`, bez zaokrągleń, ramek i cieni.",
-      "**Do** używaj ikon liniowych Lucide z `strokeWidth` 1.5, 14–16 px, zawsze obok tekstu lub z `aria-label`.",
+      "**Do** używaj jednej czarnej akcji głównej na widok (48 px w katalogu i stopce panelu, 40 px w nagłówku strony, pasku zapisu i dialogu); pozostałe akcje jako obrys `edge`, tekst lub tekst z podkreśleniem.",
+      "**Do** zapisuj akcję nieodwracalną podkreślonym tekstem Meta `ink-2` i potwierdzaj ją dialogiem z czarną akcją nazwaną czasownikiem i obiektem.",
+      "**Do** pokazuj zdjęcia w 2:3 na podkładzie `well`, bez zaokrągleń, ramek i cieni — także miniatury 32 × 48 px.",
+      "**Do** używaj ikon liniowych Lucide z `strokeWidth` 1.5, 14–16 px, zawsze obok tekstu lub z `aria-label`; strzałki również jako ikony Lucide.",
       "**Do** animuj krótko i z `ease-out-expo` (`cubic-bezier(0.16, 1, 0.3, 1)`), 300 ms dla stanów, 700 ms dla zdjęć; honoruj `prefers-reduced-motion`."
     ],
     "donts": [
-      "**Don't** dodawaj koloru akcentu do interfejsu ani nie koloruj stanów (sukces, nowość, promocja) — wyjątek to `danger` przy błędzie.",
+      "**Don't** dodawaj koloru akcentu do interfejsu ani nie koloruj stanów (sukces, nowość, promocja, status modelu) — wyjątek to `danger` przy błędzie.",
+      "**Don't** barw akcji usuwania na czerwono; `danger` należy do komunikatów błędu i błędnych pól, nie do przycisków.",
+      "**Don't** obrysowuj kontrolki samą linią `line` — znika na bieli (poniżej 3:1).",
       "**Don't** zaokrąglaj narożników; okrąg jest tylko kropką stanu.",
-      "**Don't** dawaj cienia elementom osadzonym w stronie (karty, pola, przyciski, zdjęcia).",
-      "**Don't** używaj wag powyżej 500 ani drugiego kroju; logo nie jest krojem i nie odtwarzamy go fontem.",
+      "**Don't** dawaj cienia elementom osadzonym w stronie (karty, pola, przyciski, zdjęcia, tabele, przyklejone paski) ani nie wprowadzaj trzeciego cienia poza `--shadow-menu` i `--shadow-panel`.",
+      "**Don't** ładuj ani nie używaj wag powyżej 500 ani drugiego kroju; logo nie jest krojem i nie odtwarzamy go fontem.",
+      "**Don't** używaj znaków tekstowych jako strzałek ani ikon (→, ←, ✓) w interfejsie.",
       "**Don't** obramowuj każdej komórki tabeli ani nie dawaj nagłówkom tła — to wygląd arkusza, który system odrzuca.",
+      "**Don't** buduj panelu z kafelków metryk, kart z cieniem ani kolorowych wykresów; metryki to wiersze danych, ranking to pasek `ink` na torze `line`.",
       "**Don't** wprowadzaj plakietek „nowość/-30%”, banerów promocji ani metafory koszyka."
     ]
   }

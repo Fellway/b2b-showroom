@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils"
  * - primary: jedna czarna akcja na widok,
  * - secondary: akcja obok głównej — obrys `edge`,
  * - text: akcje pomocnicze tekstem,
- * - danger: akcja nieodwracalna (tekst w `danger`, tylko po potwierdzeniu),
+ * - danger: akcja nieodwracalna — podkreślony tekst ink-2, zawsze z potwierdzeniem (kolor `danger` tylko dla błędów),
  * - icon: kwadrat z ikoną Lucide.
  */
 const buttonVariants = cva(
@@ -20,7 +20,8 @@ const buttonVariants = cva(
         primary: "bg-foreground font-medium text-background hover:bg-ink-2 disabled:bg-well disabled:text-ink-3",
         secondary: "border border-edge bg-background text-foreground hover:border-foreground disabled:border-line disabled:text-ink-3",
         text: "text-ink-2 hover:text-foreground disabled:text-ink-3",
-        danger: "text-danger underline-offset-4 hover:underline disabled:text-ink-3",
+        // akcja nieodwracalna to tekst z podkreśleniem, nie kolor — czerwień zarezerwowana dla błędów (DESIGN.md)
+        danger: "text-meta text-ink-2 underline underline-offset-4 hover:text-foreground disabled:text-ink-3 disabled:no-underline",
         icon: "text-ink-3 hover:text-foreground disabled:text-line",
       },
       size: {

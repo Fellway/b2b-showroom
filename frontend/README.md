@@ -3,7 +3,19 @@
 Next.js 16 (App Router, TypeScript) · Tailwind CSS 4 · shadcn/ui (Radix) · next-intl 4 · zustand
 
 Publiczny katalog hurtowy: lista kolekcji z filtrami, karta produktu z wyborem wariantów, zestawienie (line sheet)
-z generowaniem PDF i kontakt z opiekunem handlowym. Panel administracyjny — kolejny etap.
+z generowaniem PDF i kontakt z opiekunem handlowym oraz panel administracyjny pod `/admin`.
+
+## Panel administracyjny (`/admin`)
+
+- Osobny layout po polsku, poza routingiem językowym (`src/proxy.ts` pomija `/admin`), `noindex`.
+- Sesja (`src/lib/admin/session.ts`): access token JWT tylko w pamięci karty, refresh token w ciasteczku HttpOnly;
+  odświeżanie jest single-flight (dwa równoległe refresh-e backend traktuje jak kradzież sesji). Klient API
+  (`src/lib/admin/api.ts`) ponawia żądanie raz po 401. Dane: TanStack Query; błędy po kodach (`src/lib/admin/errors.ts`).
+- Ekrany: Modele (lista z szybką ceną i ukrywaniem, kolumna „Braki”), edytor modelu w krokach (dane, tłumaczenia
+  wklejane obok polskiego wzorca, kolory × rozmiary z SKU/EAN, zdjęcia), Kategorie / Kolory / Rozmiary, Zestawienia
+  (leady z kontaktem i PDF), Statystyki, Opiekunowie, Konta (tylko ADMIN).
+- Wspólne komponenty panelu: `src/components/admin/ui/` (pola, tabela, nagłówek strony, panel boczny z formularzem,
+  statusy, potwierdzenie, komunikat „Zapisano”).
 
 ## Uruchomienie
 

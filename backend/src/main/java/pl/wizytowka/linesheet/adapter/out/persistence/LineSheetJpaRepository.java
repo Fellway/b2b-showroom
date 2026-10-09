@@ -19,7 +19,7 @@ interface LineSheetJpaRepository extends JpaRepository<LineSheetJpaEntity, UUID>
 
     String SUMMARY = """
             select new pl.wizytowka.linesheet.application.view.LineSheetSummaryView(
-                s.id, s.publicId, s.referenceNumber, s.language, s.companyName, s.contactName, s.email,
+                s.id, s.publicId, s.referenceNumber, s.language, s.companyName, s.contactName, s.email, s.phone,
                 size(s.items), s.createdAt)
             from LineSheetJpaEntity s
             """;

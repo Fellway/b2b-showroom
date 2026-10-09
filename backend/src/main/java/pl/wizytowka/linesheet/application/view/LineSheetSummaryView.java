@@ -12,6 +12,7 @@ public record LineSheetSummaryView(UUID id,
                                    String companyName,
                                    String contactName,
                                    String email,
+                                   String phone,
                                    int itemCount,
                                    Instant createdAt) {
 }

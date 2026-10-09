@@ -1,12 +1,8 @@
-import { PageBody, PageHeader } from "@/components/admin/ui/page-header";
+import type { Metadata } from "next";
+import { UsersPage } from "@/components/admin/users/users-page";
 
-export default function Placeholder() {
-  return (
-    <>
-      <PageHeader title="users" />
-      <PageBody>
-        <p className="text-ink-3">W przygotowaniu.</p>
-      </PageBody>
-    </>
-  );
+export const metadata: Metadata = { title: "Konta" };
+
+export default function Page() {
+  return <UsersPage />;
 }

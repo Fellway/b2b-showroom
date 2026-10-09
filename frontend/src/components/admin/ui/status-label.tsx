@@ -22,3 +22,13 @@ export function StatusLabel({ status, className }: { status: ProductStatus; clas
     </span>
   );
 }
+
+/** Stan włączony / wyłączony (opiekun, konto, widoczność kategorii) w tej samej gramatyce: tekst + kropka. */
+export function ActiveLabel({ active, activeText = "Aktywny", inactiveText = "Nieaktywny" }: { active: boolean; activeText?: string; inactiveText?: string }) {
+  return (
+    <span className={active ? "inline-flex items-center gap-2" : "inline-flex items-center gap-2 text-ink-3"}>
+      <span aria-hidden className={active ? "size-2 rounded-full border border-foreground bg-foreground" : "size-2 rounded-full border border-ink-3"} />
+      {active ? activeText : inactiveText}
+    </span>
+  );
+}
