@@ -133,5 +133,17 @@
     "en": "English",
     "cs": "Čeština",
     "uk": "Українська"
+  },
+  "consent": {
+    "title": "Privacy in the catalogue",
+    "body": "With your consent we store a random identifier in your browser to count visits and see which styles are popular. Without consent the catalogue works the same and statistics stay fully anonymous.",
+    "necessary": "We always remember your line sheet and this choice — on your device only.",
+    "grant": "Accept",
+    "deny": "Decline",
+    "settings": "Privacy settings",
+    "close": "Close privacy settings",
+    "currentGranted": "Current setting: statistics consent given.",
+    "currentDenied": "Current setting: no statistics consent.",
+    "policy": "Privacy policy"
   }
 }

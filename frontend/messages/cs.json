@@ -133,5 +133,17 @@
     "en": "English",
     "cs": "Čeština",
     "uk": "Українська"
+  },
+  "consent": {
+    "title": "Soukromí v katalogu",
+    "body": "S vaším souhlasem uložíme do prohlížeče náhodný identifikátor, abychom mohli počítat návštěvy a oblíbenost modelů. Bez souhlasu katalog funguje stejně a statistiky zůstávají zcela anonymní.",
+    "necessary": "Váš výběr a toto rozhodnutí si pamatujeme vždy — jen ve vašem zařízení.",
+    "grant": "Souhlasím",
+    "deny": "Odmítám",
+    "settings": "Nastavení soukromí",
+    "close": "Zavřít nastavení soukromí",
+    "currentGranted": "Aktuálně: souhlas se statistikami udělen.",
+    "currentDenied": "Aktuálně: bez souhlasu se statistikami.",
+    "policy": "Zásady ochrany soukromí"
   }
 }

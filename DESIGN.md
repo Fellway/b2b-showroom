@@ -277,7 +277,7 @@ Panel administracyjny: od `lg` dwie kolumny — nawigacja 232 px przyklejona na 
 System jest płaski. Głębię w spoczynku niesie wyłącznie linia `line` i podkład `well`. Cień istnieje tylko na warstwach, które nakładają się na treść (menu rozwijane, dialog, potwierdzenie „Zapisano”, panel boczny), i jest długi, miękki, z ujemnym rozproszeniem — raczej sugestia uniesienia niż obrys. Zdjęcia, karty, pola, przyciski, tabele oraz przyklejone paski (nagłówek, nagłówek strony panelu, pasek zapisu) nigdy nie mają cienia — od treści oddziela je linia. Pod panelem bocznym i dialogiem leży zaciemnienie `rgb(0 0 0 / 0.25)`.
 
 ### Shadow Vocabulary
-- **Menu** (`box-shadow: 0 12px 32px -16px rgb(17 17 17 / 0.3)`, token `--shadow-menu`): jedyny cień warstw małych — popover filtrów i sortowania, przełącznik języka, dialog potwierdzenia, potwierdzenie „Zapisano”.
+- **Menu** (`box-shadow: 0 12px 32px -16px rgb(17 17 17 / 0.3)`, token `--shadow-menu`): jedyny cień warstw małych — popover filtrów i sortowania, przełącznik języka, dialog potwierdzenia, potwierdzenie „Zapisano”, panel zgody na analitykę.
 - **Panel boczny** (`box-shadow: -24px 0 48px -32px rgb(17 17 17 / 0.35)`, token `--shadow-panel`): szuflada zestawienia i panel formularza w panelu administracyjnym, cień rzucany w lewo.
 
 ### Named Rules
@@ -373,6 +373,9 @@ Prostokąt `ink` z tekstem Small `paper`, padding 12 × 16 px, ikona check 16 px
 - **Pusty:** linia górna, padding 64 px pionowo, tytuł Body 500, opis `ink-2` do 56ch, opcjonalna akcja; wyrównany do lewej.
 - **Błąd:** ten sam układ, komunikat w `danger` (`role="alert"`), „Spróbuj ponownie” jako podkreślony tekst.
 - **Ładowanie:** wiersze zastępcze w rytmie tabeli — linia górna, padding 12 px, bloki `well` (miniatura 32 × 48, dwa paski tekstu); bez spinnerów i bez pulsowania.
+
+### Panel zgody (prywatność)
+Nieblokujące pytanie o zgodę na analitykę. Desktop: pływająca karta w lewym dolnym rogu (24/32 px od krawędzi), szerokość jednej kolumny siatki katalogu od `lg`, dwóch kolumn na tablecie (`md`) — żaden tytuł produktu nie jest przecinany, a etykiety przycisków mieszczą się we wszystkich językach, `paper`, obrys `line`, cień `--shadow-menu`, padding 20 px; mobile: pełnoszeroki pas u dołu z linią górną. Tytuł Small 500, treść Small `ink-2`, informacja o tym, co zapamiętujemy zawsze, w Meta `ink-3`. Dwie akcje **równej wagi** (`secondary`, siatka 2 kolumny) — nigdy wypełnione „Akceptuję”. Zamknięcie (X) tylko w trybie ustawień, gdy decyzja już istnieje; Escape zamyka, fokus wraca do linku „Ustawienia prywatności” w stopce. Link do polityki prywatności tylko, gdy marka ją dostarczy.
 
 ### Pas noty
 Pas `well` z tekstem Meta `ink-2`, padding 8 × 20 px. W katalogu pełnoszeroki i wyśrodkowany, dla komunikatów o całej stronie (dane przykładowe); w panelu wyrównany do lewej pod danymi, które objaśnia (np. jak liczone są odsłony). Nie dla promocji.

@@ -13,7 +13,7 @@ import { useHydrated } from "@/lib/use-hydrated";
 import { cn } from "@/lib/utils";
 import { groupLines, summarize, useSelection, type SelectionLine } from "@/store/selection";
 import { RepresentativeContact } from "@/components/site/representative-contact";
-import { track } from "@/lib/analytics";
+import { track, visitorId } from "@/lib/analytics";
 
 type Step = "lines" | "form" | "done";
 
@@ -244,6 +244,7 @@ function FormStep({
           items: lines.map((line) => ({ variantId: line.variantId, quantity: line.quantity })),
           ...trimmed,
           privacyAccepted: hasData && consent,
+          visitorId: visitorId() ?? null,
         }),
       });
       if (response.ok) {

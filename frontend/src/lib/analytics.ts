@@ -1,9 +1,12 @@
 "use client";
 
+import { consent } from "./consent";
+
 /**
  * Lekka analityka bez ciasteczek: zdarzenia trafiają paczkami do `/api/v1/analytics/events`.
- * Identyfikator sesji żyje tylko w sessionStorage karty. Trwały identyfikator odwiedzającego wymaga
- * decyzji o zgodzie (ePrivacy) — do tego czasu nie jest wysyłany.
+ * Bez zgody (consent.ts) zdarzenia są w pełni anonimowe — nic nie jest zapisywane w przeglądarce.
+ * Po zgodzie: identyfikator sesji (sessionStorage) i trwały identyfikator odwiedzającego (localStorage,
+ * odnawiany po 13 miesiącach), dzięki którym statystyki liczą unikalnych odwiedzających.
  */
 
 export type AnalyticsEventType =
@@ -15,6 +18,7 @@ export type AnalyticsEventType =
 
 type QueuedEvent = {
   type: AnalyticsEventType;
+  visitorId?: string;
   sessionId?: string;
   language?: string;
   productId?: string;
@@ -29,7 +33,24 @@ const FLUSH_DELAY_MS = 2000;
 const queue: QueuedEvent[] = [];
 let timer: ReturnType<typeof setTimeout> | null = null;
 
+const VISITOR_MAX_AGE_MS = 395 * 24 * 60 * 60 * 1000;
+
+/** Identyfikator odwiedzającego — tylko po zgodzie na analitykę. */
+export function visitorId(): string | undefined {
+  if (consent.get() !== "granted") return undefined;
+  try {
+    const stored = JSON.parse(localStorage.getItem("fs-visitor") ?? "null") as { id: string; createdAt: string } | null;
+    if (stored && Date.now() - Date.parse(stored.createdAt) < VISITOR_MAX_AGE_MS) return stored.id;
+    const id = crypto.randomUUID();
+    localStorage.setItem("fs-visitor", JSON.stringify({ id, createdAt: new Date().toISOString() }));
+    return id;
+  } catch {
+    return undefined;
+  }
+}
+
 function sessionId(): string | undefined {
+  if (consent.get() !== "granted") return undefined;
   try {
     let id = sessionStorage.getItem("fs-session");
     if (!id) {
@@ -52,10 +73,11 @@ function referrerHost(): string | undefined {
   }
 }
 
-export function track(event: Omit<QueuedEvent, "sessionId" | "path" | "referrerHost">) {
+export function track(event: Omit<QueuedEvent, "visitorId" | "sessionId" | "path" | "referrerHost">) {
   if (typeof window === "undefined") return;
   queue.push({
     ...event,
+    visitorId: visitorId(),
     sessionId: sessionId(),
     path: location.pathname.slice(0, 512),
     referrerHost: event.type === "PAGE_VIEW" ? referrerHost() : undefined,

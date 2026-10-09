@@ -9,6 +9,7 @@ import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { DemoNotice } from "@/components/site/demo-notice";
 import { PageViewTracker } from "@/components/site/page-view-tracker";
+import { ConsentBanner } from "@/components/site/consent-banner";
 import { SelectionDrawer } from "@/components/selection/selection-drawer";
 import "../globals.css";
 
@@ -64,6 +65,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
           <SiteFooter representatives={representatives} />
           <SelectionDrawer representatives={representatives} />
           <PageViewTracker />
+          <ConsentBanner />
         </NextIntlClientProvider>
       </body>
     </html>

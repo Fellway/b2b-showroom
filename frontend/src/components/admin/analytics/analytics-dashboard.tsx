@@ -166,6 +166,7 @@ export function AnalyticsDashboard() {
 function Totals({ summary }: { summary: AnalyticsSummary }) {
   const t = summary.eventTotals;
   const items: { label: string; value: number; hint?: string }[] = [
+    { label: "Unikalni odwiedzający", value: summary.uniqueVisitors },
     { label: "Zestawienia PDF", value: summary.lineSheetsCreated },
     { label: "Odsłony stron", value: t.PAGE_VIEW ?? 0 },
     { label: "Karty produktów", value: t.PRODUCT_VIEW ?? 0 },
@@ -184,8 +185,8 @@ function Totals({ summary }: { summary: AnalyticsSummary }) {
         ))}
       </dl>
       <p role="note" className="mt-4 max-w-3xl bg-well px-5 py-2 text-meta text-ink-2">
-        Unikalnych odwiedzających nie liczymy: katalog nie zapisuje trwałego identyfikatora przeglądarki, dopóki nie
-        zapadnie decyzja o zgodzie (ePrivacy). Odsłony liczone są per sesja karty.
+        Unikalni odwiedzający to wyłącznie osoby, które zgodziły się na statystyki w banerze prywatności — rzeczywista
+        liczba odwiedzających jest wyższa. Odsłony i wybory osób bez zgody są liczone w pełni anonimowo.
       </p>
     </section>
   );

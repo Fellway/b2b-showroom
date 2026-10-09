@@ -133,5 +133,17 @@
     "en": "English",
     "cs": "Čeština",
     "uk": "Українська"
+  },
+  "consent": {
+    "title": "Prywatność w katalogu",
+    "body": "Za Twoją zgodą zapisujemy w przeglądarce losowy identyfikator, żeby liczyć odwiedziny i popularność modeli. Bez zgody katalog działa tak samo, a statystyki są w pełni anonimowe.",
+    "necessary": "Twoje zestawienie i ten wybór pamiętamy zawsze — tylko na Twoim urządzeniu.",
+    "grant": "Akceptuję",
+    "deny": "Odrzucam",
+    "settings": "Ustawienia prywatności",
+    "close": "Zamknij ustawienia prywatności",
+    "currentGranted": "Obecnie: zgoda na statystyki udzielona.",
+    "currentDenied": "Obecnie: bez zgody na statystyki.",
+    "policy": "Polityka prywatności"
   }
 }

@@ -46,5 +46,9 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
 ## Unresolved
 
-- Identyfikator odwiedzającego dla analityki a zgoda (ePrivacy) — do czasu decyzji tylko identyfikator sesji.
+- Polityka prywatności / administrator danych — brak danych prawnych marki (link w banerze i stopce pojawi się po ustawieniu NEXT_PUBLIC_PRIVACY_POLICY_URL).
+
+## Decisions
+
+- Zgoda na analitykę (2026-10-09): identyfikatory (sesja + odwiedzający) wyłącznie po zgodzie; bez zgody zdarzenia w pełni anonimowe; decyzja ważna 12 miesięcy; identyfikator odwiedzającego odnawiany po 13 miesiącach; wygaśnięcie lub cofnięcie zgody usuwa identyfikatory.
 - Prawdziwe dane produktów (import) — dziś dane przykładowe.

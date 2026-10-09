@@ -2,6 +2,7 @@ import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import type { SalesRepresentative } from "@/lib/types";
 import { FooterContacts } from "./footer-contacts";
+import { ConsentSettingsLink } from "./consent-banner";
 
 const SOCIAL = [
   { label: "Facebook", href: "https://www.facebook.com/fabiansstyle" },
@@ -33,7 +34,10 @@ export async function SiteFooter({ representatives }: { representatives: SalesRe
       </div>
       <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-6 border-t border-line px-5 py-6 text-meta text-ink-3 md:px-8">
         <Image src="/brand/fabians-style-logo.png" alt="" width={866} height={191} className="h-5 w-auto opacity-80" />
-        <p>{t("footer.rights", { year: new Date().getFullYear() })}</p>
+        <div className="flex items-center gap-6">
+          <ConsentSettingsLink />
+          <p>{t("footer.rights", { year: new Date().getFullYear() })}</p>
+        </div>
       </div>
     </footer>
   );

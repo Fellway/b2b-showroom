@@ -32,6 +32,7 @@ Backend z danymi demonstracyjnymi: `scripts/dev-up.sh --seed` w katalogu główn
 |---|---|
 | `API_INTERNAL_URL` | adres Spring Boot widziany z serwera Next.js (domyślnie `http://localhost:8080`) |
 | `NEXT_PUBLIC_DEMO_NOTICE` | `true` pokazuje pasek „katalog demonstracyjny” — dopóki dane są przykładowe |
+| `NEXT_PUBLIC_PRIVACY_POLICY_URL` | adres polityki prywatności marki; pusty = brak linku w banerze zgody i stopce |
 
 ## Jak to działa
 

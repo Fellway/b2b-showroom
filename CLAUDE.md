@@ -34,7 +34,7 @@ jeśli decyzja zmienia kształt rozwiązania.
 - **Języki:** `pl` (bazowy i fallback), `en`, `cs`, `uk` — interfejs i treści produktów. Język żądania: `?lang=` → `Accept-Language` → `pl`.
 - **Zestawienie PDF:** 1–200 różnych wariantów, opcjonalna ilość orientacyjna, kody EAN, zdjęcia, ceny hurtowe i sugerowane. Pozycje to **migawki** z chwili generowania. Klient tylko pobiera PDF (bez wysyłki e-mail). Podanie jakichkolwiek danych kontaktowych wymaga zgody RODO.
   Układ PDF: kompaktowa tabela (wiersz na wariant z miniaturą); dane marki to placeholdery w `showroom.brand.*` do dopracowania w Etapie 4. Domyślnie przypisywany pierwszy aktywny opiekun handlowy.
-- **Analityka:** odwiedziny (unikalni odwiedzający), najczęściej oglądane produkty, najczęściej dodawane do wyboru, najczęściej występujące w zestawieniach, liczba zestawień. Bez IP i User-Agenta. Zdarzenia z przeglądarki: paczki ≤50, czas nadaje serwer; typy `LINE_SHEET_*` tylko z serwera. Dashboard: domyślnie 30 dni, max 366.
+- **Analityka:** odwiedziny (unikalni odwiedzający — tylko po zgodzie z banera prywatności; bez zgody zdarzenia w pełni anonimowe, nic nie zapisujemy w przeglądarce), najczęściej oglądane produkty, najczęściej dodawane do wyboru, najczęściej występujące w zestawieniach, liczba zestawień. Bez IP i User-Agenta. Zdarzenia z przeglądarki: paczki ≤50, czas nadaje serwer; typy `LINE_SHEET_*` tylko z serwera. Dashboard: domyślnie 30 dni, max 366.
 
 ## Stos technologiczny
 
@@ -105,6 +105,6 @@ Konwencje:
 - Ewentualny dostęp klientów przez token w URL (świadomie odłożony).
 - Import prawdziwych danych produktów (nazwy, składy, rozmiarówki, EAN, ceny) i packshoty — dziś dane demonstracyjne.
 - Adres grupy hurtowej na Facebooku („Klienci hurtowi Fabian's Style”) do stopki; logo w wersji wektorowej (SVG).
-- Trwały identyfikator odwiedzającego w analityce wymaga decyzji o zgodzie (ePrivacy) — dziś tylko identyfikator sesji, więc statystyki nie liczą unikalnych odwiedzających.
+- Strona polityki prywatności (link z banera zgody) — wymaga od marki danych administratora danych osobowych.
 - Pomysł z przeglądu 4b: licznik nowych zestawień (leadów) od ostatniej wizyty w nawigacji panelu.
 - Wersja mobilna katalogu i panelu oraz aplikacja mobilna (logika w REST API, układy do przeskładania).
