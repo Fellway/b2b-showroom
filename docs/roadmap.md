@@ -24,6 +24,39 @@ lint i build bez błędów.
 3. **Import prawdziwych danych produktów** i packshotów (zamiast danych demonstracyjnych; potem `NEXT_PUBLIC_DEMO_NOTICE=false`).
 4. **Wersja mobilna** katalogu i panelu, potem aplikacja mobilna (API jest gotowe).
 
+## Backlog pomysłów (2026-10-09)
+
+Pomysły do rozważenia — nie są zobowiązaniem. Przy realizacji przenieś pozycję do „Następnych kroków”
+i zapisz decyzje w `decisions.md`.
+
+### Dla kupców
+- **Eksport zestawienia do Excela/CSV** obok PDF — do wklejenia w systemy zamówień sklepów.
+- **Paczki rozmiarowe** (np. 36–44 w proporcji 1-2-2-1) — dodanie modelu jednym kliknięciem zamiast pojedynczych rozmiarów. *W realizacji.*
+- **Kolekcje i sezony** — strony kolekcji z sesją zdjęciową, oznaczenie nowości.
+- **Termin dostępności przy modelu** (np. „wysyłka od 15.11”) — bez stanów magazynowych.
+- **Udostępnianie zestawienia linkiem** (wspólnik, drugi sklep).
+- **Linki per klient z tokenem** — kto co oglądał, w przyszłości ceny indywidualne (wcześniej świadomie odłożone).
+
+### Dla marki (panel)
+- **Import produktów z Excela** — potrzebny przy wprowadzaniu prawdziwej oferty.
+- **Zestawienia jako mini-CRM** — status leada (nowy / w kontakcie / zamówił), notatki, licznik nowych leadów w nawigacji.
+- **Operacje hurtowe** — zmiana cen o X% na sezon, duplikowanie modelu, ukrycie całej kategorii.
+- **Optymalizacja zdjęć przy uploadzie** — kilka rozmiarów, WebP/AVIF.
+- **Historia zmian** — kto i kiedy zmienił cenę lub status.
+
+### Technika
+- **Testy end-to-end frontendu w CI**, automatyczny audyt dostępności (axe) i wydajności (Lighthouse).
+- **SEO dla nowych kupców** — sitemap, hreflang, podglądy linków (Open Graph) przy udostępnianiu w social media.
+- **Monitoring i alerty** (logi, metryki, błędy) po wdrożeniu.
+
+### Marka i prawo
+- **Polityka prywatności** — szablon do uzupełnienia przez markę / prawnika.
+- **Strona „O marce”** — szyte w Polsce, autorski design, warunki współpracy (ważne dla nowych kupców z Instagrama).
+- **Wersja mobilna** katalogu i panelu, potem aplikacja mobilna.
+
+Rekomendowana kolejność (z rozmowy 2026-10-09): wdrożenie → import z Excela + eksport zestawienia do Excela →
+zestawienia jako mini-CRM.
+
 ## Lista kontrolna przed produkcją
 
 - [ ] `SHOWROOM_JWT_SECRET` (≥ 32 bajty, base64) i hasło pierwszego admina tylko w sekretach środowiska
