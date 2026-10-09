@@ -106,7 +106,7 @@ export function CatalogToolbar({ facets, selectedColors, selectedSizes, query, s
                   onClick={() => toggle("size", size.id)}
                   className={cn(
                     "tabular flex h-10 items-center justify-center border text-small transition-colors",
-                    checked ? "border-foreground bg-foreground text-background" : "border-line hover:border-foreground",
+                    checked ? "border-foreground bg-foreground text-background" : "border-edge hover:border-foreground",
                   )}
                 >
                   {size.code}
@@ -166,7 +166,7 @@ export function CatalogToolbar({ facets, selectedColors, selectedSizes, query, s
               key={`${chip.key}-${chip.id}`}
               type="button"
               onClick={() => toggle(chip.key, chip.id)}
-              className="inline-flex h-8 items-center gap-1.5 border border-line px-2.5 text-meta hover:border-foreground"
+              className="inline-flex h-8 items-center gap-1.5 border border-edge px-2.5 text-meta hover:border-foreground"
             >
               {chip.label}
               <X aria-hidden className="size-3.5" strokeWidth={1.5} />
@@ -209,7 +209,7 @@ function FilterPopover({
       <PopoverContent
         align={align}
         sideOffset={6}
-        className="w-72 rounded-none border-line p-0 shadow-[0_12px_32px_-16px_rgb(17_17_17/0.3)]"
+        className="w-72 p-0"
       >
         {children}
       </PopoverContent>

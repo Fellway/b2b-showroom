@@ -59,6 +59,11 @@ Potwierdzone wyróżniki marki — tylko te, bez dopowiadania szczegółów:
 - Dane kontaktowe kupca w zestawieniu są opcjonalne i wymagają zgody RODO.
 - Panel administracyjny (role ADMIN i EDITOR): CRUD produktów, kolorów, rozmiarów, kategorii, zdjęć, tłumaczeń,
   opiekunów handlowych; statusy produktu (szkic, opublikowany, ukryty, zarchiwizowany); lista zestawień; analityka.
+- Panel administracyjny: jedna osoba (właściciel / menedżer marki), praca kilka razy w tygodniu; najczęstsze zadania:
+  nowe modele ze zdjęciami, ceny i ukrywanie, przegląd zestawień (leady), statystyki. Tłumaczenia EN/CS/UK przychodzą
+  z zewnątrz i są wklejane — panel ma pokazywać braki tłumaczeń.
+- Urządzenia: panel w pierwszym etapie tylko na desktop; **docelowo całość (katalog i panel) ma działać mobilnie,
+  planowana jest też aplikacja mobilna** — logika wyłącznie w REST API, układy możliwe do przeskładania.
 - Analityka bez danych osobowych (bez IP), odwiedziny, oglądane / wybierane / zestawiane produkty.
 - Limit generowania zestawień (rate limiting) — UI musi obsłużyć komunikat „spróbuj za chwilę”.
 - Błędy API mają stabilne kody (`code`), które frontend tłumaczy na komunikaty w 4 językach.

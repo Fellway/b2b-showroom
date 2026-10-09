@@ -89,6 +89,9 @@ class AdminCatalogReadModelAdapter implements AdminCatalogReadModel {
                         product.getColors().size(),
                         product.getVariants().size(),
                         (int) product.getVariants().stream().filter(ProductVariantJpaEntity::isActive).count(),
+                        java.util.Arrays.stream(CatalogLanguage.values())
+                                .filter(language -> !product.getTranslations().containsKey(language))
+                                .toList(),
                         CatalogDictionary.sortedImages(product).stream().findFirst().map(CatalogDictionary::image).orElse(null),
                         product.getUpdatedAt(),
                         product.getVersion()))

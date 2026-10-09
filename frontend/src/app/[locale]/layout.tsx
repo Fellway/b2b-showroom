@@ -14,7 +14,7 @@ import "../globals.css";
 
 const golos = Golos_Text({
   subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500"],
   variable: "--font-golos",
   display: "swap",
 });

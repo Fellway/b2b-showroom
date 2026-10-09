@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
@@ -21,12 +22,13 @@ export function Pagination({ page, totalPages }: { page: number; totalPages: num
     return { pathname: "/" as const, query };
   };
 
-  const linkClass = "px-3 py-2 underline-offset-4 hover:underline";
+  const linkClass = "inline-flex items-center gap-1.5 px-3 py-2 underline-offset-4 hover:underline";
   return (
     <nav aria-label={t("pagination")} className="mt-16 flex items-center justify-between border-t border-line pt-6 text-small">
       {page > 1 ? (
         <Link href={hrefFor(page - 1)} className={cn(linkClass, "-ml-3")} rel="prev">
-          ← {t("previous")}
+          <ArrowLeft aria-hidden className="size-4" strokeWidth={1.5} />
+          {t("previous")}
         </Link>
       ) : (
         <span />
@@ -34,7 +36,8 @@ export function Pagination({ page, totalPages }: { page: number; totalPages: num
       <span className="tabular text-ink-3">{t("pageOf", { page, total: totalPages })}</span>
       {page < totalPages ? (
         <Link href={hrefFor(page + 1)} className={cn(linkClass, "-mr-3")} rel="next">
-          {t("next")} →
+          {t("next")}
+          <ArrowRight aria-hidden className="size-4" strokeWidth={1.5} />
         </Link>
       ) : (
         <span />

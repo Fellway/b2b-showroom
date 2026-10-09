@@ -311,7 +311,7 @@ class AdminProductControllerTest {
         UUID variant = UUID.randomUUID();
         when(queries.products(any(), any())).thenReturn(new PageResult<>(List.of(new AdminProductListItem(
                 PRODUCT, "koszula-lniana", "LS-001", "Koszula lniana", "Koszule", ProductStatus.DRAFT, PRICE,
-                1, 2, 2, null, now, 4)), 0, 25, 1));
+                1, 2, 2, List.of(CatalogLanguage.CS, CatalogLanguage.UK), null, now, 4)), 0, 25, 1));
         when(queries.product(ProductId.of(PRODUCT))).thenReturn(new AdminProductView(PRODUCT, CATEGORY,
                 "koszula-lniana", "LS-001", ProductStatus.PUBLISHED, PRICE, false, 0, now,
                 Map.of(CatalogLanguage.EN, ProductTranslation.named("Linen shirt"),
@@ -323,6 +323,7 @@ class AdminProductControllerTest {
         mvc.perform(get("/api/v1/admin/products").param("q", "len").param("status", "DRAFT")
                         .param("categoryId", CATEGORY.toString()))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[0].missingLanguages[0]").value("cs"))
                 .andExpect(jsonPath("$.items[0].status").value("DRAFT"))
                 .andExpect(jsonPath("$.items[0].updatedAt").value("2026-10-05T10:00:00Z"))
                 .andExpect(jsonPath("$.items[0].cover").value(org.hamcrest.Matchers.nullValue()))

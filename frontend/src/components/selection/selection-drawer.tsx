@@ -41,7 +41,8 @@ export function SelectionDrawer({ representatives }: { representatives: SalesRep
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full gap-0 border-line p-0 shadow-[-24px_0_48px_-32px_rgb(17_17_17/0.35)] data-[side=right]:w-full data-[side=right]:sm:max-w-[480px]"
+        closeLabel={t("close")}
+        className="w-full gap-0 border-line p-0 shadow-panel data-[side=right]:w-full data-[side=right]:sm:max-w-[480px]"
       >
         <div className="flex h-(--header-height) shrink-0 items-center border-b border-line px-6">
           <SheetTitle className="text-body font-medium">
@@ -291,7 +292,7 @@ function FormStep({
               rows={3}
               maxLength={2000}
               {...field("message")}
-              className="resize-y border border-line bg-transparent px-3 py-2 text-small outline-none focus-visible:border-foreground focus-visible:outline-none"
+              className="resize-y border border-edge bg-transparent px-3 py-2 text-small outline-none focus-visible:border-foreground focus-visible:outline-none"
             />
           </label>
           {hasData && (
@@ -393,7 +394,7 @@ function TextField({ label, className, ...props }: React.ComponentProps<"input">
       <input
         {...props}
         className={cn(
-          "h-11 border border-line bg-transparent px-3 text-small outline-none focus-visible:border-foreground focus-visible:outline-none user-invalid:border-danger",
+          "h-11 border border-edge bg-transparent px-3 text-small outline-none focus-visible:border-foreground focus-visible:outline-none user-invalid:border-danger",
           className,
         )}
       />
@@ -414,7 +415,7 @@ function MiniStepper({
   const current = value ?? 0;
   const set = (next: number) => onChange(next <= 0 ? null : Math.min(next, 9999));
   return (
-    <div className="flex items-center border border-line">
+    <div className="flex items-center border border-edge">
       <button
         type="button"
         aria-label={t("decrease", { size: label })}

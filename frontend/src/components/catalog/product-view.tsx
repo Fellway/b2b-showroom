@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { ArrowLeft, Check, Minus, Plus } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Minus, Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { track } from "@/lib/analytics";
@@ -179,7 +179,7 @@ export function ProductView({
                   onClick={() => chooseColor(option)}
                   className={cn(
                     "relative size-10 border p-1 transition-colors",
-                    active ? "border-foreground" : "border-line hover:border-ink-3",
+                    active ? "border-foreground" : "border-edge hover:border-foreground",
                   )}
                 >
                   <span className="block size-full border border-black/10" style={{ backgroundColor: option.hex ?? "transparent" }} />
@@ -217,7 +217,7 @@ export function ProductView({
                   onClick={() => toggleSize(variant.id)}
                   className={cn(
                     "tabular flex h-11 items-center justify-center border text-small transition-colors",
-                    active ? "border-foreground bg-foreground text-background" : "border-line hover:border-foreground",
+                    active ? "border-foreground bg-foreground text-background" : "border-edge hover:border-foreground",
                   )}
                 >
                   {variant.size}
@@ -276,9 +276,10 @@ export function ProductView({
               <button
                 type="button"
                 onClick={() => setDrawerOpen(true)}
-                className="shrink-0 text-foreground underline underline-offset-4 hover:no-underline"
+                className="inline-flex shrink-0 items-center gap-1 text-foreground underline underline-offset-4 hover:no-underline"
               >
-                {tSite("selection")} →
+                {tSite("selection")}
+                <ArrowRight aria-hidden className="size-3.5" strokeWidth={1.5} />
               </button>
             </p>
           )}
@@ -409,7 +410,7 @@ function QuantityStepper({
   const current = value ?? 0;
   const set = (next: number) => onChange(next <= 0 ? null : Math.min(next, 9999));
   return (
-    <div className="flex items-center border border-line">
+    <div className="flex items-center border border-edge">
       <button
         type="button"
         aria-label={`${label} −`}

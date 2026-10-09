@@ -33,7 +33,7 @@ export function LocaleSwitcher() {
         {locale}
         <ChevronDown aria-hidden className="size-3.5" strokeWidth={1.5} />
       </PopoverTrigger>
-      <PopoverContent align="end" sideOffset={8} className="w-48 rounded-none border-line p-1 shadow-[0_8px_24px_-12px_rgb(17_17_17/0.25)]">
+      <PopoverContent align="end" sideOffset={8} className="w-48 p-1">
         <ul role="listbox" aria-label={t("site.language")}>
           {routing.locales.map((code) => (
             <li key={code}>

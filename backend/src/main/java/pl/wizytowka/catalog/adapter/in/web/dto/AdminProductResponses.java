@@ -7,6 +7,7 @@ import pl.wizytowka.catalog.application.view.AdminProductListItem;
 import pl.wizytowka.catalog.application.view.AdminProductView;
 import pl.wizytowka.catalog.domain.ProductStatus;
 import pl.wizytowka.catalog.domain.ProductTranslation;
+import pl.wizytowka.shared.domain.CatalogLanguage;
 
 import java.time.Instant;
 import java.util.List;
@@ -28,6 +29,7 @@ public final class AdminProductResponses {
                                           int colorCount,
                                           int variantCount,
                                           int activeVariantCount,
+                                          List<String> missingLanguages,
                                           ImageResponse cover,
                                           Instant updatedAt,
                                           long version) {
@@ -35,7 +37,8 @@ public final class AdminProductResponses {
         public static ProductListItemResponse of(AdminProductListItem item) {
             return new ProductListItemResponse(item.id(), item.slug(), item.styleCode(), item.name(), item.categoryName(),
                     item.status(), PriceResponse.of(item.price()), item.colorCount(), item.variantCount(),
-                    item.activeVariantCount(), ImageResponse.of(item.cover()), item.updatedAt(), item.version());
+                    item.activeVariantCount(), item.missingLanguages().stream().map(CatalogLanguage::code).toList(),
+                    ImageResponse.of(item.cover()), item.updatedAt(), item.version());
         }
     }
 
