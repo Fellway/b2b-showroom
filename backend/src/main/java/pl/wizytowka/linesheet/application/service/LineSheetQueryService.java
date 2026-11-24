@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.wizytowka.contact.application.port.in.SalesRepresentativeQuery;
 import pl.wizytowka.contact.application.view.SalesRepresentativeContact;
 import pl.wizytowka.linesheet.application.port.in.AdminLineSheetQuery;
+import pl.wizytowka.linesheet.application.port.in.BuyerLineSheetQuery;
 import pl.wizytowka.linesheet.application.port.in.LineSheetStatisticsQuery;
 import pl.wizytowka.linesheet.application.port.out.LineSheetReadModel;
 import pl.wizytowka.linesheet.application.port.out.LineSheetRepository;
@@ -24,10 +25,11 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional(readOnly = true)
-class LineSheetQueryService implements AdminLineSheetQuery, LineSheetStatisticsQuery {
+class LineSheetQueryService implements AdminLineSheetQuery, LineSheetStatisticsQuery, BuyerLineSheetQuery {
 
     private static final int MAX_RANKING = 100;
 
@@ -62,7 +64,13 @@ class LineSheetQueryService implements AdminLineSheetQuery, LineSheetStatisticsQ
         return new LineSheetDetailView(sheet.id().value(), sheet.publicId(), sheet.referenceNumber(), sheet.language(),
                 sheet.currency().getCurrencyCode(), sheet.recipient(), sheet.message(), sheet.privacyAcceptedAt(),
                 salesRepresentative, sheet.hasPdf(), sheet.pdfGeneratedAt(), sheet.createdAt(), sheet.items(), wholesaleTotal,
-                sheet.version());
+                sheet.buyerAccountId(), sheet.version());
+    }
+
+    @Override
+    public PageResult<LineSheetSummaryView> lineSheetsOfBuyer(UUID buyerAccountId, PageQuery page) {
+        Objects.requireNonNull(buyerAccountId, "buyerAccountId");
+        return readModel.findSummariesOfBuyer(buyerAccountId, page);
     }
 
     @Override

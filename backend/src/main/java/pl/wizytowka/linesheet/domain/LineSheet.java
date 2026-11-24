@@ -16,9 +16,9 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
- * Zestawienie ofertowe (line sheet) wygenerowane przez klienta B2B. Treść jest niezmienna od chwili
- * utworzenia; zmienia się wyłącznie stan techniczny (dołączony plik PDF). Aplikacja nie wysyła e-maili —
- * klient pobiera PDF, a adres e-mail jest wyłącznie opcjonalną daną kontaktową.
+ * Zestawienie ofertowe (line sheet) wygenerowane przez zalogowanego kupca (D23). Treść jest niezmienna od chwili
+ * utworzenia; zmienia się wyłącznie stan techniczny (dołączony plik PDF). Zestawień nie wysyłamy e-mailem —
+ * kupiec pobiera PDF; dane kontaktowe są migawką danych konta z chwili generowania.
  *
  * <p>Zgoda na przetwarzanie danych (RODO) jest wymagana, gdy klient podał jakiekolwiek dane kontaktowe.</p>
  */
@@ -37,6 +37,7 @@ public final class LineSheet {
     private final Instant privacyAcceptedAt;
     private final UUID salesRepresentativeId;
     private final UUID visitorId;
+    private final UUID buyerAccountId;
     private final List<LineSheetItem> items;
     private final Instant createdAt;
     private String pdfStorageKey;
@@ -54,6 +55,7 @@ public final class LineSheet {
         this.privacyAcceptedAt = b.privacyAcceptedAt;
         this.salesRepresentativeId = b.salesRepresentativeId;
         this.visitorId = b.visitorId;
+        this.buyerAccountId = b.buyerAccountId;
         this.items = List.copyOf(b.items);
         this.createdAt = Objects.requireNonNull(b.createdAt, "createdAt");
         this.pdfStorageKey = b.pdfStorageKey;
@@ -64,10 +66,11 @@ public final class LineSheet {
     /**
      * Tworzy zestawienie z wybranych wariantów (w kolejności prezentacji).
      * @param referenceNumber numer nadany przez generator, np. LS-2026-000042
+     * @param buyerAccountId  konto kupca, który wygenerował zestawienie (D23); {@code null} tylko w danych historycznych
      */
     public static LineSheet create(String referenceNumber, CatalogLanguage language, Recipient recipient, String message,
                                    boolean privacyAccepted, UUID salesRepresentativeId,
-                                   UUID visitorId, List<SelectedVariant> selections, Instant now) {
+                                   UUID visitorId, UUID buyerAccountId, List<SelectedVariant> selections, Instant now) {
         Objects.requireNonNull(now, "now");
         Recipient effectiveRecipient = Objects.requireNonNullElseGet(recipient, Recipient::anonymous);
         if (selections == null || selections.isEmpty()) {
@@ -109,6 +112,7 @@ public final class LineSheet {
         b.privacyAcceptedAt = privacyAccepted ? now : null;
         b.salesRepresentativeId = salesRepresentativeId;
         b.visitorId = visitorId;
+        b.buyerAccountId = buyerAccountId;
         b.items = items;
         b.createdAt = now;
         return new LineSheet(b);
@@ -154,6 +158,7 @@ public final class LineSheet {
         private Instant privacyAcceptedAt;
         private UUID salesRepresentativeId;
         private UUID visitorId;
+        private UUID buyerAccountId;
         private List<LineSheetItem> items = List.of();
         private Instant createdAt;
         private String pdfStorageKey;
@@ -173,6 +178,7 @@ public final class LineSheet {
         public Builder privacyAcceptedAt(Instant privacyAcceptedAt) { this.privacyAcceptedAt = privacyAcceptedAt; return this; }
         public Builder salesRepresentativeId(UUID salesRepresentativeId) { this.salesRepresentativeId = salesRepresentativeId; return this; }
         public Builder visitorId(UUID visitorId) { this.visitorId = visitorId; return this; }
+        public Builder buyerAccountId(UUID buyerAccountId) { this.buyerAccountId = buyerAccountId; return this; }
         public Builder items(List<LineSheetItem> items) { this.items = items; return this; }
         public Builder createdAt(Instant createdAt) { this.createdAt = createdAt; return this; }
         public Builder pdf(String storageKey, Instant generatedAt) { this.pdfStorageKey = storageKey; this.pdfGeneratedAt = generatedAt; return this; }
@@ -195,6 +201,9 @@ public final class LineSheet {
     public Instant privacyAcceptedAt() { return privacyAcceptedAt; }
     public UUID salesRepresentativeId() { return salesRepresentativeId; }
     public UUID visitorId() { return visitorId; }
+    /** Właściciel zestawienia; {@code null} dla zestawień sprzed kont kupców lub po usunięciu konta. */
+    public UUID buyerAccountId() { return buyerAccountId; }
+    public boolean isOwnedBy(UUID buyer) { return buyerAccountId != null && buyerAccountId.equals(buyer); }
     public List<LineSheetItem> items() { return items; }
     public Instant createdAt() { return createdAt; }
     public String pdfStorageKey() { return pdfStorageKey; }

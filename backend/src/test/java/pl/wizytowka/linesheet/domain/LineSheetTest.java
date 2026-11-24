@@ -43,7 +43,7 @@ class LineSheetTest {
     @Test
     void requiresConsentWhenContactDataProvided() {
         assertThatThrownBy(() -> LineSheet.create("LS-2026-000001", CatalogLanguage.PL,
-                new Recipient("Firma", null, null, null, null), null, false, null, null,
+                new Recipient("Firma", null, null, null, null), null, false, null, null, null,
                 List.of(selection("A-1", null)), NOW))
                 .isInstanceOf(InvalidValueException.class)
                 .hasFieldOrPropertyWithValue("code", "linesheet.privacy.consent-required");
@@ -68,7 +68,7 @@ class LineSheetTest {
     @Test
     void contactEmailIsOnlyContactDataAndStillRequiresConsent() {
         assertThatThrownBy(() -> LineSheet.create("LS-2026-000001", CatalogLanguage.PL,
-                new Recipient(null, null, "buyer@boutique.cz", null, null), null, false, null, null,
+                new Recipient(null, null, "buyer@boutique.cz", null, null), null, false, null, null, null,
                 List.of(selection("A-1", null)), NOW))
                 .hasFieldOrPropertyWithValue("code", "linesheet.privacy.consent-required");
 

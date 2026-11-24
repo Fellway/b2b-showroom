@@ -9,9 +9,10 @@ Uzupełnienie README: tu jest **jak części współpracują i dlaczego**. Tabel
 przeglądarka kupca / admina
         │  https://domena  (jeden host, reverse proxy)
         ├── /            → Next.js 16 (frontend/)  ── katalog publiczny /[locale], panel /admin
-        └── /api/...     → Spring Boot 3.5 (backend/) ── REST /api/v1, JWT dla /api/v1/admin/**
+        └── /api/...     → Spring Boot 3.5 (backend/) ── REST /api/v1, JWT dla /api/v1/admin/** i /api/v1/buyer/**
                                    │
-                                   ├── PostgreSQL 18 (Flyway V1, V2)
+                                   ├── PostgreSQL 18 (Flyway V1–V3)
+                                   ├── SMTP (tylko e-maile transakcyjne kont kupców, D23)
                                    └── FileStorage: dysk lokalny (docelowo S3) — zdjęcia, PDF-y
 ```
 
@@ -26,7 +27,7 @@ Server Components Next.js czytają katalog bezpośrednio z `API_INTERNAL_URL`; p
 | `linesheet` | zestawienia (line sheets): migawki pozycji, numeracja `LS-RRRR-NNNNNN`, generowanie i przechowywanie PDF |
 | `analytics` | zdarzenia (append-only) i podsumowania/rankingi |
 | `contact` | opiekunowie handlowi |
-| `identity` | konta adminów, logowanie, refresh tokeny, blokady |
+| `identity` | konta panelu i konta kupców (D23): rejestracja, potwierdzenie adresu, akceptacja przez markę, logowanie, rotowane sesje, blokady, reset hasła, e-maile transakcyjne |
 | `shared` | jądro: języki, ceny, UUIDv7, hierarchia `DomainException`, porty plików i transakcji, wspólne adaptery web (błędy, język, media, rate limiting) |
 | `config` | konfiguracja bezpieczeństwa i zegara |
 
@@ -42,16 +43,29 @@ dzieci agregatu usuwa sam agregat.
 
 - `category` (+`_translation`, drzewo przez `parent_id`), `color` (+`_translation`), `size`
 - `product` (+`_translation`) → `product_color` (PK produkt+kolor) → `product_variant` (SKU, EAN unikalne globalnie), `product_image` (opcjonalnie przypięte do koloru złożonym FK)
-- `line_sheet` (dane kupca, publiczny `public_id` UUIDv4, ścieżka PDF) → `line_sheet_item` (migawka: nazwy, EAN, ceny, zdjęcie; po usunięciu produktu id → NULL, dane zostają)
+- `line_sheet` (migawka danych kupca, właściciel `buyer_account_id` → NULL po usunięciu konta, `public_id` UUIDv4, ścieżka PDF) → `line_sheet_item` (migawka: nazwy, EAN, ceny, zdjęcie; po usunięciu produktu id → NULL, dane zostają)
 - `sales_representative`, `analytics_event` (bez FK do katalogu, bez IP), `admin_user`, `admin_refresh_token`
+- `buyer_account` (firma, kraj + numer podatkowy, kontakt, język, status, daty zgód, decyzja marki) → `buyer_refresh_token`, `buyer_action_token` (jednorazowe tokeny z e-maili; oba usuwane kaskadowo z kontem)
 
 ## Kluczowe przepływy
 
+### Konto kupca (D23)
+1. `POST /api/v1/buyer/auth/register` → konto `PENDING_EMAIL`, po commicie e-mail z linkiem `/{lang}/account/verify-email?token=…` (48 h). Zajęty adres: ta sama odpowiedź `202`, a właściciel dostaje e-mail „konto już istnieje”.
+2. `POST …/verify-email {token}` → `PENDING_APPROVAL`, e-mail do zespołu marki (wszystkie aktywne konta panelu) z linkiem do `/admin/buyers`.
+3. Marka w panelu: `approve` → `ACTIVE` + e-mail do kupca; `reject` → `REJECTED` (+ e-mail, notatka wewnętrzna); później `suspend` (kończy sesje) / `reactivate`, `DELETE` (RODO).
+4. `POST …/login` → access token (rola `BUYER`, 15 min) + ciasteczko `showroom_buyer_refresh` (30 dni); nieaktywne konto → `403 identity.buyer.not-active` + `status` (tylko przy poprawnym haśle).
+5. Reset hasła: `password-reset/request` (zawsze `202`) → e-mail z linkiem (1 h) → `password-reset/confirm` kończy wszystkie sesje (i potwierdza adres, jeśli nie był potwierdzony).
+
+### Ceny w katalogu (D23)
+Publiczne endpointy katalogu nie zwracają cen ani EAN, więc strony katalogu Next.js zostają współdzielone i cache'owane
+(Server Components, 60 s). Przeglądarka zalogowanego kupca dociąga je osobno: `GET /api/v1/buyer/catalog/pricing?product=…`
+(maks. 100 produktów, `Cache-Control: private, no-store`) i scala z widokiem po `productId` / `variantId`.
+
 ### Zestawienie PDF (kupiec)
 1. Frontend trzyma wybór w localStorage (`src/store/selection.ts`, maks. 200 pozycji).
-2. `POST /api/v1/line-sheets?lang=…` z listą `variantId` + opcjonalną ilością, opcjonalnymi danymi kupca (wymagają `privacyAccepted`) i `visitorId` (tylko po zgodzie na analitykę).
-3. Backend pobiera migawki wariantów z katalogu (tylko aktywne, opublikowane, w widocznej kategorii), nadaje numer, renderuje PDF (Thymeleaf → OpenHTMLtoPDF), zapisuje plik (`line-sheets/RRRR/{publicId}.pdf`, usuwany przy rollbacku), zapisuje zestawienie, po commicie rejestruje zdarzenie `LINE_SHEET_GENERATED`.
-4. Odpowiedź `201 {id: publicId, referenceNumber, pdfUrl}`; PDF pod `GET /api/v1/line-sheets/{publicId}/pdf` (`no-store`, `noindex`).
+2. `POST /api/v1/buyer/line-sheets?lang=…` (token kupca) z listą `variantId` + opcjonalną ilością, wiadomością i `visitorId` (tylko po zgodzie na analitykę). Danych kontaktowych nie przesyłamy — PDF zawiera migawkę danych konta (zgody złożone przy rejestracji).
+3. Backend sprawdza, czy konto jest aktywne (access token żyje do 15 min po zawieszeniu), pobiera migawki wariantów z katalogu (tylko aktywne, opublikowane, w widocznej kategorii), nadaje numer, renderuje PDF (Thymeleaf → OpenHTMLtoPDF), zapisuje plik (`line-sheets/RRRR/{publicId}.pdf`, usuwany przy rollbacku), zapisuje zestawienie z właścicielem, po commicie rejestruje zdarzenie `LINE_SHEET_GENERATED`.
+4. Odpowiedź `201 {id: publicId, referenceNumber, pdfUrl}`; PDF pod `GET /api/v1/buyer/line-sheets/{publicId}/pdf` — tylko właściciel, żądanie z tokenem (frontend: fetch → blob); cudze zestawienie = `404`. Panel: `GET /api/v1/admin/line-sheets/{id}/pdf`.
 5. Rate limit: 5/min i 30/h na adres.
 
 ### Logowanie i sesja panelu

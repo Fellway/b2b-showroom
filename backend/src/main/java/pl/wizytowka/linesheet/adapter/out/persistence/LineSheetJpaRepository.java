@@ -20,13 +20,17 @@ interface LineSheetJpaRepository extends JpaRepository<LineSheetJpaEntity, UUID>
     String SUMMARY = """
             select new pl.wizytowka.linesheet.application.view.LineSheetSummaryView(
                 s.id, s.publicId, s.referenceNumber, s.language, s.companyName, s.contactName, s.email, s.phone,
-                size(s.items), s.createdAt)
+                size(s.items), s.createdAt, s.buyerAccountId)
             from LineSheetJpaEntity s
             """;
 
     @Query(value = SUMMARY + " order by s.createdAt desc, s.id desc",
             countQuery = "select count(s) from LineSheetJpaEntity s")
     Page<LineSheetSummaryView> findSummaries(Pageable pageable);
+
+    @Query(value = SUMMARY + " where s.buyerAccountId = :buyerAccountId order by s.createdAt desc, s.id desc",
+            countQuery = "select count(s) from LineSheetJpaEntity s where s.buyerAccountId = :buyerAccountId")
+    Page<LineSheetSummaryView> findSummariesOfBuyer(UUID buyerAccountId, Pageable pageable);
 
     @Query("select count(s) from LineSheetJpaEntity s where s.createdAt >= :from and s.createdAt < :to")
     long countCreated(Instant from, Instant to);

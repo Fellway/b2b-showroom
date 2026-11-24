@@ -59,7 +59,12 @@ class RateLimitConfigurationTest {
 
         assertThat(properties.enabled()).isTrue();
         assertThat(properties.rules()).extracting(RateLimitProperties.Rule::path).containsExactly(
-                "/api/v1/line-sheets", "/api/v1/analytics/events", "/api/v1/admin/auth/login", "/api/v1/admin/auth/refresh");
+                "/api/v1/buyer/line-sheets",
+                "/api/v1/buyer/auth/register", "/api/v1/buyer/auth/resend-verification",
+                "/api/v1/buyer/auth/password-reset/request", "/api/v1/buyer/auth/verify-email",
+                "/api/v1/buyer/auth/password-reset/confirm", "/api/v1/buyer/auth/login", "/api/v1/buyer/auth/refresh",
+                "/api/v1/buyer/me/password",
+                "/api/v1/analytics/events", "/api/v1/admin/auth/login", "/api/v1/admin/auth/refresh");
         assertThat(properties.rules().getFirst().limits()).containsExactly(
                 new RateLimitProperties.Limit(5, Duration.ofMinutes(1)),
                 new RateLimitProperties.Limit(30, Duration.ofHours(1)));

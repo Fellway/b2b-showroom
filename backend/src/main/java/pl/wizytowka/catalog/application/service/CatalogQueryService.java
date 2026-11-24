@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.wizytowka.catalog.application.port.in.AdminCatalogQueryUseCase;
 import pl.wizytowka.catalog.application.port.in.BrowseCatalogUseCase;
+import pl.wizytowka.catalog.application.port.in.BuyerPricingQuery;
 import pl.wizytowka.catalog.application.port.in.ProductLabelQuery;
 import pl.wizytowka.catalog.application.port.in.VariantSnapshotQuery;
 import pl.wizytowka.catalog.application.port.out.AdminCatalogReadModel;
@@ -20,6 +21,7 @@ import pl.wizytowka.catalog.application.view.CategoryView;
 import pl.wizytowka.catalog.application.view.ProductCardView;
 import pl.wizytowka.catalog.application.view.ProductDetailView;
 import pl.wizytowka.catalog.application.view.ProductLabel;
+import pl.wizytowka.catalog.application.view.ProductPricingView;
 import pl.wizytowka.catalog.application.view.VariantSnapshot;
 import pl.wizytowka.catalog.domain.ProductId;
 import pl.wizytowka.catalog.domain.VariantId;
@@ -38,7 +40,8 @@ import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
-class CatalogQueryService implements BrowseCatalogUseCase, AdminCatalogQueryUseCase, VariantSnapshotQuery, ProductLabelQuery {
+class CatalogQueryService implements BrowseCatalogUseCase, AdminCatalogQueryUseCase, VariantSnapshotQuery, ProductLabelQuery,
+        BuyerPricingQuery {
 
     private final CatalogReadModel catalog;
     private final AdminCatalogReadModel adminCatalog;
@@ -81,6 +84,16 @@ class CatalogQueryService implements BrowseCatalogUseCase, AdminCatalogQueryUseC
                     "Some selected variants are no longer available");
         }
         return snapshots;
+    }
+
+    @Override
+    public List<ProductPricingView> pricing(Collection<ProductId> productIds) {
+        Set<ProductId> requested = new LinkedHashSet<>(productIds);
+        if (requested.size() > MAX_PRODUCTS) {
+            throw new InvalidValueException("catalog.pricing.too-many",
+                    "At most " + MAX_PRODUCTS + " products can be requested at once");
+        }
+        return requested.isEmpty() ? List.of() : catalog.findPublishedPricing(requested);
     }
 
     @Override

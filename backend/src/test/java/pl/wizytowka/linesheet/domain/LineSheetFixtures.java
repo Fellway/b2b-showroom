@@ -21,12 +21,13 @@ public final class LineSheetFixtures {
 
     public static LineSheet anonymous(SelectedVariant... selections) {
         return LineSheet.create("LS-2026-000001", CatalogLanguage.PL, Recipient.anonymous(), null, false,
-                null, null, List.of(selections), NOW);
+                null, null, null, List.of(selections), NOW);
     }
 
     public static LineSheet withContact(SelectedVariant... selections) {
         return LineSheet.create("LS-2026-000002", CatalogLanguage.EN,
                 new Recipient("Boutique s.r.o.", "Jana", "Buyer@Boutique.cz", null, "CZ12345678"),
-                "Please confirm delivery dates", true, null, null, List.of(selections), NOW);
+                "Please confirm delivery dates", true, null, null, UUID.fromString("01900000-0000-7000-8000-000000000001"),
+                List.of(selections), NOW);
     }
 }

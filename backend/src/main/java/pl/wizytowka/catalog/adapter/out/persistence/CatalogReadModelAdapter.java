@@ -13,6 +13,7 @@ import pl.wizytowka.catalog.application.view.PriceView;
 import pl.wizytowka.catalog.application.view.ProductCardView;
 import pl.wizytowka.catalog.application.view.ProductDetailView;
 import pl.wizytowka.catalog.application.view.ProductLabel;
+import pl.wizytowka.catalog.application.view.ProductPricingView;
 import pl.wizytowka.catalog.application.view.VariantSnapshot;
 import pl.wizytowka.catalog.domain.Gtin;
 import pl.wizytowka.catalog.domain.ProductId;
@@ -25,6 +26,7 @@ import pl.wizytowka.shared.domain.CatalogLanguage;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -252,6 +254,45 @@ class CatalogReadModelAdapter implements CatalogReadModel {
                 .setParameter("categoryIds", visibleCategories)
                 .getResultList();
         return CatalogDictionary.counts(rows);
+    }
+
+    // ------------------------------------------------------------------ ceny dla kupców (D23)
+
+    @Override
+    public List<ProductPricingView> findPublishedPricing(Collection<ProductId> productIds) {
+        if (productIds.isEmpty()) {
+            return List.of();
+        }
+        Set<UUID> ids = productIds.stream().map(ProductId::value).collect(Collectors.toCollection(LinkedHashSet::new));
+        Map<UUID, ProductJpaEntity> found = entityManager.createQuery(
+                        "select p from ProductJpaEntity p where p.id in :ids and p.status = :published", ProductJpaEntity.class)
+                .setParameter("ids", ids)
+                .setParameter("published", ProductStatus.PUBLISHED)
+                .getResultStream()
+                .collect(Collectors.toMap(ProductJpaEntity::getId, Function.identity()));
+        if (found.isEmpty()) {
+            return List.of();
+        }
+        CatalogDictionary dictionary = dictionaryLoader.load();
+        Set<UUID> visibleCategories = dictionary.visibleCategoryIds();
+        return ids.stream()
+                .map(found::get)
+                .filter(java.util.Objects::nonNull)
+                .filter(product -> visibleCategories.contains(product.getCategoryId()))
+                .map(product -> {
+                    // kolejność jak na karcie produktu: kolory produktu, w nich rozmiarówka
+                    List<UUID> colorOrder = CatalogDictionary.sortedColorIds(product);
+                    return new ProductPricingView(
+                            product.getId(),
+                            PriceView.of(ProductEntityMapper.pricing(product)),
+                            product.getVariants().stream()
+                                    .filter(ProductVariantJpaEntity::isActive)
+                                    .sorted(Comparator.comparingInt((ProductVariantJpaEntity v) -> colorOrder.indexOf(v.getColorId()))
+                                            .thenComparing(ProductVariantJpaEntity::getSizeId, dictionary.sizeOrder()))
+                                    .map(v -> new ProductPricingView.VariantCode(v.getId(), v.getSku(), v.getEan()))
+                                    .toList());
+                })
+                .toList();
     }
 
     // ------------------------------------------------------------------ porty dla innych modułów

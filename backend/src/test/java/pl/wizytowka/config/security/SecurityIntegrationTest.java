@@ -156,6 +156,33 @@ class SecurityIntegrationTest {
     }
 
     @Test
+    void buyerSessionEndpointsRequireCsrfHeaderEvenWithEncodedPath() throws Exception {
+        mvc.perform(post("/api/v1/buyer/auth/login").contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of("email", "buyer@showroom.test", "password", "whatever pass"))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("auth.csrf-header-missing"));
+        mvc.perform(post(java.net.URI.create("/api/v1/buyer/aut%68/login")).contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of("email", "buyer@showroom.test", "password", "whatever pass"))))
+                .andExpect(status().isForbidden());
+        mvc.perform(post("/api/v1/buyer/auth/register").contentType(MediaType.APPLICATION_JSON).content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("auth.csrf-header-missing"));
+    }
+
+    @Test
+    void buyerApiRequiresBuyerRoleAndPanelRejectsBuyerTokens() throws Exception {
+        Instant now = Instant.now();
+        String buyerToken = signWithRoles(List.of("BUYER"), now);
+        mvc.perform(get("/api/v1/buyer/me")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/v1/admin/ping").header("Authorization", "Bearer " + buyerToken))
+                .andExpect(status().isForbidden());
+        mvc.perform(get("/api/v1/buyer/line-sheets").header("Authorization", "Bearer " + signWithRoles(List.of("ADMIN"), now)))
+                .andExpect(status().isForbidden());
+        // dawny publiczny link do PDF nie istnieje (D23) — ścieżka spoza listy jest zabroniona
+        mvc.perform(get("/api/v1/line-sheets/" + UUID.randomUUID() + "/pdf")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void wrongPasswordAndUnknownUserAreIndistinguishable() throws Exception {
         String wrongPassword = mvc.perform(authPost("/login", null)
                         .content(json(Map.of("email", uniqueEmail("ghost"), "password", "definitely wrong"))))
@@ -270,6 +297,16 @@ class SecurityIntegrationTest {
                 .issuer(issuer).subject(UUID.randomUUID().toString())
                 .issuedAt(issuedAt).expiresAt(expiresAt)
                 .claim("roles", List.of("ADMIN"))
+                .build();
+        return jwtEncoder.encode(JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(), claims))
+                .getTokenValue();
+    }
+
+    private String signWithRoles(List<String> roles, Instant issuedAt) {
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .issuer("b2b-showroom").subject(UUID.randomUUID().toString())
+                .issuedAt(issuedAt).expiresAt(issuedAt.plusSeconds(600))
+                .claim("roles", roles)
                 .build();
         return jwtEncoder.encode(JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(), claims))
                 .getTokenValue();

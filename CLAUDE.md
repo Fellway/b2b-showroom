@@ -25,7 +25,8 @@ etapów niżej; zmiana systemu wizualnego → `DESIGN.md`. Po zakończeniu etapu
 | 4a | Frontend: publiczny katalog, karta produktu, zestawienie PDF, kontakt (Impeccable: kanon na poziomie COS / Arket) | ✅ |
 | 4b | Frontend: panel administracyjny (`/admin`: modele, słowniki, zestawienia, statystyki, opiekunowie, konta) | ✅ |
 | 5 | Wdrożenie: Dockerfile'e, `deploy/` (VPS + Compose + Caddy, kopie), GitHub Actions + obrazy w GHCR (`docs/deployment.md`) | 🟡 przygotowane, czeka na serwer i domenę (wstrzymane) |
-| 6 | Konta kupców (D23): rejestracja + akceptacja, ceny/EAN/PDF tylko po zalogowaniu, e-maile transakcyjne | ⏳ zaplanowany |
+| 6a | Konta kupców — backend (D23): rejestracja + akceptacja, ceny/EAN/PDF tylko po zalogowaniu, e-maile transakcyjne (migracja V3) | ✅ |
+| 6b | Konta kupców — frontend: logowanie/rejestracja, ceny z `/api/v1/buyer/catalog/pricing`, „Moje zestawienia”, panel „Kupcy” | ⏳ następny (do tego czasu katalog na frontendzie nie działa) |
 
 Pracujemy etapami — nie piszemy całego systemu naraz. Przed startem etapu zadajemy pytania doprecyzowujące,
 jeśli decyzja zmienia kształt rozwiązania.
@@ -85,11 +86,12 @@ Konwencje:
 ## Bezpieczeństwo (decyzje)
 
 - **Panel: bezstanowy JWT** (HS256, 15 min, tylko w pamięci frontendu) + **rotowany refresh token** w ciasteczku `showroom_refresh` (HttpOnly, Secure, SameSite=Strict, Path=`/api/v1/admin/auth`, 14 dni), w bazie tylko hash SHA-256; ponowne użycie zużytego tokenu unieważnia całą rodzinę.
-- `POST /api/v1/admin/auth/*` wymaga nagłówka `X-Requested-With: XMLHttpRequest` (CSRF). Frontend nie może odświeżać tokenu równolegle (dwa refresh-e = wykrycie kradzieży = wylogowanie).
+- **Kupcy (D23):** ta sama mechanika z rolą `BUYER` — ciasteczko `showroom_buyer_refresh` (Path=`/api/v1/buyer/auth`, 30 dni), tabele `buyer_*`. Token kupca nie wchodzi do panelu i odwrotnie. Ceny/EAN wyłącznie `GET /api/v1/buyer/catalog/pricing`; publiczny katalog ich nie zwraca. PDF zestawień tylko z tokenem (właściciel albo panel). Odpowiedzi rejestracji/resetu nie zdradzają istnienia konta; tokeny z e-maili jednorazowe, tylko hash.
+- `POST /api/v1/admin/auth/*` i `/api/v1/buyer/auth/*` wymagają nagłówka `X-Requested-With: XMLHttpRequest` (CSRF). Frontend nie może odświeżać tokenu równolegle (dwa refresh-e = wykrycie kradzieży = wylogowanie).
 - Hasła: PBKDF2-HMAC-SHA256 600k iteracji, 12–128 znaków; blokada po 5 nieudanych logowaniach na 15 min; logowanie nie zdradza istnienia konta.
 - Ścieżki spoza listy → `denyAll`. Publiczny endpoint mediów serwuje wyłącznie `products/**` (PDF-y z danymi klientów nigdy).
 - Upload zdjęć: format rozpoznawany po magic bytes (JPEG/PNG/WebP/AVIF), max 10 MB, klucz generuje serwer.
-- **Rate limiting** (Bucket4j, per IP, IPv6 per /64, filtr przed Spring Security): zestawienia 5/min i 30/h (generowanie PDF jest kosztowne), analityka 60/min, logowanie 10/min i 50/h, refresh 30/min. Za proxy: `server.forward-headers-strategy=native`. Testy pełnego kontekstu z wieloma logowaniami ustawiają `showroom.rate-limit.enabled=false`.
+- **Rate limiting** (Bucket4j, per IP, IPv6 per /64, filtr przed Spring Security): zestawienia 5/min i 30/h (generowanie PDF jest kosztowne), analityka 60/min, logowanie (panel i kupcy) 10/min i 50/h, refresh 30/min, rejestracja / ponowna wysyłka / prośba o reset 3/min i 10/h (każde wysyła e-mail). Pełna lista: `backend/README.md`. Za proxy: `server.forward-headers-strategy=native`. Testy pełnego kontekstu z wieloma logowaniami ustawiają `showroom.rate-limit.enabled=false`.
 - **PDF:** dane użytkownika tylko przez `th:text`; renderer nie pobiera zasobów zewnętrznych (tylko `data:` URI i fonty z classpath).
 
 ## Środowisko i polecenia

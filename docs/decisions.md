@@ -128,4 +128,16 @@ można je rewidować, jeśli zmienią się okoliczności. Nowe decyzje dopisuj n
   (rotowany refresh token, PBKDF2, blokada po nieudanych logowaniach).
 - **Skutki:** zestawienia przypisane do konta (dane kontaktowe z konta, historia „Moje zestawienia”); model kont
   zostawia miejsce na ceny indywidualne / grupy cenowe w przyszłości.
+- **Realizacja techniczna (etap 6a, 2026-11-24):**
+  - Konta kupców w module `identity` (nie osobny moduł) — wspólne porty hashowania haseł, generatora tokenów i blokad
+    bez łamania reguł ArchUnit; `RefreshToken` uogólniony do `subjectId` (osobne tabele sesji panelu i kupców).
+  - Ceny i EAN tylko z `GET /api/v1/buyer/catalog/pricing` (dociągane w przeglądarce), zamiast warunkowego
+    serializowania publicznych odpowiedzi — strony katalogu zostają współdzielone i cache'owane, a nie ma ryzyka, że
+    strona z cenami trafi do wspólnego cache. Sortowanie po cenie zostaje dostępne publicznie (ujawnia kolejność, nie kwoty).
+  - Zestawienia tylko dla zalogowanego kupca (`/api/v1/buyer/line-sheets`), PDF tylko dla właściciela z tokenem
+    (wcześniejszy publiczny link z `publicId` usunięty) i dla panelu po id.
+  - Logowanie na nieaktywne konto: `403` ze stanem konta dopiero po poprawnym haśle; złe hasło/nieznany e-mail — `401`
+    bez rozróżnienia.
+  - Brak potwierdzonego adresu blokuje akceptację; link z resetu hasła też potwierdza adres.
+  - E-maile: zwykły tekst w 4 językach, wysyłka asynchroniczna po commicie, w dev (`showroom.mail.enabled=false`) tylko log.
 

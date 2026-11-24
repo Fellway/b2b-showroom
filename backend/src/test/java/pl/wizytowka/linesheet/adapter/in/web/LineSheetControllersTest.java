@@ -1,20 +1,27 @@
 package pl.wizytowka.linesheet.adapter.in.web;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import pl.wizytowka.linesheet.application.port.in.AdminLineSheetQuery;
+import pl.wizytowka.linesheet.application.port.in.BuyerLineSheetQuery;
 import pl.wizytowka.linesheet.application.port.in.CreateLineSheetCommand;
 import pl.wizytowka.linesheet.application.port.in.CreateLineSheetUseCase;
 import pl.wizytowka.linesheet.application.port.in.GetLineSheetPdfUseCase;
 import pl.wizytowka.linesheet.application.view.CreatedLineSheet;
 import pl.wizytowka.linesheet.application.view.LineSheetPdf;
 import pl.wizytowka.linesheet.application.view.LineSheetSummaryView;
+import pl.wizytowka.linesheet.domain.LineSheetId;
 import pl.wizytowka.shared.application.PageQuery;
 import pl.wizytowka.shared.application.PageResult;
 import pl.wizytowka.shared.domain.BusinessRuleViolationException;
@@ -38,9 +45,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = {PublicLineSheetController.class, AdminLineSheetController.class})
+/** Reguły dostępu (rola BUYER, panel) sprawdza SecurityIntegrationTest — tu filtry są wyłączone. */
+@WebMvcTest(controllers = {BuyerLineSheetController.class, AdminLineSheetController.class})
 @AutoConfigureMockMvc(addFilters = false)
 class LineSheetControllersTest {
+
+    static final UUID BUYER = UUID.fromString("01900000-0000-7000-8000-0000000000b1");
 
     @Autowired
     MockMvc mvc;
@@ -52,52 +62,74 @@ class LineSheetControllersTest {
     GetLineSheetPdfUseCase getPdf;
 
     @MockitoBean
+    BuyerLineSheetQuery buyerQuery;
+
+    @MockitoBean
     AdminLineSheetQuery adminQuery;
 
+    /** Filtry są wyłączone, więc uwierzytelnienie ustawiamy wprost (MockMvc działa w wątku testu). */
+    static RequestPostProcessor buyer() {
+        return request -> {
+            Jwt jwt = Jwt.withTokenValue("token").header("alg", "HS256").subject(BUYER.toString())
+                    .claim("roles", List.of("BUYER")).build();
+            SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+            return request;
+        };
+    }
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
+
     @Test
-    void createsLineSheetInRequestedLanguage() throws Exception {
+    void createsLineSheetForAuthenticatedBuyerInRequestedLanguage() throws Exception {
         UUID publicId = UUID.randomUUID();
         UUID variantId = UUID.randomUUID();
         given(createLineSheet.create(any())).willReturn(new CreatedLineSheet(publicId, "LS-2026-000042"));
 
-        mvc.perform(post("/api/v1/line-sheets?lang=cs").contentType(MediaType.APPLICATION_JSON).content("""
-                        {"items":[{"variantId":"%s","quantity":6}],"email":"buyer@boutique.cz",
-                         "privacyAccepted":true}""".formatted(variantId)))
+        mvc.perform(post("/api/v1/buyer/line-sheets?lang=cs").with(buyer()).contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"items":[{"variantId":"%s","quantity":6}],"message":"Dostawa w marcu",
+                                 "email":"ignored@example.com"}""".formatted(variantId)))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/api/v1/line-sheets/" + publicId + "/pdf"))
+                .andExpect(header().string("Location", "/api/v1/buyer/line-sheets/" + publicId + "/pdf"))
                 .andExpect(jsonPath("$.referenceNumber").value("LS-2026-000042"))
-                .andExpect(jsonPath("$.pdfUrl").value("/api/v1/line-sheets/" + publicId + "/pdf"));
+                .andExpect(jsonPath("$.pdfUrl").value("/api/v1/buyer/line-sheets/" + publicId + "/pdf"));
 
         ArgumentCaptor<CreateLineSheetCommand> command = ArgumentCaptor.forClass(CreateLineSheetCommand.class);
         verify(createLineSheet).create(command.capture());
+        assertThat(command.getValue().buyerAccountId()).as("kupiec z tokenu, nie z treści żądania").isEqualTo(BUYER);
         assertThat(command.getValue().language()).isEqualTo(CatalogLanguage.CS);
         assertThat(command.getValue().selections()).containsExactly(new CreateLineSheetCommand.Selection(variantId, 6));
-        assertThat(command.getValue().email()).isEqualTo("buyer@boutique.cz");
-        assertThat(command.getValue().privacyAccepted()).isTrue();
+        assertThat(command.getValue().message()).isEqualTo("Dostawa w marcu");
     }
 
     @Test
     void validatesRequestAndMapsDomainErrors() throws Exception {
-        mvc.perform(post("/api/v1/line-sheets").contentType(MediaType.APPLICATION_JSON).content("""
-                        {"items":[],"email":"not-an-email"}"""))
+        mvc.perform(post("/api/v1/buyer/line-sheets").with(buyer()).contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"items":[]}"""))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("request.invalid"));
 
         given(createLineSheet.create(any())).willThrow(
                 new BusinessRuleViolationException("catalog.variant.not-selectable", "Variant not selectable"));
-        mvc.perform(post("/api/v1/line-sheets").contentType(MediaType.APPLICATION_JSON).content("""
-                        {"items":[{"variantId":"%s"}]}""".formatted(UUID.randomUUID())))
+        mvc.perform(post("/api/v1/buyer/line-sheets").with(buyer()).contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"items":[{"variantId":"%s"}]}""".formatted(UUID.randomUUID())))
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.code").value("catalog.variant.not-selectable"));
     }
 
     @Test
-    void downloadsPdfWithPrivateHeaders() throws Exception {
+    void downloadsOwnPdfWithPrivateHeaders() throws Exception {
         UUID publicId = UUID.randomUUID();
         byte[] pdf = "%PDF-1.7".getBytes();
-        given(getPdf.pdf(publicId)).willReturn(new LineSheetPdf(new ByteArrayInputStream(pdf), pdf.length, "LS-2026-000042.pdf"));
+        given(getPdf.pdfForBuyer(BUYER, publicId))
+                .willReturn(new LineSheetPdf(new ByteArrayInputStream(pdf), pdf.length, "LS-2026-000042.pdf"));
 
-        mvc.perform(get("/api/v1/line-sheets/{id}/pdf", publicId))
+        mvc.perform(get("/api/v1/buyer/line-sheets/{id}/pdf", publicId).with(buyer()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_PDF))
                 .andExpect(content().bytes(pdf))
@@ -105,18 +137,28 @@ class LineSheetControllersTest {
                 .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")))
                 .andExpect(header().string("X-Robots-Tag", "noindex, nofollow"));
 
-        UUID missing = UUID.randomUUID();
-        given(getPdf.pdf(missing)).willThrow(new ResourceNotFoundException("linesheet.not-found", "Line sheet not found"));
-        mvc.perform(get("/api/v1/line-sheets/{id}/pdf", missing)).andExpect(status().isNotFound());
+        UUID foreign = UUID.randomUUID();
+        given(getPdf.pdfForBuyer(BUYER, foreign))
+                .willThrow(new ResourceNotFoundException("linesheet.not-found", "Line sheet not found"));
+        mvc.perform(get("/api/v1/buyer/line-sheets/{id}/pdf", foreign).with(buyer())).andExpect(status().isNotFound());
     }
 
     @Test
-    void listsLineSheetsForAdminAndHasNoEmailResend() throws Exception {
+    void listsOwnLineSheets() throws Exception {
+        given(buyerQuery.lineSheetsOfBuyer(BUYER, new PageQuery(0, 20))).willReturn(new PageResult<>(
+                List.of(summary(UUID.randomUUID())), 0, 20, 1));
+
+        mvc.perform(get("/api/v1/buyer/line-sheets").with(buyer()))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")))
+                .andExpect(jsonPath("$.items[0].referenceNumber").value("LS-2026-000001"))
+                .andExpect(jsonPath("$.items[0].buyerAccountId").value(BUYER.toString()));
+    }
+
+    @Test
+    void listsLineSheetsAndServesPdfForStaff() throws Exception {
         UUID id = UUID.randomUUID();
-        given(adminQuery.lineSheets(eq(new PageQuery(0, 20)))).willReturn(new PageResult<>(
-                List.of(new LineSheetSummaryView(id, UUID.randomUUID(), "LS-2026-000001", CatalogLanguage.PL, "Firma",
-                        null, "a@b.pl", "+48 600 100 200", 3, Instant.parse("2026-10-01T10:00:00Z"))),
-                0, 20, 1));
+        given(adminQuery.lineSheets(eq(new PageQuery(0, 20)))).willReturn(new PageResult<>(List.of(summary(id)), 0, 20, 1));
 
         mvc.perform(get("/api/v1/admin/line-sheets"))
                 .andExpect(status().isOk())
@@ -124,8 +166,20 @@ class LineSheetControllersTest {
                 .andExpect(jsonPath("$.totalItems").value(1))
                 .andExpect(jsonPath("$.totalPages").value(1));
 
-        // wysyłka e-mail została usunięta z aplikacji — endpoint nie istnieje
+        byte[] pdf = "%PDF-1.7".getBytes();
+        given(getPdf.pdfForStaff(LineSheetId.of(id)))
+                .willReturn(new LineSheetPdf(new ByteArrayInputStream(pdf), pdf.length, "LS-2026-000001.pdf"));
+        mvc.perform(get("/api/v1/admin/line-sheets/{id}/pdf", id))
+                .andExpect(status().isOk())
+                .andExpect(content().bytes(pdf));
+
+        // zestawień nie wysyłamy e-mailem (D12/D23) — endpoint nie istnieje
         mvc.perform(post("/api/v1/admin/line-sheets/{id}/resend-email", id))
                 .andExpect(status().is4xxClientError());
+    }
+
+    private static LineSheetSummaryView summary(UUID id) {
+        return new LineSheetSummaryView(id, UUID.randomUUID(), "LS-2026-000001", CatalogLanguage.PL, "Firma", null,
+                "a@b.pl", "+48 600 100 200", 3, Instant.parse("2026-10-01T10:00:00Z"), BUYER);
     }
 }

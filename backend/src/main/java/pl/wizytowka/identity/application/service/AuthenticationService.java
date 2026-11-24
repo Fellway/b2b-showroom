@@ -100,7 +100,7 @@ class AuthenticationService implements AuthenticateUseCase, CurrentAdminQuery {
         if (token.isExpired(now)) {
             throw new AuthenticationFailedException(INVALID_REFRESH_TOKEN);
         }
-        AdminUser user = users.findById(token.adminUserId())
+        AdminUser user = users.findById(AdminUserId.of(token.subjectId()))
                 .filter(AdminUser::isEnabled)
                 .orElse(null);
         if (user == null) {
@@ -128,7 +128,7 @@ class AuthenticationService implements AuthenticateUseCase, CurrentAdminQuery {
 
     private AuthenticationResult issueSession(AdminUser user, UUID familyId, Instant now) {
         String rawRefreshToken = tokenGenerator.generate();
-        RefreshToken refreshToken = RefreshToken.issue(user.id(), familyId, TokenHashing.sha256Hex(rawRefreshToken),
+        RefreshToken refreshToken = RefreshToken.issue(user.id().value(), familyId, TokenHashing.sha256Hex(rawRefreshToken),
                 now, policy.refreshTokenTtl());
         refreshTokens.save(refreshToken);
         AccessToken accessToken = accessTokenIssuer.issue(user, now);

@@ -68,7 +68,7 @@ class AdminUserManagementServiceTest {
     @Test
     void disablingAnotherAdminRevokesSessions() {
         AdminUserId secondId = service.create("second@brand.pl", "Second", AdminRole.ADMIN, "long enough password");
-        tokens.save(RefreshToken.issue(secondId, UUID.randomUUID(), "a".repeat(64), NOW, Duration.ofDays(1)));
+        tokens.save(RefreshToken.issue(secondId.value(), UUID.randomUUID(), "a".repeat(64), NOW, Duration.ofDays(1)));
 
         service.setEnabled(admin.id(), secondId, false);
 
@@ -84,7 +84,7 @@ class AdminUserManagementServiceTest {
 
     @Test
     void resetPasswordUnlocksAndRevokesSessions() {
-        tokens.save(RefreshToken.issue(admin.id(), UUID.randomUUID(), "b".repeat(64), NOW, Duration.ofDays(1)));
+        tokens.save(RefreshToken.issue(admin.id().value(), UUID.randomUUID(), "b".repeat(64), NOW, Duration.ofDays(1)));
 
         service.resetPassword(admin.id(), "brand new password");
 

@@ -6,6 +6,7 @@ import pl.wizytowka.catalog.application.view.CategoryView;
 import pl.wizytowka.catalog.application.view.ProductCardView;
 import pl.wizytowka.catalog.application.view.ProductDetailView;
 import pl.wizytowka.catalog.application.view.ProductLabel;
+import pl.wizytowka.catalog.application.view.ProductPricingView;
 import pl.wizytowka.catalog.application.view.VariantSnapshot;
 import pl.wizytowka.catalog.domain.ProductId;
 import pl.wizytowka.catalog.domain.VariantId;
@@ -36,6 +37,9 @@ public interface CatalogReadModel {
 
     /** Zwraca tylko warianty możliwe do wyboru (aktywne, w opublikowanym produkcie); pozostałe id pomija. */
     List<VariantSnapshot> findSelectableVariants(Collection<VariantId> variantIds, CatalogLanguage language);
+
+    /** Ceny i kody aktywnych wariantów produktów widocznych w katalogu; pozostałe id pomija, kolejność jak w żądaniu. */
+    List<ProductPricingView> findPublishedPricing(Collection<ProductId> productIds);
 
     /** Etykiety produktów w dowolnym statusie; brakujące (usunięte) id są pomijane. */
     Map<ProductId, ProductLabel> findProductLabels(Collection<ProductId> productIds, CatalogLanguage language);

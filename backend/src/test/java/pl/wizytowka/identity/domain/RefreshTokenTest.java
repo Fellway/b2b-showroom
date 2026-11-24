@@ -48,6 +48,6 @@ class RefreshTokenTest {
     }
 
     private static RefreshToken issue() {
-        return RefreshToken.issue(AdminUserId.newId(), UUID.randomUUID(), TokenHashing.sha256Hex("t"), NOW, Duration.ofDays(14));
+        return RefreshToken.issue(AdminUserId.newId().value(), UUID.randomUUID(), TokenHashing.sha256Hex("t"), NOW, Duration.ofDays(14));
     }
 }

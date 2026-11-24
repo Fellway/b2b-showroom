@@ -36,6 +36,10 @@ pobiera Maven 3.9.16. Polecenia Maven uruchamiaj z katalogu `backend/`.
 | `STORAGE_LOCAL_ROOT` | nie | katalog plików (zdjęcia, PDF); domyślnie `./data/storage` |
 | `SHOWROOM_BRAND_NAME`, `_LEGAL_NAME`, `_WEBSITE`, `_EMAIL`, `_PHONE` | nie | dane marki w nagłówku i stopce PDF (placeholdery do czasu identyfikacji); logo: `showroom.brand.logo` (PNG/JPEG z classpath) |
 | `SHOWROOM_RATE_LIMIT_ENABLED` | nie | domyślnie `true`; wyłączać tylko w testach |
+| `SHOWROOM_MAIL_ENABLED` | nie | e-maile transakcyjne kont kupców (D23); domyślnie `false` — treść (z linkiem) trafia tylko do logu |
+| `SHOWROOM_MAIL_FROM` | przy e-mailach | nadawca, np. `Fabian's Style B2B <b2b@marka.pl>` (domena z SPF/DKIM) |
+| `SHOWROOM_PUBLIC_BASE_URL` | przy e-mailach | publiczny adres showroomu — z niego linki w e-mailach (domyślnie `http://localhost:3000`) |
+| `SPRING_MAIL_HOST`, `_PORT`, `_USERNAME`, `_PASSWORD` | przy e-mailach | serwer SMTP (port 587, STARTTLS wymagany); brak hosta przy włączonych e-mailach = błąd startu |
 
 ## Dane demonstracyjne
 
@@ -87,23 +91,31 @@ Kluczowe decyzje:
 - **Optymistyczne blokowanie:** każda edycja w panelu przesyła `version`; konflikt → `409 data.concurrent-modification`.
 - **Błędy:** RFC 9457 Problem Details z własnością `code` (np. `catalog.variant.ean-taken`), którą frontend tłumaczy na komunikat w języku użytkownika. Hierarchia `DomainException` jest `sealed` — mapowanie na statusy HTTP to wyczerpujący `switch`.
 - **i18n:** treści w tabelach `*_translation`; `pl` jest językiem bazowym i fallbackiem. Język żądania: `?lang=` → `Accept-Language` → `pl`.
-- **Zestawienia (line sheets)** zapisują migawkę pozycji (nazwy, EAN, ceny, zdjęcie) — zmiana ceny czy usunięcie produktu nie zmienia wysłanej oferty.
+- **Zestawienia (line sheets)** zapisują migawkę pozycji (nazwy, EAN, ceny, zdjęcie) i danych kupca z jego konta — zmiana ceny, danych konta czy usunięcie produktu nie zmienia wysłanej oferty.
+- **Konta kupców (D23)** są w module `identity` obok kont panelu (wspólne hashowanie haseł, blokady, rotacja sesji), ale mają osobne tabele, ciasteczko i rolę `BUYER`. Ceny i EAN zwraca wyłącznie `GET /buyer/catalog/pricing` — publiczne odpowiedzi katalogu ich nie zawierają, więc mogą być dalej współdzielone i cache'owane.
 - **Pliki** zapisuje się przez port `FileStorage` (dziś dysk lokalny, docelowo S3). Klucze generuje serwer; zdjęcia są rozpoznawane po zawartości (magic bytes), nie po nagłówku klienta. Publiczny endpoint mediów serwuje wyłącznie `products/**`.
 
 ## Bezpieczeństwo
 
 - Panel: JWT (HS256, 15 min) w nagłówku `Authorization: Bearer`; access token trzymany wyłącznie w pamięci frontendu.
 - Refresh token: losowe 256 bitów w ciasteczku `showroom_refresh` (`HttpOnly`, `Secure`, `SameSite=Strict`, `Path=/api/v1/admin/auth`), w bazie tylko hash SHA-256, rotacja przy każdym użyciu. Ponowne użycie zużytego tokenu unieważnia całą sesję (wykrycie kradzieży).
-- Endpointy `/api/v1/admin/auth/*` wymagają nagłówka `X-Requested-With: XMLHttpRequest` (ochrona CSRF obok `SameSite=Strict`).
+- Kupcy (D23): ta sama mechanika z rolą `BUYER` — ciasteczko `showroom_buyer_refresh` (`Path=/api/v1/buyer/auth`, 30 dni), osobna tabela `buyer_refresh_token`. Token kupca nie wchodzi do panelu, token panelu — do API kupca. Logowanie na nieaktywne konto zwraca `403 identity.buyer.not-active` + `status` dopiero po poprawnym haśle.
+- Rejestracja, ponowna wysyłka potwierdzenia i prośba o reset hasła zwracają zawsze `202` (nie zdradzają istnienia konta); tokeny z e-maili są jednorazowe, w bazie tylko hash (potwierdzenie 48 h, reset 1 h), nowy unieważnia poprzedni, kolejny e-mail tego rodzaju najwcześniej po 2 min. E-maile mają stałe szablony bez treści od użytkownika i wychodzą asynchronicznie po commicie.
+- Endpointy `/api/v1/admin/auth/*` i `/api/v1/buyer/auth/*` wymagają nagłówka `X-Requested-With: XMLHttpRequest` (ochrona CSRF obok `SameSite=Strict`); filtr porównuje zdekodowaną ścieżkę, więc zakodowane znaki go nie omijają.
 - Hasła: PBKDF2-HMAC-SHA256 (600 000 iteracji), polityka 12–128 znaków. Blokada konta po 5 nieudanych logowaniach na 15 minut. Odpowiedź przy błędnym logowaniu nie zdradza, czy konto istnieje (także czasem odpowiedzi).
-- Role: `ADMIN` (wszystko, łącznie z kontami) i `EDITOR` (katalog, treści, zestawienia, analityka). Każda niewymieniona ścieżka → `denyAll`.
+- Role: `ADMIN` (wszystko, łącznie z kontami) i `EDITOR` (katalog, treści, zestawienia, analityka, wnioski kupców); `BUYER` — zaakceptowany kupiec (`/api/v1/buyer/**`). Każda niewymieniona ścieżka → `denyAll`.
 - Nagłówki: HSTS, `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy: no-referrer`, CSP `default-src 'none'`.
-- RODO: analityka nie zapisuje adresów IP ani User-Agenta; dane kontaktowe w zestawieniu wymagają zgody.
+- RODO: analityka nie zapisuje adresów IP ani User-Agenta; zgody (regulamin, polityka prywatności) kupiec składa przy rejestracji (z datą); konto można trwale usunąć w panelu (zestawienia zostają jako migawki bez właściciela).
 - **Rate limiting** (Bucket4j, per adres klienta; IPv6 per /64; kubełki w ograniczonym cache), filtr przed Spring Security, odpowiedź `429` + `Retry-After` + Problem Details `request.rate-limited`:
 
   | Endpoint | Limit |
   |---|---|
-  | `POST /api/v1/line-sheets` | 5/min i 30/h |
+  | `POST /api/v1/buyer/line-sheets` | 5/min i 30/h |
+  | `POST /api/v1/buyer/auth/register` · `/resend-verification` · `/password-reset/request` | po 3/min i 10/h |
+  | `POST /api/v1/buyer/auth/verify-email` · `/password-reset/confirm` | 10/min |
+  | `POST /api/v1/buyer/auth/login` | 10/min i 50/h |
+  | `POST /api/v1/buyer/auth/refresh` | 30/min |
+  | `POST /api/v1/buyer/me/password` | 5/min |
   | `POST /api/v1/analytics/events` | 60/min |
   | `POST /api/v1/admin/auth/login` | 10/min i 50/h |
   | `POST /api/v1/admin/auth/refresh` | 30/min |
@@ -123,18 +135,35 @@ Adapter `HtmlLineSheetPdfRenderer`: szablon Thymeleaf (`resources/pdf/templates/
 
 ## API (`/api/v1`)
 
-Publiczne:
+Publiczne (bez cen i EAN — D23):
 
 | Metoda | Ścieżka | Opis |
 |---|---|---|
 | GET | `/catalog/products` | lista: `category`, `color`*, `size`*, `q`, `featured`, `sort` (`RECOMMENDED`, `NEWEST`, `PRICE_ASC`, `PRICE_DESC`), `page`, `pageSize` |
-| GET | `/catalog/products/{slug}` | karta produktu: kolory → warianty (rozmiar, SKU, EAN), zdjęcia, ceny |
+| GET | `/catalog/products/{slug}` | karta produktu: kolory → warianty (rozmiar, SKU), zdjęcia |
 | GET | `/catalog/categories` · `/catalog/facets` | drzewo kategorii · filtry z liczbą produktów |
 | GET | `/media/products/**` | zdjęcia produktów (cache `immutable`) |
 | GET | `/contact/representatives` | opiekunowie handlowi |
-| POST | `/line-sheets` | utworzenie zestawienia PDF (dane kontaktowe opcjonalne, wymagają zgody RODO) |
-| GET | `/line-sheets/{publicId}/pdf` | pobranie PDF |
 | POST | `/analytics/events` | paczka zdarzeń z przeglądarki (max 50) |
+
+Konta kupców — bez logowania (`X-Requested-With` wymagany, język e-maili z `?lang=` / `Accept-Language`):
+
+| Metoda | Ścieżka | Opis |
+|---|---|---|
+| POST | `/buyer/auth/register` | `{email, password, companyName, countryCode, taxId, contactName, phone, termsAccepted, privacyAccepted}` → `202` (zawsze) |
+| POST | `/buyer/auth/verify-email` · `/buyer/auth/resend-verification` | `{token}` → `204` · `{email}` → `202` |
+| POST | `/buyer/auth/password-reset/request` · `/confirm` | `{email}` → `202` · `{token, password}` → `204` (kończy sesje) |
+| POST | `/buyer/auth/login` · `/refresh` · `/logout` | sesja jak w panelu; `403 identity.buyer.not-active` + `status` dla nieaktywnego konta |
+
+Zalogowany kupiec (rola `BUYER`):
+
+| Metoda | Ścieżka | Opis |
+|---|---|---|
+| GET/PUT | `/buyer/me` | konto; zmiana osoby kontaktowej, telefonu, języka (`version`) |
+| POST | `/buyer/me/password` | `{currentPassword, newPassword}` → nowa sesja, pozostałe zakończone |
+| GET | `/buyer/catalog/pricing?product=…` | ceny i EAN aktywnych wariantów (maks. 100 produktów, `no-store`) |
+| POST | `/buyer/line-sheets` | zestawienie PDF z danymi konta: `{items:[{variantId, quantity?}], message?, salesRepresentativeId?, visitorId?}` |
+| GET | `/buyer/line-sheets` · `/buyer/line-sheets/{publicId}/pdf` | „Moje zestawienia” · PDF (tylko właściciel; żądanie z tokenem) |
 
 Panel (`/admin`, JWT):
 
@@ -146,7 +175,8 @@ Panel (`/admin`, JWT):
 | Zdjęcia | `POST …/{id}/images` (multipart), `DELETE …/{id}/images/{imageId}`, `PUT …/{id}/images/order`, `PUT …/{id}/images/{imageId}/color` |
 | Słowniki | `/admin/categories`, `/admin/colors`, `/admin/sizes` (GET, POST, PUT `/{id}`, DELETE `/{id}`) |
 | Opiekunowie | `/admin/sales-representatives` (CRUD) |
-| Zestawienia | `GET /admin/line-sheets`, `GET /admin/line-sheets/{id}` |
+| Zestawienia | `GET /admin/line-sheets`, `GET /admin/line-sheets/{id}`, `GET /admin/line-sheets/{id}/pdf` |
+| Kupcy | `GET /admin/buyers?status=&q=`, `GET /admin/buyers/pending-count`, `GET /admin/buyers/{id}`, `POST …/{id}/approve` · `/reject` · `/suspend` · `/reactivate` (`{version, note?}`), `DELETE /admin/buyers/{id}` |
 | Analityka | `GET /admin/analytics/summary?from=&to=` |
 | Konta (ADMIN) | `GET/POST /admin/users`, `PUT /admin/users/{id}`, `POST /admin/users/{id}/enable` · `/disable` · `/password` |
 
@@ -158,10 +188,9 @@ Panel (`/admin`, JWT):
 | Persystencja | `*/adapter/out/persistence` | `@PersistenceTest` (PostgreSQL 18 w Testcontainers, schemat z Flyway, `ddl-auto=validate`) |
 | Web | `*/adapter/in/web` | `@WebMvcTest` + MockMvc |
 | Bezpieczeństwo | `config/security` | pełny kontekst + JWT, rotacja tokenów, blokady |
-| End-to-end | `ShowroomEndToEndTest` | admin → produkt → katalog → zestawienie PDF → analityka |
+| End-to-end | `ShowroomEndToEndTest` | admin → produkt → katalog bez cen → rejestracja kupca → akceptacja → ceny → zestawienie PDF → analityka |
 | Architektura | `architecture` | ArchUnit |
 
 ## Następne kroki
 
-- **Etap 4:** frontend Next.js (lookbook, wybór pozycji, generator PDF, panel) — projekt UI/UX z wtyczką Impeccable.
-- Adapter S3 dla `FileStorage`.
+Aktualny plan: [`docs/roadmap.md`](../docs/roadmap.md).

@@ -63,6 +63,13 @@ class LineSheetPersistenceAdapter implements LineSheetRepository, LineSheetReadM
     }
 
     @Override
+    public PageResult<LineSheetSummaryView> findSummariesOfBuyer(UUID buyerAccountId, PageQuery page) {
+        Page<LineSheetSummaryView> result = repository.findSummariesOfBuyer(buyerAccountId,
+                PageRequest.of(page.page(), page.size()));
+        return new PageResult<>(result.getContent(), page.page(), page.size(), result.getTotalElements());
+    }
+
+    @Override
     public long countCreated(Instant from, Instant to) {
         return repository.countCreated(from, to);
     }
@@ -93,6 +100,7 @@ class LineSheetPersistenceAdapter implements LineSheetRepository, LineSheetReadM
         entity.privacyAcceptedAt = sheet.privacyAcceptedAt();
         entity.salesRepresentativeId = sheet.salesRepresentativeId();
         entity.visitorId = sheet.visitorId();
+        entity.buyerAccountId = sheet.buyerAccountId();
         entity.createdAt = sheet.createdAt();
         sheet.items().forEach(item -> entity.items.add(LineSheetItemJpaEntity.of(entity, item)));
         return entity;
@@ -110,6 +118,7 @@ class LineSheetPersistenceAdapter implements LineSheetRepository, LineSheetReadM
                 .privacyAcceptedAt(e.privacyAcceptedAt)
                 .salesRepresentativeId(e.salesRepresentativeId)
                 .visitorId(e.visitorId)
+                .buyerAccountId(e.buyerAccountId)
                 .items(e.items.stream().map(LineSheetItemJpaEntity::toDomain).toList())
                 .createdAt(e.createdAt)
                 .pdf(e.pdfStorageKey, e.pdfGeneratedAt)

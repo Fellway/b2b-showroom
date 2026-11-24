@@ -28,5 +28,6 @@ public record LineSheetDetailView(UUID id,
                                   Instant createdAt,
                                   List<LineSheetItem> items,
                                   BigDecimal wholesaleTotal,
+                                  UUID buyerAccountId,
                                   long version) {
 }

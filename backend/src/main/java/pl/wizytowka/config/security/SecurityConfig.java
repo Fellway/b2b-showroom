@@ -27,6 +27,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import pl.wizytowka.identity.application.service.BuyerPolicy;
 import pl.wizytowka.identity.application.service.IdentityPolicy;
 import pl.wizytowka.identity.domain.LockoutPolicy;
 
@@ -38,15 +39,17 @@ import static jakarta.servlet.DispatcherType.ERROR;
 import static jakarta.servlet.DispatcherType.FORWARD;
 
 /**
- * Bezstanowe API: panel admina uwierzytelnia się krótko żyjącym JWT (Bearer, HS256), odnawianym
- * refresh tokenem z ciasteczka httpOnly. Brak sesji HTTP, brak CORS (frontend na tej samej domenie).
- * Domyślnie wszystko jest zabronione — publiczne ścieżki są wymienione jawnie.
+ * Bezstanowe API: panel admina i kupcy (D23) uwierzytelniają się krótko żyjącym JWT (Bearer, HS256), odnawianym
+ * refresh tokenem z ciasteczka httpOnly (osobne ciasteczka i ścieżki dla panelu i kupców). Brak sesji HTTP,
+ * brak CORS (frontend na tej samej domenie). Domyślnie wszystko jest zabronione — publiczne ścieżki są wymienione jawnie.
  */
 @Configuration(proxyBeanMethods = false)
 @EnableWebSecurity
 class SecurityConfig {
 
     static final String ROLES_CLAIM = "roles";
+    /** Rola zaakceptowanego kupca (D23); tokeny kupców nie mają dostępu do panelu, a tokeny panelu — do API kupca. */
+    static final String BUYER_ROLE = "BUYER";
     private static final int MIN_SECRET_BYTES = 32;
 
     @Bean
@@ -71,11 +74,18 @@ class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .dispatcherTypeMatchers(ERROR, FORWARD).permitAll()
                         .requestMatchers("/error").permitAll()
+                        // katalog publiczny bez cen i EAN (D23) — te są tylko pod /api/v1/buyer/**
                         .requestMatchers(HttpMethod.GET, "/api/v1/catalog/**", "/api/v1/media/**", "/api/v1/contact/**",
-                                "/api/v1/line-sheets/*/pdf", "/actuator/health", "/actuator/health/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/line-sheets", "/api/v1/analytics/events",
+                                "/actuator/health", "/actuator/health/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/analytics/events",
                                 "/api/v1/admin/auth/login", "/api/v1/admin/auth/refresh",
                                 "/api/v1/admin/auth/logout").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/buyer/auth/register",
+                                "/api/v1/buyer/auth/verify-email", "/api/v1/buyer/auth/resend-verification",
+                                "/api/v1/buyer/auth/password-reset/request", "/api/v1/buyer/auth/password-reset/confirm",
+                                "/api/v1/buyer/auth/login", "/api/v1/buyer/auth/refresh",
+                                "/api/v1/buyer/auth/logout").permitAll()
+                        .requestMatchers("/api/v1/buyer/**").hasRole(BUYER_ROLE)
                         .requestMatchers("/api/v1/admin/users/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN", "EDITOR")
                         .anyRequest().denyAll())
@@ -132,6 +142,12 @@ class SecurityConfig {
     @Bean
     IdentityPolicy identityPolicy(LockoutProperties lockout, JwtProperties jwt) {
         return new IdentityPolicy(new LockoutPolicy(lockout.maxAttempts(), lockout.duration()), jwt.refreshTokenTtl());
+    }
+
+    @Bean
+    BuyerPolicy buyerPolicy(LockoutProperties lockout, BuyerSecurityProperties buyer) {
+        return new BuyerPolicy(new LockoutPolicy(lockout.maxAttempts(), lockout.duration()), buyer.refreshTokenTtl(),
+                buyer.emailVerificationTtl(), buyer.passwordResetTtl());
     }
 
     private static JwtAuthenticationConverter jwtAuthenticationConverter() {

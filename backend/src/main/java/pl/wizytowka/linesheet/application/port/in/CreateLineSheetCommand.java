@@ -7,22 +7,22 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
+ * Zestawienie generuje zalogowany kupiec (D23); dane kontaktowe w PDF pochodzą z jego konta (migawka),
+ * a zgody na przetwarzanie danych kupiec złożył przy rejestracji.
+ *
+ * @param buyerAccountId        konto kupca z tokenu dostępu
  * @param salesRepresentativeId wybrany opiekun; {@code null} = pierwszy aktywny opiekun (jeśli istnieje)
  * @param visitorId             anonimowy identyfikator przeglądarki, przekazywany tylko po zgodzie na analitykę
  */
-public record CreateLineSheetCommand(CatalogLanguage language,
+public record CreateLineSheetCommand(UUID buyerAccountId,
+                                     CatalogLanguage language,
                                      List<Selection> selections,
-                                     String companyName,
-                                     String contactName,
-                                     String email,
-                                     String phone,
-                                     String taxId,
                                      String message,
-                                     boolean privacyAccepted,
                                      UUID salesRepresentativeId,
                                      UUID visitorId) {
 
     public CreateLineSheetCommand {
+        Objects.requireNonNull(buyerAccountId, "buyerAccountId");
         Objects.requireNonNull(language, "language");
         selections = selections == null ? List.of() : List.copyOf(selections);
     }

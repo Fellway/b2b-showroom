@@ -68,9 +68,9 @@ class IdentityPersistenceTest {
         users.save(user);
         em.flush();
         UUID family = UUID.randomUUID();
-        RefreshToken first = RefreshToken.issue(user.id(), family, TokenHashing.sha256Hex("one"), NOW, Duration.ofDays(14));
-        RefreshToken second = RefreshToken.issue(user.id(), family, TokenHashing.sha256Hex("two"), NOW, Duration.ofDays(14));
-        RefreshToken other = RefreshToken.issue(user.id(), UUID.randomUUID(), TokenHashing.sha256Hex("three"), NOW, Duration.ofDays(14));
+        RefreshToken first = RefreshToken.issue(user.id().value(), family, TokenHashing.sha256Hex("one"), NOW, Duration.ofDays(14));
+        RefreshToken second = RefreshToken.issue(user.id().value(), family, TokenHashing.sha256Hex("two"), NOW, Duration.ofDays(14));
+        RefreshToken other = RefreshToken.issue(user.id().value(), UUID.randomUUID(), TokenHashing.sha256Hex("three"), NOW, Duration.ofDays(14));
         tokens.save(first);
         tokens.save(second);
         tokens.save(other);

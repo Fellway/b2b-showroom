@@ -79,7 +79,7 @@ class PublicCatalogControllerTest {
                 .andExpect(header().string("Cache-Control", "max-age=60, public"))
                 .andExpect(header().string("Vary", "Accept-Language"))
                 .andExpect(jsonPath("$.items[0].id").value(PRODUCT_ID.toString()))
-                .andExpect(jsonPath("$.items[0].price.wholesale").value(149.00))
+                .andExpect(jsonPath("$.items[0].price").doesNotExist())
                 .andExpect(jsonPath("$.items[0].cover.url").value("/api/v1/media/products/p1/i1.webp"))
                 .andExpect(jsonPath("$.items[0].colors[0].id").value(COLOR_ID.toString()))
                 .andExpect(jsonPath("$.items[0].sizes[1]").value("M"))
@@ -160,10 +160,12 @@ class PublicCatalogControllerTest {
                 .andExpect(header().string("Vary", "Accept-Language"))
                 .andExpect(jsonPath("$.name").value("Linen shirt"))
                 .andExpect(jsonPath("$.category.slug").value("shirts"))
-                .andExpect(jsonPath("$.price.markup").value(2.35))
+                // ceny i EAN tylko dla zalogowanych kupców (D23)
+                .andExpect(jsonPath("$.price").doesNotExist())
                 .andExpect(jsonPath("$.colors[0].variants[0].id").value(variantId.toString()))
                 .andExpect(jsonPath("$.colors[0].variants[0].size").value("M"))
-                .andExpect(jsonPath("$.colors[0].variants[0].ean").value("5901234123457"))
+                .andExpect(jsonPath("$.colors[0].variants[0].sku").value("LS001-NAV-M"))
+                .andExpect(jsonPath("$.colors[0].variants[0].ean").doesNotExist())
                 .andExpect(jsonPath("$.images[0].colorId").value(COLOR_ID.toString()))
                 .andExpect(jsonPath("$.images[0].url").value("/api/v1/media/products/p1/i1.webp"));
     }

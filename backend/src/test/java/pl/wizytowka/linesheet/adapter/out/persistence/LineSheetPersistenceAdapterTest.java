@@ -163,7 +163,7 @@ class LineSheetPersistenceAdapterTest {
                 ? new Recipient("Boutique s.r.o.", "Jana", "buyer@boutique.cz", null, "CZ12345678")
                 : Recipient.anonymous();
         return LineSheet.create(LineSheet.formatReference(2026, ++counter), CatalogLanguage.EN, recipient, null,
-                withContact, null, UUID.randomUUID(), List.of(items), createdAt);
+                withContact, null, UUID.randomUUID(), null, List.of(items), createdAt);
     }
 
     private static SelectedVariant item(UUID product, UUID variant, String sku, Integer quantity) {

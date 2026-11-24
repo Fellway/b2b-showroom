@@ -51,6 +51,14 @@ services:
       SHOWROOM_BRAND_WEBSITE: ${SHOWROOM_BRAND_WEBSITE:-}
       SHOWROOM_BRAND_EMAIL: ${SHOWROOM_BRAND_EMAIL:-}
       SHOWROOM_BRAND_PHONE: ${SHOWROOM_BRAND_PHONE:-}
+      # e-maile transakcyjne kont kupców (D23): potwierdzenie adresu, akceptacja, reset hasła
+      SHOWROOM_MAIL_ENABLED: ${SHOWROOM_MAIL_ENABLED:-true}
+      SHOWROOM_MAIL_FROM: ${SHOWROOM_MAIL_FROM:?Ustaw SHOWROOM_MAIL_FROM w deploy/.env}
+      SHOWROOM_PUBLIC_BASE_URL: https://${SHOWROOM_DOMAIN}
+      SPRING_MAIL_HOST: ${SMTP_HOST:?Ustaw SMTP_HOST w deploy/.env}
+      SPRING_MAIL_PORT: ${SMTP_PORT:-587}
+      SPRING_MAIL_USERNAME: ${SMTP_USERNAME:-}
+      SPRING_MAIL_PASSWORD: ${SMTP_PASSWORD:-}
       # bezpieczne wartości produkcyjne — nie nadpisywać w .env
       SHOWROOM_REFRESH_COOKIE_SECURE: "true"
       SHOWROOM_RATE_LIMIT_ENABLED: "true"

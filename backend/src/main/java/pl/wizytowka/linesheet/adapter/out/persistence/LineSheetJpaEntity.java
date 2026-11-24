@@ -61,6 +61,10 @@ class LineSheetJpaEntity {
     @Column(name = "visitor_id", updatable = false)
     UUID visitorId;
 
+    /** Ustawiane na NULL przez bazę po usunięciu konta kupca (on delete set null). */
+    @Column(name = "buyer_account_id", updatable = false)
+    UUID buyerAccountId;
+
     @Column(name = "pdf_storage_key", length = 512)
     String pdfStorageKey;
 

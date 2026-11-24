@@ -35,7 +35,7 @@ class RefreshTokenPersistenceAdapter implements RefreshTokenRepository {
             existing.get().setRevokedAt(token.revokedAt());
             return;
         }
-        RefreshTokenJpaEntity entity = new RefreshTokenJpaEntity(token.id().value(), token.adminUserId().value(),
+        RefreshTokenJpaEntity entity = new RefreshTokenJpaEntity(token.id().value(), token.subjectId(),
                 token.familyId(), token.tokenHash(), token.issuedAt(), token.expiresAt());
         entity.setUsedAt(token.usedAt());
         entity.setRevokedAt(token.revokedAt());
@@ -54,7 +54,7 @@ class RefreshTokenPersistenceAdapter implements RefreshTokenRepository {
     }
 
     private static RefreshToken toDomain(RefreshTokenJpaEntity e) {
-        return RefreshToken.restore(RefreshTokenId.of(e.getId()), AdminUserId.of(e.getAdminUserId()), e.getFamilyId(),
+        return RefreshToken.restore(RefreshTokenId.of(e.getId()), e.getAdminUserId(), e.getFamilyId(),
                 e.getTokenHash(), e.getIssuedAt(), e.getExpiresAt(), e.getUsedAt(), e.getRevokedAt());
     }
 }

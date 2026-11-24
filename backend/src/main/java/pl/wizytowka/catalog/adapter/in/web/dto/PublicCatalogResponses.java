@@ -2,7 +2,6 @@ package pl.wizytowka.catalog.adapter.in.web.dto;
 
 import pl.wizytowka.catalog.adapter.in.web.dto.CommonResponses.ColorSwatchResponse;
 import pl.wizytowka.catalog.adapter.in.web.dto.CommonResponses.ImageResponse;
-import pl.wizytowka.catalog.adapter.in.web.dto.CommonResponses.PriceResponse;
 import pl.wizytowka.catalog.application.view.CatalogFacetsView;
 import pl.wizytowka.catalog.application.view.CategoryView;
 import pl.wizytowka.catalog.application.view.ProductCardView;
@@ -11,7 +10,10 @@ import pl.wizytowka.catalog.application.view.ProductDetailView;
 import java.util.List;
 import java.util.UUID;
 
-/** Odpowiedzi publicznego katalogu (treści w języku żądania). */
+/**
+ * Odpowiedzi publicznego katalogu (treści w języku żądania). Celowo bez cen i kodów EAN (D23) — te dostaje
+ * wyłącznie zalogowany kupiec z {@code /api/v1/buyer/catalog/pricing}.
+ */
 public final class PublicCatalogResponses {
 
     private PublicCatalogResponses() {
@@ -22,7 +24,6 @@ public final class PublicCatalogResponses {
                                       String styleCode,
                                       String name,
                                       String categorySlug,
-                                      PriceResponse price,
                                       boolean featured,
                                       ImageResponse cover,
                                       List<ColorSwatchResponse> colors,
@@ -30,7 +31,7 @@ public final class PublicCatalogResponses {
 
         public static ProductCardResponse of(ProductCardView view) {
             return new ProductCardResponse(view.id(), view.slug(), view.styleCode(), view.name(), view.categorySlug(),
-                    PriceResponse.of(view.price()), view.featured(), ImageResponse.of(view.cover()),
+                    view.featured(), ImageResponse.of(view.cover()),
                     view.colors().stream().map(ColorSwatchResponse::of).toList(), List.copyOf(view.sizes()));
         }
     }
@@ -43,7 +44,6 @@ public final class PublicCatalogResponses {
                                         String materialComposition,
                                         String careInstructions,
                                         CategoryRefResponse category,
-                                        PriceResponse price,
                                         List<ColorOptionResponse> colors,
                                         List<ImageResponse> images) {
 
@@ -52,7 +52,6 @@ public final class PublicCatalogResponses {
             return new ProductDetailResponse(view.id(), view.slug(), view.styleCode(), view.name(), view.description(),
                     view.materialComposition(), view.careInstructions(),
                     category == null ? null : new CategoryRefResponse(category.id(), category.slug(), category.name()),
-                    PriceResponse.of(view.price()),
                     view.colors().stream().map(ColorOptionResponse::of).toList(),
                     view.images().stream().map(ImageResponse::of).toList());
         }
@@ -66,12 +65,12 @@ public final class PublicCatalogResponses {
         static ColorOptionResponse of(ProductDetailView.ColorOption option) {
             return new ColorOptionResponse(option.colorId(), option.code(), option.name(), option.hex(),
                     option.variants().stream()
-                            .map(v -> new VariantOptionResponse(v.id(), v.sizeCode(), v.sku(), v.ean()))
+                            .map(v -> new VariantOptionResponse(v.id(), v.sizeCode(), v.sku()))
                             .toList());
         }
     }
 
-    public record VariantOptionResponse(UUID id, String size, String sku, String ean) {
+    public record VariantOptionResponse(UUID id, String size, String sku) {
     }
 
     public record CategoryResponse(UUID id, UUID parentId, String slug, String name, String description, int sortOrder) {

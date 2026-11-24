@@ -16,6 +16,7 @@ import pl.wizytowka.contact.application.port.in.SalesRepresentativeQuery;
 import pl.wizytowka.contact.application.view.AdminSalesRepresentativeView;
 import pl.wizytowka.contact.application.view.SalesRepresentativeContact;
 import pl.wizytowka.contact.domain.SalesRepresentativeId;
+import pl.wizytowka.identity.application.port.in.BuyerContactQuery.BuyerContact;
 import pl.wizytowka.linesheet.application.port.in.CreateLineSheetCommand;
 import pl.wizytowka.linesheet.application.port.out.LineSheetDocumentRenderer;
 import pl.wizytowka.linesheet.application.port.out.LineSheetRepository;
@@ -54,6 +55,7 @@ class LineSheetServiceTest {
 
     private static final Instant NOW = Instant.parse("2026-10-05T12:00:00Z");
     private static final byte[] PDF = "%PDF-1.7 test".getBytes();
+    private static final UUID BUYER = UUID.fromString("01900000-0000-7000-8000-0000000000b1");
 
     private final Map<VariantId, VariantSnapshot> catalog = new HashMap<>();
     private final InMemoryLineSheets lineSheets = new InMemoryLineSheets();
@@ -62,6 +64,8 @@ class LineSheetServiceTest {
     private final RecordingAnalytics analytics = new RecordingAnalytics();
     private final List<SalesRepresentativeContact> representatives = new ArrayList<>();
     private final List<LineSheetDocument> rendered = new ArrayList<>();
+    /** Aktywni kupcy (BuyerContactQuery zwraca tylko aktywne konta). */
+    private final Map<UUID, BuyerContact> activeBuyers = new HashMap<>();
     private LineSheetService service;
 
     @BeforeEach
@@ -72,8 +76,11 @@ class LineSheetServiceTest {
             return PDF;
         };
         long[] sequence = {41};
+        activeBuyers.put(BUYER, new BuyerContact(BUYER, "Boutique s.r.o.", "Jana", "buyer@boutique.cz",
+                "+420 777 100 200", "CZ 12345678", CatalogLanguage.EN));
         service = new LineSheetService(lineSheets, () -> ++sequence[0], renderer, new StubCatalog(),
-                new StubRepresentatives(), analytics, storage, hooks, clock);
+                new StubRepresentatives(), buyerId -> Optional.ofNullable(activeBuyers.get(buyerId)), analytics,
+                storage, hooks, clock);
     }
 
     @Test
@@ -112,8 +119,10 @@ class LineSheetServiceTest {
         assertThat(rendered).singleElement().satisfies(document -> {
             assertThat(document.publicId()).isEqualTo(created.publicId());
             assertThat(document.language()).isEqualTo(CatalogLanguage.EN);
-            assertThat(document.recipient().email()).as("e-mail klienta to wyłącznie dana kontaktowa")
+            assertThat(document.recipient().email()).as("dane kontaktowe to migawka konta kupca")
                     .isEqualTo("buyer@boutique.cz");
+            assertThat(document.recipient().companyName()).isEqualTo("Boutique s.r.o.");
+            assertThat(document.recipient().taxId()).isEqualTo("CZ 12345678");
             assertThat(document.salesRepresentative()).isEqualTo(rep);
             assertThat(document.items()).extracting(item -> item.sku()).containsExactly("LS100-NAV-M");
         });
@@ -143,16 +152,36 @@ class LineSheetServiceTest {
     }
 
     @Test
-    void servesPdfByPublicIdOnly() throws IOException {
+    void onlyActiveBuyerCanGenerateLineSheet() {
+        VariantSnapshot variant = variant("LS100-NAV-M");
+        activeBuyers.clear();
+
+        assertThatThrownBy(() -> service.create(command(List.of(variant.variantId()), null)))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasFieldOrPropertyWithValue("code", "linesheet.buyer.not-active");
+        assertThat(lineSheets.store).isEmpty();
+        assertThat(storage.files).as("PDF nie jest renderowany dla nieaktywnego konta").isEmpty();
+    }
+
+    @Test
+    void servesPdfOnlyToOwnerAndStaff() throws IOException {
         VariantSnapshot variant = variant("LS100-NAV-M");
         CreatedLineSheet created = service.create(command(List.of(variant.variantId()), null));
+        LineSheet saved = lineSheets.findByPublicId(created.publicId()).orElseThrow();
+        assertThat(saved.buyerAccountId()).isEqualTo(BUYER);
 
-        try (LineSheetPdf pdf = service.pdf(created.publicId())) {
+        try (LineSheetPdf pdf = service.pdfForBuyer(BUYER, created.publicId())) {
             assertThat(pdf.content().readAllBytes()).isEqualTo(PDF);
             assertThat(pdf.sizeBytes()).isEqualTo(PDF.length);
             assertThat(pdf.fileName()).isEqualTo("LS-2026-000042.pdf");
         }
-        assertThatThrownBy(() -> service.pdf(UUID.randomUUID())).isInstanceOf(ResourceNotFoundException.class);
+        try (LineSheetPdf pdf = service.pdfForStaff(saved.id())) {
+            assertThat(pdf.content().readAllBytes()).isEqualTo(PDF);
+        }
+        assertThatThrownBy(() -> service.pdfForBuyer(UUID.randomUUID(), created.publicId()))
+                .as("cudze zestawienie jest nieodróżnialne od nieistniejącego")
+                .isInstanceOf(ResourceNotFoundException.class);
+        assertThatThrownBy(() -> service.pdfForBuyer(BUYER, UUID.randomUUID())).isInstanceOf(ResourceNotFoundException.class);
     }
 
     // ------------------------------------------------------------------ fixtures & fakes
@@ -172,10 +201,9 @@ class LineSheetServiceTest {
     }
 
     private static CreateLineSheetCommand command(List<VariantId> variants, UUID representativeId) {
-        return new CreateLineSheetCommand(CatalogLanguage.EN,
+        return new CreateLineSheetCommand(BUYER, CatalogLanguage.EN,
                 variants.stream().map(v -> new CreateLineSheetCommand.Selection(v.value(), 6)).toList(),
-                "Boutique s.r.o.", "Jana", "Buyer@Boutique.cz", null, null, null, true,
-                representativeId, UUID.randomUUID());
+                null, representativeId, UUID.randomUUID());
     }
 
     private final class StubCatalog implements VariantSnapshotQuery {

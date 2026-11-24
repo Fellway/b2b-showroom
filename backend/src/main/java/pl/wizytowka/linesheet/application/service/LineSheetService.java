@@ -10,6 +10,8 @@ import pl.wizytowka.catalog.application.view.VariantSnapshot;
 import pl.wizytowka.catalog.domain.VariantId;
 import pl.wizytowka.contact.application.port.in.SalesRepresentativeQuery;
 import pl.wizytowka.contact.application.view.SalesRepresentativeContact;
+import pl.wizytowka.identity.application.port.in.BuyerContactQuery;
+import pl.wizytowka.identity.application.port.in.BuyerContactQuery.BuyerContact;
 import pl.wizytowka.linesheet.application.port.in.CreateLineSheetCommand;
 import pl.wizytowka.linesheet.application.port.in.CreateLineSheetUseCase;
 import pl.wizytowka.linesheet.application.port.in.GetLineSheetPdfUseCase;
@@ -20,10 +22,12 @@ import pl.wizytowka.linesheet.application.view.CreatedLineSheet;
 import pl.wizytowka.linesheet.application.view.LineSheetDocument;
 import pl.wizytowka.linesheet.application.view.LineSheetPdf;
 import pl.wizytowka.linesheet.domain.LineSheet;
+import pl.wizytowka.linesheet.domain.LineSheetId;
 import pl.wizytowka.linesheet.domain.Recipient;
 import pl.wizytowka.linesheet.domain.SelectedVariant;
 import pl.wizytowka.shared.application.port.out.FileStorage;
 import pl.wizytowka.shared.application.port.out.TransactionalHooks;
+import pl.wizytowka.shared.domain.BusinessRuleViolationException;
 import pl.wizytowka.shared.domain.InvalidValueException;
 import pl.wizytowka.shared.domain.ResourceNotFoundException;
 
@@ -46,6 +50,7 @@ class LineSheetService implements CreateLineSheetUseCase, GetLineSheetPdfUseCase
     private final LineSheetDocumentRenderer renderer;
     private final VariantSnapshotQuery variantSnapshots;
     private final SalesRepresentativeQuery salesRepresentatives;
+    private final BuyerContactQuery buyers;
     private final RecordAnalyticsEventsUseCase analytics;
     private final FileStorage fileStorage;
     private final TransactionalHooks transactionalHooks;
@@ -53,13 +58,15 @@ class LineSheetService implements CreateLineSheetUseCase, GetLineSheetPdfUseCase
 
     LineSheetService(LineSheetRepository lineSheets, LineSheetNumberGenerator numbers, LineSheetDocumentRenderer renderer,
                      VariantSnapshotQuery variantSnapshots,
-                     SalesRepresentativeQuery salesRepresentatives, RecordAnalyticsEventsUseCase analytics,
+                     SalesRepresentativeQuery salesRepresentatives, BuyerContactQuery buyers,
+                     RecordAnalyticsEventsUseCase analytics,
                      FileStorage fileStorage, TransactionalHooks transactionalHooks, Clock clock) {
         this.lineSheets = lineSheets;
         this.numbers = numbers;
         this.renderer = renderer;
         this.variantSnapshots = variantSnapshots;
         this.salesRepresentatives = salesRepresentatives;
+        this.buyers = buyers;
         this.analytics = analytics;
         this.fileStorage = fileStorage;
         this.transactionalHooks = transactionalHooks;
@@ -69,16 +76,21 @@ class LineSheetService implements CreateLineSheetUseCase, GetLineSheetPdfUseCase
     @Override
     @Transactional
     public CreatedLineSheet create(CreateLineSheetCommand command) {
+        // konto mogło zostać zawieszone w trakcie ważności access tokenu (do 15 min) — sprawdzamy stan w bazie
+        BuyerContact buyer = buyers.activeBuyer(command.buyerAccountId())
+                .orElseThrow(() -> new BusinessRuleViolationException("linesheet.buyer.not-active",
+                        "Only an active buyer account can generate line sheets"));
         List<SelectedVariant> selections = resolveSelections(command);
         SalesRepresentativeContact salesRepresentative = resolveSalesRepresentative(command.salesRepresentativeId());
         Instant now = clock.instant();
         String referenceNumber = LineSheet.formatReference(now.atZone(ZoneOffset.UTC).getYear(), numbers.nextSequenceNumber());
-        Recipient recipient = new Recipient(command.companyName(), command.contactName(), command.email(),
-                command.phone(), command.taxId());
+        Recipient recipient = new Recipient(buyer.companyName(), buyer.contactName(), buyer.email(), buyer.phone(),
+                buyer.taxId());
 
-        LineSheet sheet = LineSheet.create(referenceNumber, command.language(), recipient, command.message(),
-                command.privacyAccepted(),
-                salesRepresentative == null ? null : salesRepresentative.id(), command.visitorId(), selections, now);
+        // zgoda na przetwarzanie danych złożona przy rejestracji konta (D23)
+        LineSheet sheet = LineSheet.create(referenceNumber, command.language(), recipient, command.message(), true,
+                salesRepresentative == null ? null : salesRepresentative.id(), command.visitorId(), buyer.id(),
+                selections, now);
         LineSheetDocument document = LineSheetDocuments.of(sheet, salesRepresentative);
         storePdf(sheet, document);
         sheet.attachPdf(LineSheetDocuments.storageKey(sheet), now);
@@ -92,8 +104,20 @@ class LineSheetService implements CreateLineSheetUseCase, GetLineSheetPdfUseCase
 
     @Override
     @Transactional(readOnly = true)
-    public LineSheetPdf pdf(UUID publicId) {
-        LineSheet sheet = lineSheets.findByPublicId(publicId).orElseThrow(LineSheetService::notFound);
+    public LineSheetPdf pdfForBuyer(UUID buyerAccountId, UUID publicId) {
+        LineSheet sheet = lineSheets.findByPublicId(publicId)
+                .filter(found -> found.isOwnedBy(buyerAccountId))
+                .orElseThrow(LineSheetService::notFound);
+        return pdf(sheet);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public LineSheetPdf pdfForStaff(LineSheetId id) {
+        return pdf(lineSheets.findById(id).orElseThrow(LineSheetService::notFound));
+    }
+
+    private LineSheetPdf pdf(LineSheet sheet) {
         if (!sheet.hasPdf()) {
             throw pdfNotFound();
         }

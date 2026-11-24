@@ -23,6 +23,18 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  # SMTP dla e-maili transakcyjnych kont kupców (D23), używany przy showroom.mail.enabled=true.
+  # Serwer i dane logowania ze zmiennych środowiskowych: SPRING_MAIL_HOST, SPRING_MAIL_PORT (587),
+  # SPRING_MAIL_USERNAME, SPRING_MAIL_PASSWORD. Domyślnie STARTTLS wymagany.
+  mail:
+    port: 587
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+      mail.smtp.connectiontimeout: 10000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
 
 server:
   # Za reverse proxy: adres klienta z X-Forwarded-For, ale tylko od zaufanych (wewnętrznych) proxy — Tomcat RemoteIpValve
@@ -47,6 +59,14 @@ showroom:
     lockout:
       max-attempts: 5
       duration: 15m
+    buyer:                            # konta kupców (D23)
+      refresh-token-ttl: 30d
+      email-verification-ttl: 48h
+      password-reset-ttl: 1h
+  mail:
+    enabled: ${SHOWROOM_MAIL_ENABLED:false}           # false = e-maile tylko w logu (dev)
+    from: ${SHOWROOM_MAIL_FROM:B2B Showroom <no-reply@localhost>}
+    public-base-url: ${SHOWROOM_PUBLIC_BASE_URL:http://localhost:3000}   # z niego budowane są linki w e-mailach
     bootstrap-admin:
       email: ${SHOWROOM_ADMIN_EMAIL:}
       password: ${SHOWROOM_ADMIN_PASSWORD:}
@@ -56,10 +76,54 @@ showroom:
     rules:
       - name: line-sheets             # generowanie PDF jest kosztowne
         method: POST
-        path: /api/v1/line-sheets
+        path: /api/v1/buyer/line-sheets
         limits:
           - { capacity: 5, period: 1m }
           - { capacity: 30, period: 1h }
+      - name: buyer-register          # każda rejestracja wysyła e-mail
+        method: POST
+        path: /api/v1/buyer/auth/register
+        limits:
+          - { capacity: 3, period: 1m }
+          - { capacity: 10, period: 1h }
+      - name: buyer-resend-verification
+        method: POST
+        path: /api/v1/buyer/auth/resend-verification
+        limits:
+          - { capacity: 3, period: 1m }
+          - { capacity: 10, period: 1h }
+      - name: buyer-password-reset-request
+        method: POST
+        path: /api/v1/buyer/auth/password-reset/request
+        limits:
+          - { capacity: 3, period: 1m }
+          - { capacity: 10, period: 1h }
+      - name: buyer-verify-email
+        method: POST
+        path: /api/v1/buyer/auth/verify-email
+        limits:
+          - { capacity: 10, period: 1m }
+      - name: buyer-password-reset-confirm
+        method: POST
+        path: /api/v1/buyer/auth/password-reset/confirm
+        limits:
+          - { capacity: 10, period: 1m }
+      - name: buyer-login             # uzupełnia blokadę konta, jak w panelu
+        method: POST
+        path: /api/v1/buyer/auth/login
+        limits:
+          - { capacity: 10, period: 1m }
+          - { capacity: 50, period: 1h }
+      - name: buyer-refresh
+        method: POST
+        path: /api/v1/buyer/auth/refresh
+        limits:
+          - { capacity: 30, period: 1m }
+      - name: buyer-change-password
+        method: POST
+        path: /api/v1/buyer/me/password
+        limits:
+          - { capacity: 5, period: 1m }
       - name: analytics-events
         method: POST
         path: /api/v1/analytics/events

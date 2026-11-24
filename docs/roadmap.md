@@ -20,21 +20,19 @@ lint i build bez błędów. Repozytorium: [github.com/Fellway/b2b-showroom](http
 
 Priorytet biznesowy od 2026-11-24 — przed importem/eksportem Excela.
 
-- **6a. Backend**
-  - Moduł kont kupców: agregat `BuyerAccount` (firma, NIP / VAT UE z walidacją sumy kontrolnej, kontakt, język,
-    zgody z datą), stany `PENDING_EMAIL` → `PENDING_APPROVAL` → `ACTIVE` / `REJECTED`, `SUSPENDED`; migracja V-next.
-  - Logowanie kupca: osobny JWT (rola `BUYER`) + rotowany refresh token w osobnym ciasteczku i ścieżce, blokada konta.
-  - Port `TransactionalMailer` + adapter SMTP (dev: adapter logujący); tokeny jednorazowe (potwierdzenie adresu,
-    reset hasła) — w bazie tylko hash, krótka ważność.
-  - Katalog: widoki z cenami/EAN tylko dla roli `BUYER` (anonimowo pola nieobecne); zestawienia PDF wymagają
-    zalogowanego kupca i są przypisane do konta.
-  - Panel: lista wniosków, akceptacja / odrzucenie / zawieszenie, podgląd konta i jego zestawień.
-  - Rate limiting: rejestracja, logowanie kupca, reset hasła.
-- **6b. Frontend**
-  - Rejestracja, logowanie, potwierdzenie adresu, reset hasła, „Moje konto” i „Moje zestawienia” (4 języki).
-  - Katalog: ceny pobierane per użytkownik (bez współdzielonego cache'u stron z cenami); dla gości „Zaloguj się,
-    aby zobaczyć ceny hurtowe”; zestawienie dostępne po zalogowaniu.
-  - Panel: sekcja „Kupcy” z licznikiem wniosków.
+- **6a. Backend — ✅ 2026-11-24** (migracja V3, API w `backend/README.md`, przepływy w `architecture.md`, D23).
+  Konta kupców w module `identity` (rejestracja, potwierdzenie adresu, akceptacja, logowanie z rolą `BUYER`, reset hasła,
+  e-maile transakcyjne w 4 językach), ceny i EAN tylko z `/api/v1/buyer/catalog/pricing`, zestawienia i PDF tylko dla
+  właściciela, obsługa wniosków w panelu (`/api/v1/admin/buyers`), limity zapytań. Sprawdzone end-to-end na żywym API.
+- **6b. Frontend — następny krok.** Do czasu 6b **katalog na frontendzie nie działa** (strony czytają `price`, którego
+  publiczne API już nie zwraca; zestawienie woła usunięty `POST /api/v1/line-sheets`) — 6a i 6b wdrażamy razem.
+  - Sesja kupca jak w panelu (token w pamięci, single-flight refresh z ciasteczka `showroom_buyer_refresh`).
+  - Strony (4 języki): `/account/login`, `/account/register`, `/account/verify-email?token=`,
+    `/account/reset-password?token=` (te ścieżki są w linkach e-maili), „Moje konto”, „Moje zestawienia”.
+    Token z linku: wysłać POST-em i usunąć z adresu (historia, nagłówek Referer).
+  - Katalog: dla gości „Zaloguj się, aby zobaczyć ceny hurtowe”; zalogowany — ceny i EAN z `pricing` scalane po
+    `productId`/`variantId`; zestawienie tylko po zalogowaniu, PDF przez fetch → blob (także w panelu).
+  - Panel: sekcja „Kupcy” (`/admin/buyers` — ścieżka z e-maila do zespołu) z licznikiem wniosków.
 - **Do ustalenia z marką:** treść e-maili, regulamin i zgody przy rejestracji (polityka prywatności staje się
   pilniejsza — zbieramy dane firm i osób), dostawca SMTP i adres nadawcy (SPF/DKIM na domenie).
 
@@ -95,6 +93,8 @@ zestawienia jako mini-CRM.
 - [x] `SHOWROOM_RATE_LIMIT_ENABLED` nie wyłączony — wymuszone w `deploy/compose.yml`
 - [ ] Kopie zapasowe bazy i magazynu plików — `deploy/backup.sh` w cronie + kopia poza serwerem
 - [ ] Odtworzenie z kopii przećwiczone
+- [ ] SMTP dla e-maili kont kupców (`SMTP_*`, `SHOWROOM_MAIL_FROM`), SPF i DKIM na domenie nadawcy; test: rejestracja → e-mail dochodzi
+- [ ] Regulamin i polityka prywatności podpięte w formularzu rejestracji kupca (zgody są wymagane)
 - [ ] Dane marki w PDF: `SHOWROOM_BRAND_*` (nazwa, firma, adres, kontakt), opcjonalnie logo
 - [ ] Prawdziwy opiekun handlowy w panelu (zamiast przykładowego)
 - [ ] `NEXT_PUBLIC_DEMO_NOTICE=false` po imporcie prawdziwych danych
