@@ -27,6 +27,7 @@ npm run dev                  # http://localhost:3000 — wymaga backendu na API_
 ```
 
 Backend z danymi demonstracyjnymi: `scripts/dev-up.sh --seed` w katalogu głównym (zob. `backend/README.md`).
+Na Windowsie: `scripts\dev-up.ps1 -Seed -Frontend` stawia bazę, backend, dane demo i frontend naraz.
 
 | Zmienna | Opis |
 |---|---|

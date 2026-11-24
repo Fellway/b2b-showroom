@@ -94,11 +94,12 @@ Konwencje:
 - Baza lokalnie: `docker compose up -d` (port 5433). Konfiguracja: `.env.example` → `.env` (`SHOWROOM_JWT_SECRET` wymagany: `openssl rand -base64 48`).
 - Testy wymagają Dockera (Testcontainers). Slice JPA: `@PersistenceTest`; pełny kontekst: `@SpringBootTest` + `TestcontainersConfiguration` + właściwości `showroom.security.jwt.secret` i `showroom.storage.local-root`.
 - Nie tworzyć `src/test/resources/application.yml` (przesłania główny plik konfiguracyjny).
-- Git: lokalna tożsamość repozytorium to `Mateusz Skrzypczyk <33421875+Fellway@users.noreply.github.com>` (GitHub: [Fellway](https://github.com/Fellway)). **Nigdy nie używać maila z Empiku.**
+- Git: lokalna tożsamość repozytorium to `Mateusz Skrzypczyk <mateusz.skrzypczyk@hotmail.com>` (GitHub: [Fellway](https://github.com/Fellway)), zdalne repozytorium `origin` → `https://github.com/Fellway/b2b-showroom.git`. **Nigdy nie używać maila z Empiku.**
 
 ## Środowisko deweloperskie (frontend + backend)
 
 - `docker compose up` nie działa na tej maszynie (Dockerowi skończyły się pule adresów sieci) — `scripts/dev-up.sh` stawia bazę na sieci `bridge` i backend; `--seed` ładuje dane demonstracyjne (`scripts/seed-demo.mjs`, zdjęcia z `brand-assets/`). Niczego nie usuwać w Dockerze bez zgody użytkownika.
+- **Windows (bez Dockera/WSL):** `scripts\dev-up.ps1 [-Build] [-Seed] [-Frontend] | stop` — natywny PostgreSQL 18 (usługa `postgresql-x64-18`, port 5433), backend i frontend w tle; pułapki (SWC cache, PS 5.1) w `docs/development.md`.
 - Frontend: `cd frontend && nvm use && npm run dev` (rewrite `/api` → `API_INTERNAL_URL`, domyślnie :8080). `NEXT_PUBLIC_DEMO_NOTICE=true` oznacza dane jako przykładowe — wymagane, dopóki katalog nie ma prawdziwych danych.
 - `brand-assets/` (zdjęcia, logo marki) jest poza gitem.
 

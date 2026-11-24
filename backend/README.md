@@ -47,6 +47,8 @@ scripts/dev-up.sh --seed     # baza + backend + dane demo (wymaga .env z SHOWROO
 scripts/dev-up.sh stop
 ```
 
+Na Windowsie bez Dockera: `scripts\dev-up.ps1 -Seed` / `scripts\dev-up.ps1 stop` (natywny PostgreSQL 18, zob. `docs/development.md`).
+
 `scripts/seed-demo.mjs` (Node 22, bez zależności) korzysta wyłącznie z REST API i jest idempotentny. Tworzy 3 kategorie,
 15 kolorów nazwanych od printów, rozmiary 36–46, 9 modeli sukienek (7 opublikowanych, 1 ukryty, 1 szkic) z wariantami
 i zdjęciami oraz przykładowego opiekuna handlowego. **Nazwy, opisy, ceny, SKU i EAN są ilustracyjne** — EAN-y leżą

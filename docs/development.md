@@ -18,6 +18,26 @@ npm run dev                     # http://localhost:3000, panel: /admin (login z 
 `scripts/dev-up.sh stop` zatrzymuje backend i bazę. Log backendu: `backend/data/dev-backend.log`.
 Pliki (zdjęcia, PDF-y) lądują w `backend/data/storage` (poza gitem).
 
+### Windows (bez Dockera i WSL)
+
+`scripts/dev-up.ps1` to odpowiednik `dev-up.sh`, tyle że baza jest natywną usługą Windows zamiast kontenera.
+Jednorazowo, przez winget:
+
+```powershell
+winget install --id OpenJS.NodeJS.22 -e
+winget install --id PostgreSQL.PostgreSQL.18 -e --override "--mode unattended --unattendedmodeui none --superpassword <hasło> --serverport 5433 --disable-components stackbuilder,pgAdmin"
+# dopisz do .env: POSTGRES_SUPERUSER_PASSWORD=<hasło> — skrypt sam założy rolę i bazę showroom
+cd frontend; npm ci             # node_modules zbudowane na Linuksie/macOS nie działają na Windowsie
+```
+
+```powershell
+scripts\dev-up.ps1 -Build -Seed -Frontend   # baza (usługa postgresql-x64-18, :5433) + backend :8080 + dane demo + frontend :3000
+scripts\dev-up.ps1 stop                     # backend i frontend; usługa bazy działa dalej (startuje z systemem)
+```
+
+Logi: `backend/data/dev-backend.log`, `frontend/.next-dev.log`. Backend nie wstaje sam po restarcie komputera —
+uruchom skrypt ponownie. Wymagana Java ≥ 21 (działa też na Temurin 25).
+
 **Dane demonstracyjne** (`scripts/seed-demo.mjs`, idempotentny, tylko przez REST API): 9 modeli ze zdjęć
 w `brand-assets/` (7 opublikowanych, 1 szkic, 1 ukryty), 15 kolorów, rozmiary 36–46, EAN z prefiksem 29
 (zakres wewnętrzny GS1 — nigdy nie koliduje z prawdziwymi kodami), przykładowy opiekun „Fabian's Style B2B”
@@ -50,6 +70,13 @@ cd frontend && npx tsc --noEmit && npm run lint && npx next build
   musi obejmować każdą lokalną ścieżkę `next/image` (`/api/v1/media/products/**`, `/brand/**`). Przed pisaniem kodu
   czytaj `frontend/node_modules/next/dist/docs/`. Zmiana `next.config.ts` wymaga restartu serwera dev.
   Typy tras regeneruje `npx next typegen` (np. po dodaniu nowego layoutu).
+- **Windows, SWC:** natywny moduł `@swc/core` (ładowany przez plugin next-intl) odrzuca katalog cache
+  `%LOCALAPPDATA%\swc`, gdy jego ACL nadaje pełne prawa obcemu SID-owi (np. piaskownicy AppContainer) —
+  `next dev` kończy się błędem `ERR_SWC_NATIVE_CACHE`. Obejście bez zmiany uprawnień w profilu:
+  `SWC_NATIVE_BINDING_CACHE=frontend/.swc-cache` (ustawia je `dev-up.ps1` i `.claude/launch.json`).
+- **Windows, PowerShell 5.1:** pliki `.ps1` z polskimi znakami muszą być zapisane w UTF-8 **z BOM**,
+  inaczej są czytane jako ANSI. Przekierowanie stderr programu natywnego (`2>$null`) przy
+  `$ErrorActionPreference = 'Stop'` przerywa skrypt.
 - **Dev-only:** React StrictMode podwaja zdarzenia analityczne w trybie deweloperskim — w produkcji tego nie ma.
 - **Cache katalogu:** Server Components odświeżają dane co 60 s — zmiana w panelu pojawia się w katalogu z opóźnieniem.
 
