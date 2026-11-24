@@ -21,6 +21,11 @@ lint i build bez błędów. Repozytorium: [github.com/Fellway/b2b-showroom](http
 1. **Wdrożenie produkcyjne** — przygotowane ([deployment.md](deployment.md)). Zostało: wybór i założenie VPS, domena,
    pierwsze wdrożenie, kopie poza serwer (rclone/snapshoty), przećwiczenie odtwarzania. Adapter **S3** dla `FileStorage`
    odłożony (D22) — pliki na dysku serwera. Automatyczne wdrożenie po pushu (CD przez SSH) — gdy serwer będzie gotowy.
+   **Wstrzymane (2026-11-24)** — wrócimy później. Rozważany serwer: **Mikrus 3.5** (4 GB RAM, LXC, 197 zł/rok). Wymaga
+   trybu „za pośrednikiem”: brak własnego IPv4 i portów 80/443, więc HTTPS robi Cloudflare (AAAA + proxy, najlepiej
+   Full strict z certyfikatem Origin) albo subdomena `*.mikrus.cloud`; Caddy po HTTP na IPv6, `trusted_proxies`
+   pośrednika i adres klienta z jego nagłówka (inaczej rate limiting liczy wszystkich jako jednego klienta).
+   Do sprawdzenia na serwerze: `docker compose` w LXC.
 2. **Polityka prywatności** — strona z danymi administratora danych; po publikacji ustawić
    `NEXT_PUBLIC_PRIVACY_POLICY_URL` (link w banerze i stopce). Szablon możemy przygotować; treść prawna i dane — od marki.
 3. **Import prawdziwych danych produktów** i packshotów (zamiast danych demonstracyjnych; potem `NEXT_PUBLIC_DEMO_NOTICE=false`).
