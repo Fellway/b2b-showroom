@@ -97,3 +97,16 @@ można je rewidować, jeśli zmienią się okoliczności. Nowe decyzje dopisuj n
 - Tylko frontend: zestawienie i PDF już przechowują ilość przy wariancie, więc backend bez zmian.
 - **Możliwe rozszerzenie:** szablony proporcji (np. 1-2-2-1) definiowane w panelu.
 
+## D22. Wdrożenie: jeden VPS z Docker Compose, obrazy z GHCR *(użytkownik, 2026-11-24)*
+- **Hosting:** jeden serwer VPS, `deploy/compose.yml`: Caddy (automatyczny HTTPS z Let's Encrypt) → frontend
+  (Next.js standalone) i backend (Spring Boot) → PostgreSQL 18. Na zewnątrz tylko porty 80/443. Odrzucone: PaaS
+  (Railway/Render/Fly.io) — kilkukrotnie droższy przy tej skali, a routing jednej domeny (D8) trzeba by dopasowywać.
+- **Pliki na dysku serwera na start** (wolumen `showroom_storage`), kopie razem z bazą (`deploy/backup.sh`, cron).
+  Adapter S3 dla portu `FileStorage` dopiero, gdy będzie potrzebny (kilka instancji, brak miejsca).
+- **CI/CD:** GitHub Actions — testy backendu i typy/lint/build frontendu przy każdym pushu; na `main` obrazy
+  do GitHub Container Registry (`latest` + `sha-<commit>`). Wdrożenie ręcznie na serwerze (`docker compose pull && up -d`),
+  wycofanie przez `IMAGE_TAG=sha-…`. Automatyczne wdrożenie po pushu odłożone (wymaga kluczy SSH w sekretach).
+- **Domena** jeszcze nie wybrana — `SHOWROOM_DOMAIN` w `deploy/.env`; na próbę `<ip>.sslip.io`.
+- Zmienne `NEXT_PUBLIC_*` i rewrite `/api` są wpisywane w obraz frontendu przy buildzie — ustawiane jako
+  zmienne repozytorium (Settings → Variables → Actions), zmiana wymaga ponownego zbudowania obrazu.
+

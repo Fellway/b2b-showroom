@@ -1,0 +1,89 @@
+# Produkcja na jednym serwerze (VPS): Caddy (HTTPS) → frontend (Next.js) i backend (Spring Boot) → PostgreSQL.
+# Uruchomienie: zob. docs/deployment.md. Konfiguracja i sekrety: deploy/.env (wzór: deploy/.env.example).
+#
+#   docker compose pull && docker compose up -d
+#
+# Na zewnątrz wystawiony jest wyłącznie Caddy (80/443). Baza, backend i frontend są tylko w sieci wewnętrznej.
+
+name: showroom
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      SHOWROOM_DOMAIN: ${SHOWROOM_DOMAIN:?Ustaw SHOWROOM_DOMAIN w deploy/.env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+
+  frontend:
+    image: ghcr.io/fellway/b2b-showroom-frontend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      API_INTERNAL_URL: http://backend:8080
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  backend:
+    image: ghcr.io/fellway/b2b-showroom-backend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/showroom
+      DB_USERNAME: showroom
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Ustaw POSTGRES_PASSWORD w deploy/.env}
+      SHOWROOM_JWT_SECRET: ${SHOWROOM_JWT_SECRET:?Ustaw SHOWROOM_JWT_SECRET w deploy/.env}
+      SHOWROOM_ADMIN_EMAIL: ${SHOWROOM_ADMIN_EMAIL:-}
+      SHOWROOM_ADMIN_PASSWORD: ${SHOWROOM_ADMIN_PASSWORD:-}
+      SHOWROOM_BRAND_NAME: ${SHOWROOM_BRAND_NAME:-Fabian's Style}
+      SHOWROOM_BRAND_LEGAL_NAME: ${SHOWROOM_BRAND_LEGAL_NAME:-}
+      SHOWROOM_BRAND_WEBSITE: ${SHOWROOM_BRAND_WEBSITE:-}
+      SHOWROOM_BRAND_EMAIL: ${SHOWROOM_BRAND_EMAIL:-}
+      SHOWROOM_BRAND_PHONE: ${SHOWROOM_BRAND_PHONE:-}
+      # bezpieczne wartości produkcyjne — nie nadpisywać w .env
+      SHOWROOM_REFRESH_COOKIE_SECURE: "true"
+      SHOWROOM_RATE_LIMIT_ENABLED: "true"
+      STORAGE_LOCAL_ROOT: /data/storage
+    volumes:
+      - storage:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:18.4-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: showroom
+      POSTGRES_USER: showroom
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Ustaw POSTGRES_PASSWORD w deploy/.env}
+    volumes:
+      # PostgreSQL 18+ trzyma dane w podkatalogu wersji, dlatego montujemy /var/lib/postgresql
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U showroom -d showroom"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+# Stałe nazwy wolumenów — używa ich skrypt kopii zapasowych (deploy/backup.sh).
+volumes:
+  pgdata:
+    name: showroom_pgdata
+  storage:
+    name: showroom_storage
+  caddy_data:
+    name: showroom_caddy_data
+  caddy_config:
+    name: showroom_caddy_config

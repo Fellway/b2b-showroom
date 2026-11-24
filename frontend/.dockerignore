@@ -1,0 +1,9 @@
+node_modules/
+.next/
+.swc-cache/
+.next-dev.*
+.env*
+!.env.example
+*.log
+Dockerfile
+.dockerignore

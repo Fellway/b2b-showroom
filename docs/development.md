@@ -74,6 +74,10 @@ cd frontend && npx tsc --noEmit && npm run lint && npx next build
   `%LOCALAPPDATA%\swc`, gdy jego ACL nadaje pełne prawa obcemu SID-owi (np. piaskownicy AppContainer) —
   `next dev` kończy się błędem `ERR_SWC_NATIVE_CACHE`. Obejście bez zmiany uprawnień w profilu:
   `SWC_NATIVE_BINDING_CACHE=frontend/.swc-cache` (ustawia je `dev-up.ps1` i `.claude/launch.json`).
+- **Windows, `next build`:** Turbopack wywraca się na `next/font/google` („queries have exactly one entry”) —
+  lokalnie buduj `npx next build --webpack`. CI i obraz Dockera (Linux) używają domyślnego Turbopacka.
+  Testując lokalnie serwer `standalone`, ustaw `HOSTNAME=0.0.0.0` (jak w obrazie) — przy `127.0.0.1` rewrite
+  middleware next-intl wskazuje na `localhost` i strona główna wpada w pętlę przekierowań.
 - **Windows, PowerShell 5.1:** pliki `.ps1` z polskimi znakami muszą być zapisane w UTF-8 **z BOM**,
   inaczej są czytane jako ANSI. Przekierowanie stderr programu natywnego (`2>$null`) przy
   `$ErrorActionPreference = 'Stop'` przerywa skrypt.

@@ -24,6 +24,7 @@ etapów niżej; zmiana systemu wizualnego → `DESIGN.md`. Po zakończeniu etapu
 | 3 | Adapter PDF (Thymeleaf → HTML → OpenHTMLtoPDF), usunięcie wysyłki e-mail (migracja V2), rate limiting | ✅ 258 testów |
 | 4a | Frontend: publiczny katalog, karta produktu, zestawienie PDF, kontakt (Impeccable: kanon na poziomie COS / Arket) | ✅ |
 | 4b | Frontend: panel administracyjny (`/admin`: modele, słowniki, zestawienia, statystyki, opiekunowie, konta) | ✅ |
+| 5 | Wdrożenie: Dockerfile'e, `deploy/` (VPS + Compose + Caddy, kopie), GitHub Actions + obrazy w GHCR (`docs/deployment.md`) | 🟡 przygotowane, czeka na serwer i domenę |
 
 Pracujemy etapami — nie piszemy całego systemu naraz. Przed startem etapu zadajemy pytania doprecyzowujące,
 jeśli decyzja zmienia kształt rozwiązania.
@@ -48,6 +49,8 @@ jeśli decyzja zmienia kształt rozwiązania.
 - **Pliki:** port `FileStorage` — dziś dysk lokalny, docelowo S3.
 - **Frontend** (`frontend/`): Next.js 16 (App Router, TypeScript; middleware nazywa się tu `src/proxy.ts`, `params`/`searchParams` są asynchroniczne — przed pisaniem kodu czytaj `frontend/node_modules/next/dist/docs/`), Tailwind CSS 4, shadcn/ui (Radix, przestylowane tokenami), next-intl 4, zustand. Node 22 (`frontend/.nvmrc`, przez nvm). **UI/UX projektujemy wtyczką `/impeccable`**: `PRODUCT.md` (produkt), `DESIGN.md` + `.impeccable/design.json` (system wizualny — kanon kategorii na poziomie COS / Arket, wybrany przez użytkownika), kontrakt kierunku w `.impeccable/surfaces/`. Szczegóły: `frontend/README.md`.
 - **Wdrożenie:** frontend i API na **tej samej domenie** za reverse proxy (`/api` → Spring Boot). Brak CORS.
+  Jeden VPS: `deploy/compose.yml` (Caddy → Next.js standalone + Spring Boot → PostgreSQL), obrazy z GHCR budowane
+  przez `.github/workflows/ci.yml` na `main`; pliki na wolumenie serwera (S3 odłożone) — D22, `docs/deployment.md`.
 
 ## Architektura backendu — heksagonalna z czystą domeną
 

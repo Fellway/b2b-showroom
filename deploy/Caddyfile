@@ -1,0 +1,31 @@
+# Jedna domena: /api → Spring Boot, reszta → Next.js (decyzja D8 — brak CORS, ciasteczka first-party).
+# Certyfikat HTTPS (Let's Encrypt) Caddy pobiera i odnawia sam; domena musi wskazywać na serwer (rekord A/AAAA),
+# a porty 80 i 443 muszą być otwarte.
+
+{$SHOWROOM_DOMAIN} {
+	encode zstd gzip
+
+	# Caddy nadpisuje X-Forwarded-For adresem klienta (nie ufa nagłówkom z zewnątrz),
+	# a backend ufa Caddy'emu, bo jest w sieci wewnętrznej (server.forward-headers-strategy=native).
+	handle /api/* {
+		reverse_proxy backend:8080
+	}
+
+	handle {
+		reverse_proxy frontend:3000
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Frame-Options "DENY"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

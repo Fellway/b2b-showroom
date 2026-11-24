@@ -10,15 +10,17 @@
 | 4a | Katalog publiczny (Next.js, 4 języki, zestawienie PDF) | ✅ |
 | 4b | Panel administracyjny | ✅ |
 | — | Baner zgody na analitykę | ✅ |
+| — | Paczki rozmiarowe (D21) | ✅ |
+| 5 | Wdrożenie: obrazy Docker, `deploy/` (Caddy + compose + kopie), CI i obrazy w GHCR (D22) | 🟡 przygotowane 2026-11-24, czeka na serwer i domenę |
 
 Aplikacja działa lokalnie end-to-end na danych demonstracyjnych. Backend: 258 testów zielonych; frontend: typy,
-lint i build bez błędów.
+lint i build bez błędów. Repozytorium: [github.com/Fellway/b2b-showroom](https://github.com/Fellway/b2b-showroom).
 
 ## Następne kroki (propozycja kolejności)
 
-1. **Wdrożenie produkcyjne** — obrazy Docker (backend, frontend), reverse proxy z HTTPS (jedna domena: `/` → Next.js,
-   `/api` → Spring Boot), PostgreSQL z kopiami zapasowymi, sekrety poza repozytorium, CI na GitHubie (testy backendu
-   z Testcontainers, lint/typy/build frontendu), adapter **S3** dla `FileStorage` (zdjęcia i PDF-y).
+1. **Wdrożenie produkcyjne** — przygotowane ([deployment.md](deployment.md)). Zostało: wybór i założenie VPS, domena,
+   pierwsze wdrożenie, kopie poza serwer (rclone/snapshoty), przećwiczenie odtwarzania. Adapter **S3** dla `FileStorage`
+   odłożony (D22) — pliki na dysku serwera. Automatyczne wdrożenie po pushu (CD przez SSH) — gdy serwer będzie gotowy.
 2. **Polityka prywatności** — strona z danymi administratora danych; po publikacji ustawić
    `NEXT_PUBLIC_PRIVACY_POLICY_URL` (link w banerze i stopce). Szablon możemy przygotować; treść prawna i dane — od marki.
 3. **Import prawdziwych danych produktów** i packshotów (zamiast danych demonstracyjnych; potem `NEXT_PUBLIC_DEMO_NOTICE=false`).
@@ -60,11 +62,12 @@ zestawienia jako mini-CRM.
 ## Lista kontrolna przed produkcją
 
 - [ ] `SHOWROOM_JWT_SECRET` (≥ 32 bajty, base64) i hasło pierwszego admina tylko w sekretach środowiska
-- [ ] `SHOWROOM_REFRESH_COOKIE_SECURE=true` (domyślnie), HTTPS na proxy
-- [ ] Proxy ustawia `X-Forwarded-For` (rate limiting rozpoznaje klienta tylko od zaufanych proxy)
+- [x] `SHOWROOM_REFRESH_COOKIE_SECURE=true`, HTTPS na proxy — wymuszone w `deploy/compose.yml` / Caddy
+- [x] Proxy ustawia `X-Forwarded-For` (rate limiting rozpoznaje klienta tylko od zaufanych proxy) — Caddy
 - [ ] Rate limiting działa w pamięci jednej instancji — przy kilku instancjach wspólny backend (Redis/JCache)
-- [ ] `SHOWROOM_RATE_LIMIT_ENABLED` nie wyłączony (wyłączamy go tylko w dev)
-- [ ] Kopie zapasowe bazy i magazynu plików
+- [x] `SHOWROOM_RATE_LIMIT_ENABLED` nie wyłączony — wymuszone w `deploy/compose.yml`
+- [ ] Kopie zapasowe bazy i magazynu plików — `deploy/backup.sh` w cronie + kopia poza serwerem
+- [ ] Odtworzenie z kopii przećwiczone
 - [ ] Dane marki w PDF: `SHOWROOM_BRAND_*` (nazwa, firma, adres, kontakt), opcjonalnie logo
 - [ ] Prawdziwy opiekun handlowy w panelu (zamiast przykładowego)
 - [ ] `NEXT_PUBLIC_DEMO_NOTICE=false` po imporcie prawdziwych danych
