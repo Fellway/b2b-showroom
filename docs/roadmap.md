@@ -16,6 +16,28 @@
 Aplikacja działa lokalnie end-to-end na danych demonstracyjnych. Backend: 258 testów zielonych; frontend: typy,
 lint i build bez błędów. Repozytorium: [github.com/Fellway/b2b-showroom](https://github.com/Fellway/b2b-showroom).
 
+## Etap 6 — konta kupców (D23), plan
+
+Priorytet biznesowy od 2026-11-24 — przed importem/eksportem Excela.
+
+- **6a. Backend**
+  - Moduł kont kupców: agregat `BuyerAccount` (firma, NIP / VAT UE z walidacją sumy kontrolnej, kontakt, język,
+    zgody z datą), stany `PENDING_EMAIL` → `PENDING_APPROVAL` → `ACTIVE` / `REJECTED`, `SUSPENDED`; migracja V-next.
+  - Logowanie kupca: osobny JWT (rola `BUYER`) + rotowany refresh token w osobnym ciasteczku i ścieżce, blokada konta.
+  - Port `TransactionalMailer` + adapter SMTP (dev: adapter logujący); tokeny jednorazowe (potwierdzenie adresu,
+    reset hasła) — w bazie tylko hash, krótka ważność.
+  - Katalog: widoki z cenami/EAN tylko dla roli `BUYER` (anonimowo pola nieobecne); zestawienia PDF wymagają
+    zalogowanego kupca i są przypisane do konta.
+  - Panel: lista wniosków, akceptacja / odrzucenie / zawieszenie, podgląd konta i jego zestawień.
+  - Rate limiting: rejestracja, logowanie kupca, reset hasła.
+- **6b. Frontend**
+  - Rejestracja, logowanie, potwierdzenie adresu, reset hasła, „Moje konto” i „Moje zestawienia” (4 języki).
+  - Katalog: ceny pobierane per użytkownik (bez współdzielonego cache'u stron z cenami); dla gości „Zaloguj się,
+    aby zobaczyć ceny hurtowe”; zestawienie dostępne po zalogowaniu.
+  - Panel: sekcja „Kupcy” z licznikiem wniosków.
+- **Do ustalenia z marką:** treść e-maili, regulamin i zgody przy rejestracji (polityka prywatności staje się
+  pilniejsza — zbieramy dane firm i osób), dostawca SMTP i adres nadawcy (SPF/DKIM na domenie).
+
 ## Następne kroki (propozycja kolejności)
 
 1. **Wdrożenie produkcyjne** — przygotowane ([deployment.md](deployment.md)). Zostało: wybór i założenie VPS, domena,

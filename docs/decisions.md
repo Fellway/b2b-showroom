@@ -7,6 +7,7 @@ można je rewidować, jeśli zmienią się okoliczności. Nowe decyzje dopisuj n
 ---
 
 ## D1. Katalog publiczny, bez kont i tokenów dla kupców *(użytkownik, 2026-10-05)*
+> **Zmienione przez D23 (2026-11-24):** katalog nadal publiczny, ale ceny i EAN tylko dla zalogowanych, zaakceptowanych kupców.
 - **Dlaczego:** najprostsza ścieżka dla kupca; link z tokenem per klient świadomie odłożony.
 - **Skutki:** ceny hurtowe są publiczne; ochrona publicznych POST-ów przez rate limiting (D13). Tabela kont dotyczy tylko adminów.
 
@@ -19,7 +20,7 @@ można je rewidować, jeśli zmienią się okoliczności. Nowe decyzje dopisuj n
 
 ## D4. Niezależność od infrastruktury Empiku *(użytkownik, 2026-10-05 i 2026-10-06)*
 - Maven wyłącznie z Maven Central przez `backend/.mvn/settings.xml` (podpięty w `.mvn/maven.config`), osobne repozytorium lokalne `~/.m2/b2b-showroom-repository`, Maven Wrapper 3.9.16.
-- Git: lokalna tożsamość `Mateusz Skrzypczyk <33421875+Fellway@users.noreply.github.com>` (GitHub: Fellway). Nigdy maila z Empiku.
+- Git: lokalna tożsamość `Mateusz Skrzypczyk <mateusz.skrzypczyk@hotmail.com>` (od 2026-11-24; wcześniej adres noreply GitHuba), GitHub: Fellway, repozytorium `Fellway/b2b-showroom` (publiczne). Nigdy maila z Empiku.
 - npm: publiczny rejestr (`frontend/.npmrc`), obrazy Dockera z Docker Huba.
 
 ## D5. Flyway 11.20.x zamiast domyślnego 11.7 *(użytkownik, 2026-10-05)*
@@ -47,6 +48,8 @@ można je rewidować, jeśli zmienią się okoliczności. Nowe decyzje dopisuj n
 - **Dlaczego:** produkt w ukrytej kategorii jest dla kupca niewidoczny, więc nie może trafić do zestawienia.
 
 ## D12. Aplikacja nie wysyła żadnych e-maili *(użytkownik, 2026-10-06)*
+> **Zmienione przez D23 (2026-11-24):** dopuszczone wyłącznie e-maile transakcyjne związane z kontem kupca.
+> Zestawienia nadal tylko do pobrania — żadnej wysyłki PDF ani marketingu.
 - Kupiec tylko pobiera PDF; kontakt z opiekunem przez widoczny e-mail/telefon. Usunięto port mailera, stan wysyłki i endpoint resend (migracja V2).
 - **Dlaczego:** zero ryzyka wysyłki spamu z domeny marki przez publiczny endpoint.
 
@@ -109,4 +112,20 @@ można je rewidować, jeśli zmienią się okoliczności. Nowe decyzje dopisuj n
 - **Domena** jeszcze nie wybrana — `SHOWROOM_DOMAIN` w `deploy/.env`; na próbę `<ip>.sslip.io`.
 - Zmienne `NEXT_PUBLIC_*` i rewrite `/api` są wpisywane w obraz frontendu przy buildzie — ustawiane jako
   zmienne repozytorium (Settings → Variables → Actions), zmiana wymaga ponownego zbudowania obrazu.
+
+## D23. Konta kupców: ceny i EAN tylko po zalogowaniu, rejestracja z akceptacją marki *(użytkownik, 2026-11-24)*
+- **Dlaczego:** wymaganie biznesu — ceny hurtowe nie mogą być publiczne (konkurencja, klienci detaliczni).
+- **Bez logowania:** katalog dalej publiczny jako wizytówka (zdjęcia, opisy, kolory, rozmiary, kontakt, widoczny
+  w wyszukiwarkach), ale **bez cen (hurtowej i MSRP), bez EAN i bez zestawień PDF**. Ukrywa to **API** (anonimowa
+  odpowiedź w ogóle nie zawiera tych pól), nie tylko interfejs; strony z cenami nie trafiają do współdzielonego cache'u.
+- **Rejestracja → akceptacja:** kupiec zakłada konto (firma, NIP / numer VAT UE, osoba kontaktowa, e-mail, telefon,
+  zgody); konto czeka na zatwierdzenie przez markę w panelu (ADMIN/EDITOR); dopiero zaakceptowane widzi ceny.
+- **E-maile transakcyjne dopuszczone** (zmiana D12): potwierdzenie adresu, „konto zaakceptowane/odrzucone”, reset
+  hasła, powiadomienie marki o nowym wniosku. Przez zewnętrznego dostawcę SMTP za portem — dostawca do wyboru przy wdrożeniu.
+  Ryzyko z D12 (spam z domeny marki przez publiczny endpoint) ograniczamy: rate limiting rejestracji i resetu,
+  e-mail tylko na adres, którego dotyczy konto, stałe szablony **bez treści wpisanych przez użytkownika**.
+- **Konta kupców osobno od kont panelu:** osobna sesja (ciasteczko, ścieżka), ta sama mechanika co D7/D9
+  (rotowany refresh token, PBKDF2, blokada po nieudanych logowaniach).
+- **Skutki:** zestawienia przypisane do konta (dane kontaktowe z konta, historia „Moje zestawienia”); model kont
+  zostawia miejsce na ceny indywidualne / grupy cenowe w przyszłości.
 

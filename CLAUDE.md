@@ -4,7 +4,7 @@ Interaktywna wizytówka i katalog B2B marki odzieży damskiej **fabian's style**
 Kontekst produktowy dla projektowania UI (użytkownicy, sytuacje, pozycjonowanie, zasady): [`PRODUCT.md`](PRODUCT.md). **To NIE jest sklep**: brak koszyka, płatności i stanów
 magazynowych. Klient hurtowy przegląda katalog/lookbook, zaznacza warianty i generuje spersonalizowane
 zestawienie PDF (line sheet) do pobrania, oraz kontaktuje się z opiekunem handlowym (widoczny e-mail/telefon).
-**Aplikacja nie wysyła żadnych e-maili** (decyzja użytkownika, Etap 3).
+**Aplikacja nie wysyła zestawień ani marketingu e-mailem** — od D23 tylko e-maile transakcyjne kont kupców.
 
 Projekt prywatny, **całkowicie niezależny od Empiku** — patrz „Środowisko”.
 
@@ -24,14 +24,16 @@ etapów niżej; zmiana systemu wizualnego → `DESIGN.md`. Po zakończeniu etapu
 | 3 | Adapter PDF (Thymeleaf → HTML → OpenHTMLtoPDF), usunięcie wysyłki e-mail (migracja V2), rate limiting | ✅ 258 testów |
 | 4a | Frontend: publiczny katalog, karta produktu, zestawienie PDF, kontakt (Impeccable: kanon na poziomie COS / Arket) | ✅ |
 | 4b | Frontend: panel administracyjny (`/admin`: modele, słowniki, zestawienia, statystyki, opiekunowie, konta) | ✅ |
-| 5 | Wdrożenie: Dockerfile'e, `deploy/` (VPS + Compose + Caddy, kopie), GitHub Actions + obrazy w GHCR (`docs/deployment.md`) | 🟡 przygotowane, czeka na serwer i domenę |
+| 5 | Wdrożenie: Dockerfile'e, `deploy/` (VPS + Compose + Caddy, kopie), GitHub Actions + obrazy w GHCR (`docs/deployment.md`) | 🟡 przygotowane, czeka na serwer i domenę (wstrzymane) |
+| 6 | Konta kupców (D23): rejestracja + akceptacja, ceny/EAN/PDF tylko po zalogowaniu, e-maile transakcyjne | ⏳ zaplanowany |
 
 Pracujemy etapami — nie piszemy całego systemu naraz. Przed startem etapu zadajemy pytania doprecyzowujące,
 jeśli decyzja zmienia kształt rozwiązania.
 
 ## Założenia biznesowe (decyzje użytkownika)
 
-- **Dostęp klientów:** katalog całkowicie publiczny, bez logowania i tokenów (może się zmienić później — np. linki z tokenem per klient).
+- **Dostęp klientów (D23, zmienia D1):** katalog publiczny jako wizytówka, ale **ceny, EAN i zestawienia PDF tylko dla zalogowanych kupców**. Rejestracja (firma, NIP/VAT UE, kontakt, zgody) → akceptacja przez markę w panelu. Ukrywa API, nie tylko UI. Konta kupców osobno od kont panelu.
+- **E-maile (D23, zmienia D12):** wyłącznie transakcyjne dla kont kupców (potwierdzenie adresu, akceptacja, reset hasła, powiadomienie marki) — stałe szablony bez treści od użytkownika; zestawienia nadal tylko do pobrania.
 - **Panel administracyjny:** zabezpieczony; role `ADMIN` (wszystko + konta) i `EDITOR` (katalog, treści, zestawienia, analityka).
 - **Struktura produktu:** Produkt → Kolor → Rozmiar → wariant z SKU i EAN (GTIN-8/12/13/14, walidowana cyfra kontrolna). SKU i EAN globalnie unikalne.
 - **Ceny tylko na poziomie produktu:** hurtowa (netto) + sugerowana detaliczna MSRP/RRP (brutto). Waluta PLN na start (model wspiera ISO 4217).
