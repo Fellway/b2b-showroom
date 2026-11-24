@@ -27,8 +27,9 @@ Internet ──443──▶ Caddy (HTTPS) ──/api/*──▶ backend :8080 (S
 
 ## Pierwsze wdrożenie
 
-1. **Obrazy w GHCR.** Po pierwszym zielonym przebiegu CI na `main` obrazy są w zakładce *Packages* profilu Fellway.
-   Pakiety GHCR są domyślnie **prywatne** — serwer musi się zalogować tokenem z uprawnieniem `read:packages`
+1. **Obrazy w GHCR.** Po zielonym przebiegu CI na `main` obrazy są w zakładce *Packages* profilu Fellway.
+   Repozytorium jest publiczne, więc pakiety też — serwer pobiera je bez logowania. Jeśli repozytorium
+   (lub pakiety) staną się prywatne, serwer musi się zalogować tokenem z uprawnieniem `read:packages`
    (GitHub → Settings → Developer settings → Personal access tokens → *Tokens (classic)*):
    ```bash
    echo <token> | docker login ghcr.io -u Fellway --password-stdin
