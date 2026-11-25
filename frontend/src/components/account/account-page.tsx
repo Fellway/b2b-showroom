@@ -8,7 +8,9 @@ import { BuyerApiError, buyerApi, useBuyerSession } from "@/lib/buyer/api";
 import { buyerSession } from "@/lib/buyer/session";
 import type { BuyerAccount, BuyerLineSheet, Page } from "@/lib/types";
 import { routing } from "@/i18n/routing";
+import { isSupportedCountry, splitPhone, toInternational } from "@/lib/phone";
 import { FormMessage, SelectField, SubmitButton, TextField } from "./fields";
+import { PhoneField } from "./phone-field";
 
 const SHEETS_PAGE_SIZE = 10;
 
@@ -21,6 +23,17 @@ export function AccountPage() {
   useEffect(() => {
     if (state.status === "anonymous") router.replace({ pathname: "/account/login", query: { next: pathname } });
   }, [state.status, router, pathname]);
+
+  // Dane konta z sesji pochodzą z chwili logowania (sprzed zapisania czasu logowania), więc ich `version` bywa
+  // nieaktualna — przed edycją pobieramy bieżący stan, inaczej zapis kończy się konfliktem wersji.
+  const authenticated = state.status === "authenticated";
+  useEffect(() => {
+    if (!authenticated) return;
+    buyerApi
+      .get<BuyerAccount>("/me")
+      .then((fresh) => buyerSession.update(fresh))
+      .catch(() => undefined);
+  }, [authenticated]);
 
   if (state.status !== "authenticated") {
     return <div className="min-h-[60vh]" aria-busy="true" />;
@@ -90,16 +103,24 @@ function ProfileForm({ buyer }: { buyer: BuyerAccount }) {
   const t = useTranslations("account.page");
   const tErrors = useTranslations("errors");
   const tLanguages = useTranslations("languages");
-  const [form, setForm] = useState({ contactName: buyer.contactName, phone: buyer.phone, language: buyer.language });
+  const tAccount = useTranslations("account");
+  const initialPhone = splitPhone(buyer.phone, isSupportedCountry(buyer.countryCode) ? buyer.countryCode : "PL");
+  const [form, setForm] = useState({ contactName: buyer.contactName, phone: initialPhone.national, language: buyer.language });
+  const [phoneCountry, setPhoneCountry] = useState(initialPhone.country);
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<{ tone: "info" | "error"; text: string } | null>(null);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     setMessage(null);
+    const phone = toInternational(phoneCountry, form.phone);
+    if (!phone) {
+      setMessage({ tone: "error", text: tAccount("register.errors.phone") });
+      return;
+    }
     setPending(true);
     try {
-      await buyerApi.put("/me", { ...form, contactName: form.contactName.trim(), phone: form.phone.trim(), version: buyer.version });
+      await buyerApi.put("/me", { ...form, contactName: form.contactName.trim(), phone, version: buyer.version });
       buyerSession.update(await buyerApi.get<BuyerAccount>("/me"));
       setMessage({ tone: "info", text: t("saved") });
     } catch (error) {
@@ -130,14 +151,13 @@ function ProfileForm({ buyer }: { buyer: BuyerAccount }) {
             value={form.contactName}
             onChange={(e) => setForm((f) => ({ ...f, contactName: e.target.value }))}
           />
-          <TextField
+          <PhoneField
             label={t("phone")}
-            type="tel"
-            autoComplete="tel"
             required
-            maxLength={32}
-            value={form.phone}
-            onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+            country={phoneCountry}
+            onCountryChange={setPhoneCountry}
+            national={form.phone}
+            onNationalChange={(value) => setForm((f) => ({ ...f, phone: value }))}
           />
         </div>
         <SelectField label={t("language")} value={form.language} onChange={(e) => setForm((f) => ({ ...f, language: e.target.value }))}>

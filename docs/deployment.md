@@ -74,6 +74,13 @@ Wycofanie do konkretnej wersji: `IMAGE_TAG=sha-1a2b3c4` w `.env` (tag z zakładk
 potem `docker compose up -d`. Uwaga: migracje bazy są tylko „w przód” — wycofanie obrazu po migracji, która zmieniła
 schemat, wymaga odtworzenia kopii sprzed wdrożenia.
 
+## Podpowiedź kraju w rejestracji (opcjonalnie)
+
+Formularz rejestracji podpowiada kraj firmy i numer kierunkowy (D24). Bez dodatkowej konfiguracji korzysta z języka
+przeglądarki. Dokładniej działa z nagłówkiem kraju od proxy: za Cloudflare (proxy włączone) nagłówek `CF-IPCountry`
+przychodzi sam; przy samym Caddy można ustawić `X-Country-Code` modułem GeoIP (np. baza MaxMind GeoLite2 — wymaga
+darmowego konta i klucza licencyjnego). Nagłówek wpływa tylko na podpowiedź — nie służy do kontroli dostępu.
+
 ## Zmienne frontendu wpisywane przy buildzie
 
 `NEXT_PUBLIC_DEMO_NOTICE` (domyślnie `true`) i `NEXT_PUBLIC_PRIVACY_POLICY_URL` ustawiasz w repozytorium:

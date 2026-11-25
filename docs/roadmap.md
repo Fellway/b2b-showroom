@@ -90,7 +90,9 @@ zestawienia jako mini-CRM.
 - [x] `SHOWROOM_RATE_LIMIT_ENABLED` nie wyłączony — wymuszone w `deploy/compose.yml`
 - [ ] Kopie zapasowe bazy i magazynu plików — `deploy/backup.sh` w cronie + kopia poza serwerem
 - [ ] Odtworzenie z kopii przećwiczone
-- [ ] SMTP dla e-maili kont kupców (`SMTP_*`, `SHOWROOM_MAIL_FROM`), SPF i DKIM na domenie nadawcy; test: rejestracja → e-mail dochodzi
+- [ ] SMTP dla e-maili kont kupców (`SMTP_*`, `SHOWROOM_MAIL_FROM`), SPF i DKIM na domenie nadawcy; test: rejestracja → e-mail dochodzi.
+  Konto Brevo założone, wysyłka sprawdzona lokalnie (2026-11-25, nadawca tymczasowo z hotmail) — zostało: własna
+  domena w Brevo z DKIM/DMARC i osobny klucz SMTP dla produkcji.
 - [ ] Regulamin i polityka prywatności podpięte w formularzu rejestracji kupca (zgody są wymagane)
 - [ ] Dane marki w PDF: `SHOWROOM_BRAND_*` (nazwa, firma, adres, kontakt), opcjonalnie logo
 - [ ] Prawdziwy opiekun handlowy w panelu (zamiast przykładowego)

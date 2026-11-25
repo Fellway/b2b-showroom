@@ -233,7 +233,7 @@
       "doneHint": "Can't see the message? Check your spam folder or send the link again.",
       "errors": {
         "taxId": "Invalid number — check the VAT / tax number and the country.",
-        "phone": "Enter a phone number (at least 6 digits).",
+        "phone": "Enter a valid phone number for the selected country.",
         "password": "The password must have 12 to 128 characters.",
         "email": "Enter a valid e-mail address.",
         "consent": "Tick both consents to create an account.",
@@ -289,6 +289,12 @@
         "download": "Download PDF",
         "more": "Show older"
       }
+    },
+    "phone": {
+      "country": "Country code: {country} ({code}). Change country",
+      "search": "Search country or dialling code",
+      "list": "Countries",
+      "noResults": "No matching country."
     }
   }
 }

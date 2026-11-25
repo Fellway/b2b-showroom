@@ -21,6 +21,11 @@ administracyjny pod `/admin`.
   z szuflady wraca na tę samą stronę i otwiera zestawienie (`?next=…&selection=1`). PDF pobierany z tokenem
   (fetch → blob), także w panelu.
 - Token z linku e-mail jest wysyłany najwyżej raz i usuwany z paska adresu po hydratacji (`components/account/token-link.ts`).
+- Telefon (D24): kraj z flagą i numerem kierunkowym + numer krajowy (`components/account/phone-field.tsx`,
+  `lib/phone.ts`), zapis `+48 600 111 222`. Rejestracja podpowiada kraj z żądania (`lib/request-country.ts`:
+  nagłówek proxy `CF-IPCountry` / `X-Country-Code` → `Accept-Language` → język strony).
+- „Moje konto” po otwarciu pobiera `/api/v1/buyer/me` — dane konta w sesji są z chwili logowania i mają nieaktualną
+  wersję (logowanie zapisuje czas logowania), a edycja wymaga bieżącej.
 
 ## Panel administracyjny (`/admin`)
 

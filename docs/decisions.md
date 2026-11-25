@@ -140,4 +140,18 @@ można je rewidować, jeśli zmienią się okoliczności. Nowe decyzje dopisuj n
     bez rozróżnienia.
   - Brak potwierdzonego adresu blokuje akceptację; link z resetu hasła też potwierdza adres.
   - E-maile: zwykły tekst w 4 językach, wysyłka asynchroniczna po commicie, w dev (`showroom.mail.enabled=false`) tylko log.
+  - **Dostawca SMTP: Brevo** *(użytkownik, 2026-11-25)* — darmowy plan (300 maili/dzień), firma z UE, zwykłe SMTP
+    (`smtp-relay.brevo.com:587`, STARTTLS), bez zmian w kodzie. Własny serwer pocztowy odrzucony (zablokowany port 25
+    na VPS, reputacja IP, utrzymanie). Dopóki nadawcą jest adres z darmowej poczty, Brevo podmienia domenę w „From”
+    na `…brevosend.com` — na produkcji potrzebna własna domena z DKIM/DMARC w Brevo (*Senders, Domains*).
 
+## D24. Telefon z numerem kierunkowym i podpowiedź kraju *(użytkownik, 2026-11-25)*
+- **Dlaczego:** bez numeru kierunkowego opiekun handlowy nie wie, do jakiego kraju dzwoni.
+- Pole telefonu (rejestracja, „Moje konto”) = kraj wybierany z listy z flagą i numerem kierunkowym (wyszukiwanie po
+  nazwie, kodzie kraju i numerze) + numer krajowy; zapisujemy postać międzynarodową (`+48 600 111 222`).
+  Biblioteki: `libphonenumber-js` (numery kierunkowe, sprawdzenie, czy numer może istnieć), `country-flag-icons`
+  (flagi SVG — Windows nie wyświetla emoji flag). Starsze numery bez `+` czytamy jako krajowe w kraju firmy.
+- **Podpowiedź kraju** (kraj firmy i numer kierunkowy w rejestracji) bez zewnętrznej geolokalizacji — adres IP nie
+  opuszcza serwera: nagłówek kraju od proxy/CDN (`CF-IPCountry`, `X-Country-Code`), potem region z
+  `Accept-Language`, na końcu język strony. Kupiec zawsze może zmienić wybór.
+- Backend sprawdza telefon jak dotąd (format, min. 6 cyfr) — dokładniejsza walidacja jest po stronie formularza.

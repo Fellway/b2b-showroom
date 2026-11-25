@@ -6,7 +6,10 @@ import { useMemo, useState, type FormEvent } from "react";
 import { Link } from "@/i18n/navigation";
 import { readProblem } from "@/lib/problem";
 import { buyerAuthPost } from "@/lib/buyer/session";
+import { isSupportedCountry, toInternational } from "@/lib/phone";
+import type { CountryCode } from "libphonenumber-js/min";
 import { AccountColumn, CheckField, FormMessage, SelectField, SubmitButton, TextField, safeNext } from "./fields";
+import { PhoneField } from "./phone-field";
 
 /** Rynki marki na początku listy, potem pozostałe kraje Europy (kolejność alfabetyczna w języku strony). */
 const PRIMARY_COUNTRIES = ["PL", "CZ", "SK", "UA"];
@@ -15,6 +18,7 @@ const OTHER_COUNTRIES = [
   "LV", "MD", "MT", "NL", "NO", "PT", "RO", "SE", "SI",
 ];
 const DEFAULT_COUNTRY: Record<string, string> = { pl: "PL", cs: "CZ", uk: "UA" };
+const COMPANY_COUNTRIES = new Set([...PRIMARY_COUNTRIES, ...OTHER_COUNTRIES]);
 const PRIVACY_POLICY_URL = process.env.NEXT_PUBLIC_PRIVACY_POLICY_URL;
 const PASSWORD_MIN = 12;
 const PASSWORD_MAX = 128;
@@ -45,14 +49,22 @@ const CODE_TO_FIELD: Record<string, [FieldKey, string]> = {
   "identity.buyer.consent-required": ["consent", "consent"],
 };
 
-export function RegisterForm() {
+/** @param suggestedCountry kraj z żądania (nagłówek proxy / Accept-Language) — tylko podpowiedź, do zmiany */
+export function RegisterForm({ suggestedCountry }: { suggestedCountry?: string | null }) {
   const t = useTranslations("account");
   const tErrors = useTranslations("errors");
   const locale = useLocale();
   const searchParams = useSearchParams();
+  const initialCompanyCountry =
+    suggestedCountry && COMPANY_COUNTRIES.has(suggestedCountry) ? suggestedCountry : (DEFAULT_COUNTRY[locale] ?? "");
+  const [phoneCountry, setPhoneCountry] = useState<CountryCode>(
+    isSupportedCountry(suggestedCountry) ? suggestedCountry : isSupportedCountry(initialCompanyCountry) ? initialCompanyCountry : "PL",
+  );
+  // numer kierunkowy podąża za krajem firmy, dopóki kupiec nie wybierze go sam
+  const [phoneCountryTouched, setPhoneCountryTouched] = useState(false);
   const [form, setForm] = useState<Form>({
     companyName: "",
-    countryCode: DEFAULT_COUNTRY[locale] ?? "",
+    countryCode: initialCompanyCountry,
     taxId: "",
     contactName: "",
     phone: "",
@@ -90,7 +102,7 @@ export function RegisterForm() {
     if (!form.countryCode) found.countryCode = t("register.errors.country");
     if (!form.taxId.trim()) found.taxId = required;
     if (!form.contactName.trim()) found.contactName = required;
-    if ((form.phone.match(/\d/g) ?? []).length < 6) found.phone = t("register.errors.phone");
+    if (!toInternational(phoneCountry, form.phone)) found.phone = t("register.errors.phone");
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(form.email.trim())) found.email = t("register.errors.email");
     const length = [...form.password].length;
     if (length < PASSWORD_MIN || length > PASSWORD_MAX) found.password = t("register.errors.password");
@@ -110,7 +122,8 @@ export function RegisterForm() {
       companyName: form.companyName.trim(),
       taxId: form.taxId.trim(),
       contactName: form.contactName.trim(),
-      phone: form.phone.trim(),
+      // zawsze z numerem kierunkowym, np. „+48 600 111 222”
+      phone: toInternational(phoneCountry, form.phone) ?? form.phone.trim(),
       email: form.email.trim(),
     };
     try {
@@ -183,7 +196,10 @@ export function RegisterForm() {
               label={t("register.country")}
               autoComplete="country"
               value={form.countryCode}
-              onChange={(e) => set("countryCode", e.target.value)}
+              onChange={(e) => {
+                set("countryCode", e.target.value);
+                if (!phoneCountryTouched && isSupportedCountry(e.target.value)) setPhoneCountry(e.target.value);
+              }}
               error={errors.countryCode}
             >
               <option value="" disabled>
@@ -223,13 +239,16 @@ export function RegisterForm() {
               onChange={(e) => set("contactName", e.target.value)}
               error={errors.contactName}
             />
-            <TextField
+            <PhoneField
               label={t("register.phone")}
-              type="tel"
-              autoComplete="tel"
-              maxLength={32}
-              value={form.phone}
-              onChange={(e) => set("phone", e.target.value)}
+              country={phoneCountry}
+              onCountryChange={(next) => {
+                setPhoneCountry(next);
+                setPhoneCountryTouched(true);
+                setErrors((current) => ({ ...current, phone: undefined }));
+              }}
+              national={form.phone}
+              onNationalChange={(value) => set("phone", value)}
               error={errors.phone}
             />
           </div>

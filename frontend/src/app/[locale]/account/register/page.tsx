@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { connection } from "next/server";
+import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { RegisterForm } from "@/components/account/register-form";
+import { suggestedCountry } from "@/lib/request-country";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/account/register">): Promise<Metadata> {
   const { locale } = await params;
@@ -15,9 +16,11 @@ export default async function Page({ params }: PageProps<"/[locale]/account/regi
   await connection();
   const { locale } = await params;
   setRequestLocale(locale);
+  // podpowiedź kraju firmy i numeru kierunkowego na podstawie żądania (zob. lib/request-country.ts)
+  const country = await suggestedCountry(locale);
   return (
     <Suspense>
-      <RegisterForm />
+      <RegisterForm suggestedCountry={country} />
     </Suspense>
   );
 }

@@ -233,7 +233,7 @@
       "doneHint": "Nie widzisz wiadomości? Sprawdź folder spam albo wyślij link ponownie.",
       "errors": {
         "taxId": "Nieprawidłowy numer — sprawdź NIP / numer VAT i kraj.",
-        "phone": "Podaj numer telefonu (co najmniej 6 cyfr).",
+        "phone": "Podaj poprawny numer telefonu dla wybranego kraju.",
         "password": "Hasło musi mieć od 12 do 128 znaków.",
         "email": "Podaj poprawny adres e-mail.",
         "consent": "Zaznacz obie zgody, aby założyć konto.",
@@ -289,6 +289,12 @@
         "download": "Pobierz PDF",
         "more": "Pokaż starsze"
       }
+    },
+    "phone": {
+      "country": "Numer kierunkowy: {country} ({code}). Zmień kraj",
+      "search": "Szukaj kraju lub numeru kierunkowego",
+      "list": "Kraje",
+      "noResults": "Brak pasującego kraju."
     }
   }
 }

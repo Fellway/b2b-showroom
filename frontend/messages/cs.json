@@ -233,7 +233,7 @@
       "doneHint": "Nevidíte zprávu? Zkontrolujte složku spam nebo pošlete odkaz znovu.",
       "errors": {
         "taxId": "Neplatné číslo — zkontrolujte DIČ / VAT a zemi.",
-        "phone": "Zadejte telefonní číslo (alespoň 6 číslic).",
+        "phone": "Zadejte platné telefonní číslo pro zvolenou zemi.",
         "password": "Heslo musí mít 12 až 128 znaků.",
         "email": "Zadejte platnou e-mailovou adresu.",
         "consent": "Pro založení účtu zaškrtněte oba souhlasy.",
@@ -289,6 +289,12 @@
         "download": "Stáhnout PDF",
         "more": "Zobrazit starší"
       }
+    },
+    "phone": {
+      "country": "Předvolba: {country} ({code}). Změnit zemi",
+      "search": "Hledat zemi nebo předvolbu",
+      "list": "Země",
+      "noResults": "Žádná odpovídající země."
     }
   }
 }
