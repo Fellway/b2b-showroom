@@ -14,6 +14,8 @@ export type LineSheetSummary = {
   phone: string | null;
   itemCount: number;
   createdAt: string;
+  /** Konto kupca (D23); `null` dla zestawień sprzed kont i po usunięciu konta. */
+  buyerAccountId: string | null;
 };
 
 export type LineSheetItem = {
@@ -47,6 +49,7 @@ export type LineSheetDetail = {
   createdAt: string;
   items: LineSheetItem[];
   wholesaleTotal: number | null;
+  buyerAccountId: string | null;
   version: number;
 };
 
@@ -62,8 +65,9 @@ export const useLineSheets = (page: number) =>
 export const useLineSheet = (id: string) =>
   useQuery({ queryKey: ["admin", "line-sheets", "detail", id], queryFn: () => adminApi.get<LineSheetDetail>(`/line-sheets/${id}`) });
 
-/** PDF serwuje publiczny endpoint po nieodgadywalnym publicId — ten sam plik, który dostał kupiec. */
-export const pdfUrl = (publicId: string) => `/api/v1/line-sheets/${publicId}/pdf`;
+/** PDF zawiera ceny i dane kupca — pobierany z tokenem panelu (D23), ten sam plik, który dostał kupiec. */
+export const downloadPdf = (id: string, referenceNumber: string) =>
+  adminApi.download(`/line-sheets/${id}/pdf`, `${referenceNumber}.pdf`);
 
 /** Miniatury pozycji to zdjęcia produktów z publicznego magazynu mediów. */
 export const mediaUrl = (storageKey: string | null) => (storageKey ? `/api/v1/media/${storageKey}` : null);

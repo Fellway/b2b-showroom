@@ -24,15 +24,12 @@ Priorytet biznesowy od 2026-11-24 — przed importem/eksportem Excela.
   Konta kupców w module `identity` (rejestracja, potwierdzenie adresu, akceptacja, logowanie z rolą `BUYER`, reset hasła,
   e-maile transakcyjne w 4 językach), ceny i EAN tylko z `/api/v1/buyer/catalog/pricing`, zestawienia i PDF tylko dla
   właściciela, obsługa wniosków w panelu (`/api/v1/admin/buyers`), limity zapytań. Sprawdzone end-to-end na żywym API.
-- **6b. Frontend — następny krok.** Do czasu 6b **katalog na frontendzie nie działa** (strony czytają `price`, którego
-  publiczne API już nie zwraca; zestawienie woła usunięty `POST /api/v1/line-sheets`) — 6a i 6b wdrażamy razem.
-  - Sesja kupca jak w panelu (token w pamięci, single-flight refresh z ciasteczka `showroom_buyer_refresh`).
-  - Strony (4 języki): `/account/login`, `/account/register`, `/account/verify-email?token=`,
-    `/account/reset-password?token=` (te ścieżki są w linkach e-maili), „Moje konto”, „Moje zestawienia”.
-    Token z linku: wysłać POST-em i usunąć z adresu (historia, nagłówek Referer).
-  - Katalog: dla gości „Zaloguj się, aby zobaczyć ceny hurtowe”; zalogowany — ceny i EAN z `pricing` scalane po
-    `productId`/`variantId`; zestawienie tylko po zalogowaniu, PDF przez fetch → blob (także w panelu).
-  - Panel: sekcja „Kupcy” (`/admin/buyers` — ścieżka z e-maila do zespołu) z licznikiem wniosków.
+- **6b. Frontend — ✅ 2026-11-25** (szczegóły w `frontend/README.md`). Logowanie, rejestracja, potwierdzenie adresu,
+  reset hasła i „Moje konto” z „Moimi zestawieniami” (4 języki); katalog z cenami i EAN po zalogowaniu (dociągane
+  w przeglądarce), dla gości pasek z logowaniem; zestawienie wymaga logowania (powrót do szuflady po zalogowaniu),
+  PDF przez fetch → blob; panel: sekcja „Kupcy” z licznikiem wniosków. Sprawdzone end-to-end w przeglądarce
+  (rejestracja → potwierdzenie → akceptacja → ceny → PDF). Etap 6 jest na gałęzi `feature/buyer-accounts` —
+  6a i 6b trafiają na `main` razem.
 - **Do ustalenia z marką:** treść e-maili, regulamin i zgody przy rejestracji (polityka prywatności staje się
   pilniejsza — zbieramy dane firm i osób), dostawca SMTP i adres nadawcy (SPF/DKIM na domenie).
 

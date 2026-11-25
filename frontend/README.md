@@ -3,7 +3,24 @@
 Next.js 16 (App Router, TypeScript) · Tailwind CSS 4 · shadcn/ui (Radix) · next-intl 4 · zustand
 
 Publiczny katalog hurtowy: lista kolekcji z filtrami, karta produktu z wyborem wariantów, zestawienie (line sheet)
-z generowaniem PDF i kontakt z opiekunem handlowym oraz panel administracyjny pod `/admin`.
+z generowaniem PDF i kontakt z opiekunem handlowym, konta kupców (ceny i EAN po zalogowaniu, D23) oraz panel
+administracyjny pod `/admin`.
+
+## Konta kupców (D23)
+
+- Strony (4 języki, `noindex`, renderowane na żądanie): `/account/login`, `/account/register`,
+  `/account/verify-email?token=`, `/account/reset-password[?token=]`, `/account` (dane, hasło, „Moje zestawienia”).
+  Ścieżki z tokenem są w linkach e-maili backendu — nie zmieniać bez zmiany `TransactionalBuyerMailer`.
+- Sesja (`src/lib/buyer/session.ts`): ta sama mechanika co w panelu (token w pamięci, refresh z ciasteczka
+  `showroom_buyer_refresh`, single-flight). Znacznik w localStorage (bez danych) mówi, że w tej przeglądarce ktoś
+  był zalogowany — tylko wtedy po przeładowaniu odtwarzamy sesję (gość nie wysyła prób odświeżenia).
+- Ceny i EAN (`usePricing` w `src/lib/buyer/api.ts`): strony katalogu są wspólne i cache'owane, a przeglądarka
+  zalogowanego kupca dociąga `GET /api/v1/buyer/catalog/pricing` — jedno żądanie na stronę (`PricingScope`).
+  Pamięć cen czyszczona przy wylogowaniu. Gość widzi „Ceny po zalogowaniu” i pasek z logowaniem/rejestracją.
+- Zestawienie: wybór działa także dla gościa (bez cen w localStorage), utworzenie PDF wymaga logowania — logowanie
+  z szuflady wraca na tę samą stronę i otwiera zestawienie (`?next=…&selection=1`). PDF pobierany z tokenem
+  (fetch → blob), także w panelu.
+- Token z linku e-mail jest wysyłany najwyżej raz i usuwany z paska adresu po hydratacji (`components/account/token-link.ts`).
 
 ## Panel administracyjny (`/admin`)
 
@@ -13,7 +30,8 @@ z generowaniem PDF i kontakt z opiekunem handlowym oraz panel administracyjny po
   (`src/lib/admin/api.ts`) ponawia żądanie raz po 401. Dane: TanStack Query; błędy po kodach (`src/lib/admin/errors.ts`).
 - Ekrany: Modele (lista z szybką ceną i ukrywaniem, kolumna „Braki”), edytor modelu w krokach (dane, tłumaczenia
   wklejane obok polskiego wzorca, kolory × rozmiary z SKU/EAN, zdjęcia), Kategorie / Kolory / Rozmiary, Zestawienia
-  (leady z kontaktem i PDF), Statystyki, Opiekunowie, Konta (tylko ADMIN).
+  (leady z kontaktem i PDF), Kupcy (wnioski do akceptacji z licznikiem w nawigacji, akceptacja / odrzucenie /
+  zawieszenie / usunięcie konta), Statystyki, Opiekunowie, Konta (tylko ADMIN).
 - Wspólne komponenty panelu: `src/components/admin/ui/` (pola, tabela, nagłówek strony, panel boczny z formularzem,
   statusy, potwierdzenie, komunikat „Zapisano”).
 
@@ -43,8 +61,10 @@ Na Windowsie: `scripts\dev-up.ps1 -Seed -Frontend` stawia bazę, backend, dane d
   liczby mnogie). Błędy API tłumaczone po stabilnym `code` (`src/lib/problem.ts`), nigdy po treści komunikatu.
 - **Dane katalogu** pobierają Server Components (`src/lib/api.ts`, odświeżanie co 60 s); filtry żyją w URL,
   więc link z filtrami można przesłać kupcowi.
-- **Zestawienie** (`src/store/selection.ts`) to stan po stronie przeglądarki (localStorage, maks. 200 pozycji);
-  PDF składa backend z aktualnego katalogu w języku żądania.
+- **Zestawienie** (`src/store/selection.ts`) to stan po stronie przeglądarki (localStorage, maks. 200 pozycji,
+  bez cen i EAN — od wersji 2 magazynu); PDF składa backend z aktualnego katalogu i danych konta w języku żądania.
+- **Nagłówek na stronach statycznych:** komponenty z `useSearchParams` muszą być w granicy `Suspense`
+  (`CategoryNav`) albo czytać adres w obsłudze zdarzenia (`LocaleSwitcher`) — inaczej prerender kończy się błędem.
 - **Analityka** (`src/lib/analytics.ts`) bez ciasteczek: zdarzenia paczkami, tylko identyfikator sesji karty.
   Trwały identyfikator odwiedzającego czeka na decyzję o zgodzie.
 - **Kierunek wizualny:** standard kategorii na poziomie COS / Arket — kontrakt w

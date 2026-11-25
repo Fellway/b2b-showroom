@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Download } from "lucide-react";
 import { PageBody, PageHeader } from "@/components/admin/ui/page-header";
 import { EmptyState, ErrorState, LoadingRows } from "@/components/admin/ui/states";
 import { Table, Td, Th, Tr } from "@/components/admin/ui/table";
 import { errorMessage } from "@/lib/admin/errors";
-import { formatDateTime, LANGUAGE_NAME, pdfUrl, useLineSheets } from "@/lib/admin/line-sheets";
+import { formatDateTime, LANGUAGE_NAME, useLineSheets } from "@/lib/admin/line-sheets";
+import { PdfButton } from "./pdf-button";
 import { Pager } from "./pager";
 
 const plural = (n: number) => (n === 1 ? "zestawienie" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? "zestawienia" : "zestawień");
@@ -32,8 +32,8 @@ export function LineSheetList() {
           <ErrorState message={errorMessage(error)} onRetry={() => void refetch()} />
         ) : data.items.length === 0 ? (
           <EmptyState title="Nie ma jeszcze żadnych zestawień">
-            Zestawienia pojawiają się tutaj, gdy kupiec wybierze modele w katalogu publicznym i pobierze PDF. Każde to
-            potencjalne zamówienie — z danymi kontaktowymi, jeśli kupiec je podał.
+            Zestawienia pojawiają się tutaj, gdy zalogowany kupiec wybierze modele w katalogu i utworzy PDF. Każde to
+            potencjalne zamówienie — z danymi firmy z konta kupca.
           </EmptyState>
         ) : (
           <>
@@ -94,16 +94,7 @@ export function LineSheetList() {
                     <Td numeric>{sheet.itemCount}</Td>
                     <Td className="text-ink-2">{LANGUAGE_NAME[sheet.language] ?? sheet.language}</Td>
                     <Td className="w-10 text-right">
-                      <a
-                        href={pdfUrl(sheet.publicId)}
-                        download
-                        onClick={(e) => e.stopPropagation()}
-                        aria-label={`Pobierz PDF ${sheet.referenceNumber}`}
-                        title="Pobierz PDF"
-                        className="inline-flex size-8 items-center justify-center text-ink-3 hover:text-foreground"
-                      >
-                        <Download aria-hidden className="size-4" strokeWidth={1.5} />
-                      </a>
+                      <PdfButton id={sheet.id} referenceNumber={sheet.referenceNumber} compact />
                     </Td>
                   </Tr>
                 ))}

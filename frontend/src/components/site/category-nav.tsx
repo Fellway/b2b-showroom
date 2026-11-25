@@ -2,17 +2,34 @@
 
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { Suspense } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import type { Category } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-export function CategoryNav({ categories, className }: { categories: Category[]; className?: string }) {
-  const t = useTranslations("site");
+type Props = { categories: Category[]; className?: string };
+
+/**
+ * Nawigacja kategorii. Aktywna kategoria pochodzi z `?category=`, więc część z `useSearchParams` jest w granicy
+ * Suspense — strony statyczne (np. konto kupca) dostają w HTML nawigację bez podświetlenia, uzupełnianą po hydratacji.
+ */
+export function CategoryNav(props: Props) {
+  return (
+    <Suspense fallback={<CategoryLinks {...props} active={null} />}>
+      <CategoryNavWithActive {...props} />
+    </Suspense>
+  );
+}
+
+function CategoryNavWithActive(props: Props) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const onCatalog = pathname === "/";
-  const active = onCatalog ? (searchParams.get("category") ?? "") : null;
+  const active = pathname === "/" ? (searchParams.get("category") ?? "") : null;
+  return <CategoryLinks {...props} active={active} />;
+}
 
+function CategoryLinks({ categories, className, active }: Props & { active: string | null }) {
+  const t = useTranslations("site");
   const items = [{ slug: "", name: t("allProducts") }, ...categories.map((c) => ({ slug: c.slug, name: c.name }))];
 
   return (

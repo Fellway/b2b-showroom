@@ -4,6 +4,7 @@ import type { CatalogSort } from "@/lib/types";
 import { CatalogToolbar } from "@/components/catalog/catalog-toolbar";
 import { ProductCard } from "@/components/catalog/product-card";
 import { Pagination } from "@/components/catalog/pagination";
+import { PriceGate, PricingScope } from "@/components/catalog/pricing";
 import { Link } from "@/i18n/navigation";
 
 const SORTS: CatalogSort[] = ["RECOMMENDED", "NEWEST", "PRICE_ASC", "PRICE_DESC"];
@@ -53,6 +54,8 @@ export default async function CatalogPage({ params, searchParams }: PageProps<"/
         </p>
       </div>
 
+      <PriceGate className="mb-5" />
+
       <CatalogToolbar
         facets={facets}
         selectedColors={colors}
@@ -63,7 +66,7 @@ export default async function CatalogPage({ params, searchParams }: PageProps<"/
       />
 
       {result.items.length > 0 ? (
-        <>
+        <PricingScope productIds={result.items.map((product) => product.id)}>
           <ul className="grid grid-cols-2 gap-x-3 gap-y-10 pt-6 md:grid-cols-3 md:gap-x-4 lg:grid-cols-4 lg:gap-y-14">
             {result.items.map((product, index) => (
               <li key={product.id}>
@@ -72,7 +75,7 @@ export default async function CatalogPage({ params, searchParams }: PageProps<"/
             ))}
           </ul>
           <Pagination page={page} totalPages={result.totalPages} />
-        </>
+        </PricingScope>
       ) : (
         <div className="flex flex-col items-start gap-4 py-24">
           <p className="max-w-[52ch] text-ink-2">{filtered || category ? t("empty") : t("emptyCatalog")}</p>

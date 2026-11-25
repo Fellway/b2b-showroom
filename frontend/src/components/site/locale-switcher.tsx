@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { ChevronDown, Check } from "lucide-react";
 import { useState } from "react";
@@ -14,12 +14,12 @@ export function LocaleSwitcher() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useParams();
-  const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
 
   function change(next: Locale) {
     setOpen(false);
-    const query = Object.fromEntries(searchParams.entries());
+    // parametry adresu czytamy w chwili kliknięcia — bez useSearchParams nagłówek renderuje się też na stronach statycznych
+    const query = Object.fromEntries(new URLSearchParams(window.location.search).entries());
     // @ts-expect-error -- ścieżka i parametry pochodzą z bieżącej trasy, więc są zgodne z jej wzorcem
     router.replace({ pathname, params, query }, { locale: next, scroll: false });
   }

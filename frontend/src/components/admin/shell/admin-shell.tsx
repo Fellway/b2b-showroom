@@ -12,21 +12,24 @@ import {
   Palette,
   Ruler,
   Shirt,
+  Store,
   Tags,
   Users,
   type LucideIcon,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import { usePendingBuyersCount } from "@/lib/admin/buyers";
 import { session, type AdminIdentity } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
 
-type NavItem = { href: string; label: string; icon: LucideIcon; adminOnly?: boolean };
+type NavItem = { href: string; label: string; icon: LucideIcon; adminOnly?: boolean; badge?: "pendingBuyers" };
 
 const NAV: { title?: string; items: NavItem[] }[] = [
   {
     items: [
       { href: "/admin/products", label: "Modele", icon: Shirt },
       { href: "/admin/line-sheets", label: "Zestawienia", icon: FileText },
+      { href: "/admin/buyers", label: "Kupcy", icon: Store, badge: "pendingBuyers" },
       { href: "/admin/analytics", label: "Statystyki", icon: BarChart3 },
     ],
   },
@@ -56,6 +59,7 @@ const ROLE_LABEL = { ADMIN: "Administrator", EDITOR: "Redaktor" } as const;
 export function AdminShell({ admin, children }: { admin: AdminIdentity; children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const pendingBuyers = usePendingBuyersCount().data ?? 0;
 
   async function logout() {
     await session.logout();
@@ -92,6 +96,17 @@ export function AdminShell({ admin, children }: { admin: AdminIdentity; children
                     >
                       <Icon aria-hidden className="size-4" strokeWidth={1.5} />
                       {item.label}
+                      {item.badge === "pendingBuyers" && pendingBuyers > 0 && (
+                        <span
+                          className={cn(
+                            "tabular ml-auto min-w-5 px-1.5 text-center text-meta",
+                            active ? "bg-background text-foreground" : "bg-foreground text-background",
+                          )}
+                          aria-label={`${pendingBuyers} do akceptacji`}
+                        >
+                          {pendingBuyers}
+                        </span>
+                      )}
                     </Link>
                   );
                 })}

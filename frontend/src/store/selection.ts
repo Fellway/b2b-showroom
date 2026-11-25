@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import type { Price } from "@/lib/types";
 
 /** Maksymalna liczba pozycji zestawienia — zgodna z limitem backendu (LineSheet.MAX_ITEMS). */
 export const MAX_LINES = 200;
@@ -9,6 +10,9 @@ export const MAX_LINES = 200;
 /**
  * Jedna pozycja zestawienia = jeden wariant (model × kolor × rozmiar). Dane do wyświetlenia są migawką z chwili
  * dodania; PDF i tak składa backend z aktualnego katalogu w języku żądania.
+ *
+ * Wybór działa także dla gościa (lookbook), dlatego pozycja nie przechowuje cen ani EAN — te zna tylko zalogowany
+ * kupiec (D23) i są dociągane z API przy wyświetlaniu podsumowania.
  */
 export type SelectionLine = {
   variantId: string;
@@ -21,11 +25,7 @@ export type SelectionLine = {
   colorHex: string | null;
   size: string;
   sizeOrder: number;
-  ean: string;
   imageUrl: string | null;
-  wholesale: number;
-  retail: number;
-  currency: string;
   quantity: number | null;
 };
 
@@ -65,9 +65,28 @@ export const useSelection = create<SelectionState>()(
     }),
     {
       name: "fs-line-sheet",
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ lines: state.lines }),
+      // v1 zapisywała w przeglądarce ceny i EAN — od D23 tych danych nie trzymamy lokalnie
+      migrate: (persisted) => {
+        const stored = (persisted as { lines?: SelectionLine[] } | undefined)?.lines ?? [];
+        const lines: SelectionLine[] = stored.map((line) => ({
+          variantId: line.variantId,
+          productId: line.productId,
+          slug: line.slug,
+          styleCode: line.styleCode,
+          name: line.name,
+          colorId: line.colorId,
+          colorName: line.colorName,
+          colorHex: line.colorHex,
+          size: line.size,
+          sizeOrder: line.sizeOrder,
+          imageUrl: line.imageUrl,
+          quantity: line.quantity,
+        }));
+        return { lines };
+      },
     },
   ),
 );
@@ -108,14 +127,19 @@ export function groupLines(lines: SelectionLine[]): SelectionGroup[] {
   return [...groups.values()].map((g) => ({ ...g, lines: g.lines.sort((a, b) => a.sizeOrder - b.sizeOrder) }));
 }
 
-export function summarize(lines: SelectionLine[]) {
+/**
+ * Podsumowanie wyboru. Wartość hurtowa jest liczona tylko, gdy znamy ceny (zalogowany kupiec) — `prices` po `productId`.
+ */
+export function summarize(lines: SelectionLine[], prices?: Map<string, Price>) {
   const withQuantity = lines.filter((l) => l.quantity != null);
+  const priced = prices ? withQuantity.filter((l) => prices.has(l.productId)) : [];
   return {
     lines: lines.length,
     units: withQuantity.reduce((sum, l) => sum + (l.quantity ?? 0), 0),
-    value: withQuantity.reduce((sum, l) => sum + (l.quantity ?? 0) * l.wholesale, 0),
+    value: priced.reduce((sum, l) => sum + (l.quantity ?? 0) * (prices?.get(l.productId)?.wholesale ?? 0), 0),
+    hasValue: priced.length > 0,
     partial: withQuantity.length > 0 && withQuantity.length < lines.length,
     hasQuantities: withQuantity.length > 0,
-    currency: lines[0]?.currency ?? "PLN",
+    currency: (priced[0] && prices?.get(priced[0].productId)?.currency) ?? "PLN",
   };
 }

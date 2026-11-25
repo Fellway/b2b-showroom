@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Fabian's Style — wholesale catalogue",
-    "description": "Wholesale catalogue of Fabian's Style womenswear. Original design, made in Poland. Wholesale prices, recommended retail prices and EAN codes."
+    "description": "Fabian's Style women's wholesale catalogue. Original design, made in Poland. Wholesale prices and EAN codes for registered buyers."
   },
   "site": {
     "context": "Wholesale collection · Made in Poland",
@@ -17,7 +17,9 @@
       "contactLead": "Call or write — we will prepare terms, delivery dates and samples.",
       "social": "The brand on social media",
       "rights": "© {year} Fabian's Style"
-    }
+    },
+    "account": "Account",
+    "signIn": "Sign in"
   },
   "catalog": {
     "title": "Wholesale collection",
@@ -48,7 +50,14 @@
     "previous": "Previous",
     "next": "Next",
     "pageOf": "Page {page} of {total}",
-    "inSelection": "On line sheet: {count}"
+    "inSelection": "On line sheet: {count}",
+    "pricesLocked": "Prices after sign-in",
+    "gate": {
+      "title": "Wholesale prices are for registered buyers",
+      "lead": "Create a business account — once verified you will see wholesale prices, recommended retail prices and EAN codes, and you can prepare a PDF line sheet.",
+      "signIn": "Sign in",
+      "register": "Create account"
+    }
   },
   "product": {
     "back": "Back to catalogue",
@@ -77,7 +86,14 @@
       "sizes": "{range} · {count, plural, one {# size} other {# sizes}}",
       "count": "Number of packs",
       "add": "{count, plural, one {Add pack} other {Add # packs}}"
-    }
+    },
+    "gate": {
+      "title": "Prices and EAN codes for wholesale buyers",
+      "lead": "Sign in to your business account to see the wholesale price, recommended retail price and EAN codes.",
+      "signIn": "Sign in",
+      "register": "Create account"
+    },
+    "eanLocked": "after sign-in"
   },
   "selection": {
     "title": "Line sheet",
@@ -100,26 +116,31 @@
     "continue": "Next: create PDF",
     "limit": "A line sheet can hold at most {max} lines.",
     "form": {
-      "title": "Line sheet details",
-      "lead": "All fields are optional. If you fill them in, they appear in the PDF header and help your sales contact prepare an offer.",
-      "company": "Store or company name",
-      "contactName": "Full name",
-      "email": "Email",
+      "title": "PDF line sheet",
+      "lead": "The PDF header will show your company details from your account, so your sales representative knows who prepared the order.",
+      "company": "Company",
+      "contactName": "Contact person",
+      "email": "E-mail",
       "phone": "Phone",
-      "taxId": "Tax ID / EU VAT",
-      "message": "Message to your sales contact",
-      "consent": "I agree to Fabian's Style processing the data provided to prepare the line sheet and for sales contact.",
-      "consentRequired": "Tick the consent to include your details — or remove the details from the form.",
-      "back": "Back to lines",
+      "taxId": "VAT number",
+      "message": "Message to your sales representative (optional)",
+      "back": "Back to items",
       "submit": "Create PDF line sheet",
-      "submitting": "Creating line sheet…"
+      "submitting": "Creating line sheet…",
+      "editProfile": "Change contact details",
+      "signInTitle": "Sign in to create the PDF",
+      "signInLead": "Line sheets with wholesale prices and EAN codes are available to registered buyers. Your selection will be kept.",
+      "signIn": "Sign in",
+      "register": "Create account"
     },
     "done": {
       "title": "Line sheet <ref>{reference}</ref> is ready",
-      "lead": "Download the PDF and share it with your team. Questions about dates or terms? Contact your sales representative.",
+      "lead": "Download the PDF and share it with your team. You will also find it in your account. Questions about delivery or terms? Contact your sales representative.",
       "download": "Download PDF",
       "newSheet": "Start a new line sheet",
-      "keep": "Back to catalogue"
+      "keep": "Back to catalogue",
+      "downloading": "Downloading…",
+      "mySheets": "My line sheets"
     },
     "allSizesShort": "All",
     "allSizesLabel": "all sizes"
@@ -134,7 +155,10 @@
     "validation": "Check the form fields.",
     "notFoundTitle": "We could not find this page",
     "notFoundLead": "The style may have been withdrawn from the collection.",
-    "notFoundBack": "Go to the catalogue"
+    "notFoundBack": "Go to the catalogue",
+    "notActive": "Your account is not active. Please contact your sales representative.",
+    "sessionExpired": "Your session has expired. Please sign in again.",
+    "download": "The PDF could not be downloaded. Please try again."
   },
   "languages": {
     "pl": "Polski",
@@ -153,5 +177,118 @@
     "currentGranted": "Current setting: statistics consent given.",
     "currentDenied": "Current setting: no statistics consent.",
     "policy": "Privacy policy"
+  },
+  "account": {
+    "titles": {
+      "login": "Sign in",
+      "register": "Registration",
+      "verify": "E-mail confirmation",
+      "reset": "New password",
+      "account": "My account"
+    },
+    "email": "E-mail",
+    "password": "Password",
+    "passwordHint": "At least 12 characters — a few easy-to-remember words work best.",
+    "backToCatalog": "Back to the catalogue",
+    "login": {
+      "title": "Sign in",
+      "lead": "Business account for the Fabian's Style wholesale catalogue.",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "forgot": "Forgot password",
+      "noAccount": "No account yet?",
+      "register": "Create a business account",
+      "invalid": "Incorrect e-mail or password.",
+      "status": {
+        "PENDING_EMAIL": "Please confirm your e-mail address — we have sent a link to your inbox.",
+        "PENDING_APPROVAL": "Your application is awaiting approval. We will e-mail you once your account is active.",
+        "REJECTED": "We cannot activate this account. Please contact your sales representative.",
+        "SUSPENDED": "This account is suspended. Please contact your sales representative.",
+        "ACTIVE": ""
+      },
+      "resend": "Send the link again",
+      "resent": "If the address is awaiting confirmation, we have sent a new link."
+    },
+    "register": {
+      "title": "Create a business account",
+      "lead": "The wholesale catalogue is for shops and businesses. Once you confirm your e-mail address, we will review your application and activate the account — then you will see wholesale prices and EAN codes.",
+      "company": "Company",
+      "contact": "Contact person",
+      "access": "Sign-in details",
+      "companyName": "Company name",
+      "country": "Country",
+      "countryPlaceholder": "Choose a country",
+      "taxId": "VAT / tax number",
+      "taxIdHint": "Poland: 10-digit NIP.",
+      "contactName": "Full name",
+      "phone": "Phone",
+      "terms": "I accept the terms of use of the Fabian's Style wholesale catalogue.",
+      "privacy": "I agree to Fabian's Style processing the data I provide to manage my account and for business contact. <policy>Privacy policy</policy>",
+      "submit": "Create account",
+      "submitting": "Sending…",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "doneTitle": "Check your inbox",
+      "doneLead": "We have sent a confirmation link to {email}. Once you confirm it, your application goes to our team.",
+      "doneHint": "Can't see the message? Check your spam folder or send the link again.",
+      "errors": {
+        "taxId": "Invalid number — check the VAT / tax number and the country.",
+        "phone": "Enter a phone number (at least 6 digits).",
+        "password": "The password must have 12 to 128 characters.",
+        "email": "Enter a valid e-mail address.",
+        "consent": "Tick both consents to create an account.",
+        "country": "Choose a country.",
+        "required": "Please fill in this field."
+      }
+    },
+    "verify": {
+      "checking": "Confirming your address…",
+      "doneTitle": "Address confirmed",
+      "doneLead": "Your application has been passed to our team. We will e-mail you once your account is active.",
+      "invalidTitle": "The link has expired or has already been used",
+      "invalidLead": "If your account is still awaiting confirmation, send a new link.",
+      "toLogin": "Go to sign-in"
+    },
+    "reset": {
+      "requestTitle": "Forgot your password?",
+      "requestLead": "Enter your account e-mail — we will send a link to set a new password.",
+      "requestSubmit": "Send link",
+      "sent": "If an account with this address exists, we have sent a link. It is valid for one hour.",
+      "newTitle": "Set a new password",
+      "newSubmit": "Save password",
+      "saved": "Password changed. Sign in with your new password.",
+      "invalid": "The link has expired or has already been used. Request a new one."
+    },
+    "page": {
+      "title": "My account",
+      "company": "Company",
+      "taxId": "VAT number",
+      "email": "E-mail",
+      "companyHint": "Your sales representative can change the company name, tax number and e-mail.",
+      "profile": "Contact details",
+      "contactName": "Contact person",
+      "phone": "Phone",
+      "language": "E-mail language",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Saved.",
+      "concurrent": "The data has changed in the meantime — please reload the page.",
+      "logout": "Sign out",
+      "password": {
+        "title": "Change password",
+        "current": "Current password",
+        "new": "New password",
+        "submit": "Change password",
+        "changed": "Password changed. Other sessions have been signed out.",
+        "currentInvalid": "The current password is incorrect."
+      },
+      "sheets": {
+        "title": "My line sheets",
+        "empty": "You have no line sheets yet. Choose products in the catalogue and create a PDF.",
+        "items": "{count, plural, one {# item} other {# items}}",
+        "download": "Download PDF",
+        "more": "Show older"
+      }
+    }
   }
 }

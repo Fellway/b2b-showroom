@@ -5,6 +5,7 @@ import type { Category } from "@/lib/types";
 import { CategoryNav } from "./category-nav";
 import { LocaleSwitcher } from "./locale-switcher";
 import { SelectionButton } from "@/components/selection/selection-button";
+import { AccountLink } from "@/components/account/account-link";
 
 export async function SiteHeader({ categories }: { categories: Category[] }) {
   const t = await getTranslations("site");
@@ -24,6 +25,7 @@ export async function SiteHeader({ categories }: { categories: Category[] }) {
         <CategoryNav categories={categories} className="hidden lg:flex" />
         <div className="ml-auto flex items-center gap-1">
           <LocaleSwitcher />
+          <AccountLink />
           <SelectionButton />
         </div>
       </div>

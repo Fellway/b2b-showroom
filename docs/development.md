@@ -78,6 +78,13 @@ cd frontend && npx tsc --noEmit && npm run lint && npx next build
   lokalnie buduj `npx next build --webpack`. CI i obraz Dockera (Linux) używają domyślnego Turbopacka.
   Testując lokalnie serwer `standalone`, ustaw `HOSTNAME=0.0.0.0` (jak w obrazie) — przy `127.0.0.1` rewrite
   middleware next-intl wskazuje na `localhost` i strona główna wpada w pętlę przekierowań.
+- **Next.js — strony statyczne i `useSearchParams`:** komponent z `useSearchParams` w layoucie bez granicy
+  `Suspense` psuje prerender stron statycznych (`missing-suspense-with-csr-bailout`). Strony konta kupca
+  renderujemy na żądanie (`await connection()`), żeby nie zamrażać w nich danych z chwili buildu.
+- **Ręczne testy kont kupców lokalnie:** e-maile są wyłączone (`SHOWROOM_MAIL_ENABLED=false`) — link
+  potwierdzający / resetu jest w `backend/data/dev-backend.log`; wniosek akceptujesz w panelu (`/admin/buyers`).
+- **Windows, PowerShell 5.1:** `Get-Content` bez `-Encoding UTF8` wyświetla pliki UTF-8 jako krzaki (sam plik jest
+  poprawny).
 - **Windows, PowerShell 5.1:** pliki `.ps1` z polskimi znakami muszą być zapisane w UTF-8 **z BOM**,
   inaczej są czytane jako ANSI. Przekierowanie stderr programu natywnego (`2>$null`) przy
   `$ErrorActionPreference = 'Stop'` przerywa skrypt.

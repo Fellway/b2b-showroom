@@ -2,15 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Download, Mail, Phone } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 import type { ReactNode } from "react";
 import { PageBody, PageHeader } from "@/components/admin/ui/page-header";
 import { ErrorState, LoadingRows } from "@/components/admin/ui/states";
 import { Table, Td, Th, Tr } from "@/components/admin/ui/table";
-import { buttonVariants } from "@/components/ui/button";
 import { errorMessage } from "@/lib/admin/errors";
-import { formatDateTime, formatMoney, LANGUAGE_NAME, mediaUrl, pdfUrl, useLineSheet } from "@/lib/admin/line-sheets";
-import { cn } from "@/lib/utils";
+import { formatDateTime, formatMoney, LANGUAGE_NAME, mediaUrl, useLineSheet } from "@/lib/admin/line-sheets";
+import { PdfButton } from "./pdf-button";
 
 export function LineSheetDetailView({ id }: { id: string }) {
   const { data: sheet, isPending, isError, error, refetch } = useLineSheet(id);
@@ -50,10 +49,7 @@ export function LineSheetDetailView({ id }: { id: string }) {
         back={back}
         actions={
           sheet.pdfAvailable ? (
-            <a href={pdfUrl(sheet.publicId)} download className={cn(buttonVariants({ variant: "primary", size: "md" }))}>
-              <Download aria-hidden strokeWidth={1.5} />
-              Pobierz PDF
-            </a>
+            <PdfButton id={sheet.id} referenceNumber={sheet.referenceNumber} />
           ) : (
             <span className="text-meta text-ink-3">PDF niedostępny</span>
           )
@@ -89,6 +85,14 @@ export function LineSheetDetailView({ id }: { id: string }) {
               ) : (
                 <p className="text-ink-2">Kupiec nie podał danych kontaktowych — zestawienie anonimowe.</p>
               )}
+              {sheet.buyerAccountId ? (
+                <Link
+                  href={`/admin/buyers?buyer=${sheet.buyerAccountId}`}
+                  className="mt-3 inline-block text-meta text-ink-2 underline underline-offset-4 hover:text-foreground"
+                >
+                  Konto kupca
+                </Link>
+              ) : null}
             </InfoBlock>
 
             {sheet.message && (

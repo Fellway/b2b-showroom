@@ -11,6 +11,7 @@ import { DemoNotice } from "@/components/site/demo-notice";
 import { PageViewTracker } from "@/components/site/page-view-tracker";
 import { ConsentBanner } from "@/components/site/consent-banner";
 import { SelectionDrawer } from "@/components/selection/selection-drawer";
+import { BuyerSessionBootstrap } from "@/components/account/session-bootstrap";
 import "../globals.css";
 
 const golos = Golos_Text({
@@ -66,6 +67,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
           <SelectionDrawer representatives={representatives} />
           <PageViewTracker />
           <ConsentBanner />
+          <BuyerSessionBootstrap />
         </NextIntlClientProvider>
       </body>
     </html>

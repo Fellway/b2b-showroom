@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Fabian's Style — velkoobchodní katalog",
-    "description": "Velkoobchodní katalog dámského oblečení Fabian's Style. Autorský design, šito v Polsku. Velkoobchodní ceny, doporučené maloobchodní ceny a kódy EAN."
+    "description": "Velkoobchodní katalog dámské módy Fabian's Style. Autorský design, šito v Polsku. Velkoobchodní ceny a kódy EAN pro registrované odběratele."
   },
   "site": {
     "context": "Velkoobchodní kolekce · Šito v Polsku",
@@ -17,7 +17,9 @@
       "contactLead": "Zavolejte nebo napište — připravíme podmínky spolupráce, termíny dodání a vzorky.",
       "social": "Značka na sociálních sítích",
       "rights": "© {year} Fabian's Style"
-    }
+    },
+    "account": "Účet",
+    "signIn": "Přihlásit se"
   },
   "catalog": {
     "title": "Velkoobchodní kolekce",
@@ -48,7 +50,14 @@
     "previous": "Předchozí",
     "next": "Další",
     "pageOf": "Strana {page} z {total}",
-    "inSelection": "Ve výběru: {count}"
+    "inSelection": "Ve výběru: {count}",
+    "pricesLocked": "Ceny po přihlášení",
+    "gate": {
+      "title": "Velkoobchodní ceny vidí registrovaní odběratelé",
+      "lead": "Založte si firemní účet — po ověření uvidíte velkoobchodní ceny, doporučené maloobchodní ceny a kódy EAN a připravíte si PDF přehled.",
+      "signIn": "Přihlásit se",
+      "register": "Založit účet"
+    }
   },
   "product": {
     "back": "Zpět do katalogu",
@@ -77,13 +86,20 @@
       "sizes": "{range} · {count, plural, one {# velikost} few {# velikosti} many {# velikosti} other {# velikostí}}",
       "count": "Počet balíčků",
       "add": "{count, plural, one {Přidat balíček} few {Přidat # balíčky} many {Přidat # balíčku} other {Přidat # balíčků}}"
-    }
+    },
+    "gate": {
+      "title": "Ceny a kódy EAN pro velkoobchodní odběratele",
+      "lead": "Přihlaste se k firemnímu účtu a uvidíte velkoobchodní cenu, doporučenou maloobchodní cenu a kódy EAN.",
+      "signIn": "Přihlásit se",
+      "register": "Založit účet"
+    },
+    "eanLocked": "po přihlášení"
   },
   "selection": {
     "title": "Výběr",
     "open": "Otevřít výběr",
     "close": "Zavřít",
-    "empty": "Výběr je prázdný. Na kartě produktu zvolte velikosti a připravte přehled s cenami a kódy EAN.",
+    "empty": "Přehled je prázdný. Vyberte velikosti na kartě produktu a připravte si přehled s cenami a kódy EAN.",
     "browse": "Prohlížet kolekci",
     "summary": {
       "lines": "Položky",
@@ -100,26 +116,31 @@
     "continue": "Dále: vytvořit PDF",
     "limit": "Výběr může obsahovat nejvýše {max} položek.",
     "form": {
-      "title": "Údaje do výběru",
-      "lead": "Všechna pole jsou nepovinná. Pokud je vyplníte, objeví se v záhlaví PDF a pomohou obchodnímu zástupci připravit nabídku.",
-      "company": "Název obchodu nebo firmy",
-      "contactName": "Jméno a příjmení",
+      "title": "PDF přehled",
+      "lead": "V záhlaví PDF budou údaje vaší firmy z účtu — obchodní zástupce uvidí, kdo nabídku připravil.",
+      "company": "Firma",
+      "contactName": "Kontaktní osoba",
       "email": "E-mail",
       "phone": "Telefon",
-      "taxId": "IČ / DIČ",
-      "message": "Zpráva pro obchodního zástupce",
-      "consent": "Souhlasím se zpracováním uvedených údajů společností Fabian's Style za účelem přípravy výběru a obchodního kontaktu.",
-      "consentRequired": "Zaškrtněte souhlas, abyste mohli připojit své údaje — nebo údaje z formuláře odstraňte.",
-      "back": "Zpět k položkám",
-      "submit": "Vytvořit PDF",
-      "submitting": "Vytvářím výběr…"
+      "taxId": "DIČ / VAT",
+      "message": "Zpráva obchodnímu zástupci (nepovinné)",
+      "back": "Zpět na položky",
+      "submit": "Vytvořit PDF přehled",
+      "submitting": "Vytvářím přehled…",
+      "editProfile": "Změnit kontaktní údaje",
+      "signInTitle": "Pro vytvoření PDF se přihlaste",
+      "signInLead": "Přehled s velkoobchodními cenami a kódy EAN si připraví registrovaní odběratelé. Váš výběr zůstane uložený.",
+      "signIn": "Přihlásit se",
+      "register": "Založit účet"
     },
     "done": {
       "title": "Výběr <ref>{reference}</ref> je připraven",
-      "lead": "Stáhněte si PDF a sdílejte ho se svým týmem. Máte dotazy k termínům nebo podmínkám? Kontaktujte obchodního zástupce.",
+      "lead": "Stáhněte si PDF a pošlete ho svému týmu. Přehled najdete i ve svém účtu. Máte dotazy k termínům nebo podmínkám? Kontaktujte obchodního zástupce.",
       "download": "Stáhnout PDF",
       "newSheet": "Začít nový výběr",
-      "keep": "Zpět do katalogu"
+      "keep": "Zpět do katalogu",
+      "downloading": "Stahuji…",
+      "mySheets": "Moje přehledy"
     },
     "allSizesShort": "Vše",
     "allSizesLabel": "všechny velikosti"
@@ -134,7 +155,10 @@
     "validation": "Zkontrolujte pole formuláře.",
     "notFoundTitle": "Tuto stránku jsme nenašli",
     "notFoundLead": "Model mohl být z kolekce stažen.",
-    "notFoundBack": "Přejít do katalogu"
+    "notFoundBack": "Přejít do katalogu",
+    "notActive": "Váš účet není aktivní. Kontaktujte obchodního zástupce.",
+    "sessionExpired": "Přihlášení vypršelo. Přihlaste se znovu.",
+    "download": "PDF se nepodařilo stáhnout. Zkuste to znovu."
   },
   "languages": {
     "pl": "Polski",
@@ -153,5 +177,118 @@
     "currentGranted": "Aktuálně: souhlas se statistikami udělen.",
     "currentDenied": "Aktuálně: bez souhlasu se statistikami.",
     "policy": "Zásady ochrany soukromí"
+  },
+  "account": {
+    "titles": {
+      "login": "Přihlášení",
+      "register": "Registrace",
+      "verify": "Potvrzení adresy",
+      "reset": "Nové heslo",
+      "account": "Můj účet"
+    },
+    "email": "E-mail",
+    "password": "Heslo",
+    "passwordHint": "Alespoň 12 znaků — nejlépe několik slov, která si snadno zapamatujete.",
+    "backToCatalog": "Zpět do katalogu",
+    "login": {
+      "title": "Přihlásit se",
+      "lead": "Firemní účet ve velkoobchodním katalogu Fabian's Style.",
+      "submit": "Přihlásit se",
+      "submitting": "Přihlašování…",
+      "forgot": "Zapomenuté heslo",
+      "noAccount": "Nemáte účet?",
+      "register": "Založit firemní účet",
+      "invalid": "Nesprávný e-mail nebo heslo.",
+      "status": {
+        "PENDING_EMAIL": "Potvrďte e-mailovou adresu — poslali jsme vám odkaz.",
+        "PENDING_APPROVAL": "Vaše žádost čeká na schválení. Jakmile bude účet aktivní, pošleme vám e-mail.",
+        "REJECTED": "Tento účet nemůžeme aktivovat. Kontaktujte obchodního zástupce.",
+        "SUSPENDED": "Účet je pozastaven. Kontaktujte obchodního zástupce.",
+        "ACTIVE": ""
+      },
+      "resend": "Poslat odkaz znovu",
+      "resent": "Pokud adresa čeká na potvrzení, poslali jsme nový odkaz."
+    },
+    "register": {
+      "title": "Založit firemní účet",
+      "lead": "Velkoobchodní katalog je určen obchodům a firmám. Po potvrzení e-mailové adresy žádost posoudíme a účet aktivujeme — pak uvidíte velkoobchodní ceny a kódy EAN.",
+      "company": "Firma",
+      "contact": "Kontaktní osoba",
+      "access": "Přihlašovací údaje",
+      "companyName": "Název firmy",
+      "country": "Země",
+      "countryPlaceholder": "Vyberte zemi",
+      "taxId": "DIČ / VAT",
+      "taxIdHint": "V Polsku — 10místné NIP.",
+      "contactName": "Jméno a příjmení",
+      "phone": "Telefon",
+      "terms": "Přijímám podmínky používání velkoobchodního katalogu Fabian's Style.",
+      "privacy": "Souhlasím se zpracováním uvedených údajů společností Fabian's Style za účelem správy účtu a obchodního kontaktu. <policy>Zásady ochrany osobních údajů</policy>",
+      "submit": "Založit účet",
+      "submitting": "Odesílání…",
+      "haveAccount": "Už máte účet?",
+      "signIn": "Přihlásit se",
+      "doneTitle": "Zkontrolujte schránku",
+      "doneLead": "Na adresu {email} jsme poslali potvrzovací odkaz. Po potvrzení adresy předáme žádost našemu týmu.",
+      "doneHint": "Nevidíte zprávu? Zkontrolujte složku spam nebo pošlete odkaz znovu.",
+      "errors": {
+        "taxId": "Neplatné číslo — zkontrolujte DIČ / VAT a zemi.",
+        "phone": "Zadejte telefonní číslo (alespoň 6 číslic).",
+        "password": "Heslo musí mít 12 až 128 znaků.",
+        "email": "Zadejte platnou e-mailovou adresu.",
+        "consent": "Pro založení účtu zaškrtněte oba souhlasy.",
+        "country": "Vyberte zemi.",
+        "required": "Vyplňte toto pole."
+      }
+    },
+    "verify": {
+      "checking": "Potvrzuji adresu…",
+      "doneTitle": "Adresa potvrzena",
+      "doneLead": "Žádost jsme předali našemu týmu. Jakmile bude účet aktivní, pošleme vám e-mail.",
+      "invalidTitle": "Odkaz vypršel nebo už byl použit",
+      "invalidLead": "Pokud účet stále čeká na potvrzení, pošlete si nový odkaz.",
+      "toLogin": "Přejít k přihlášení"
+    },
+    "reset": {
+      "requestTitle": "Zapomněli jste heslo?",
+      "requestLead": "Zadejte e-mail účtu — pošleme odkaz pro nastavení nového hesla.",
+      "requestSubmit": "Poslat odkaz",
+      "sent": "Pokud účet s touto adresou existuje, poslali jsme odkaz. Platí jednu hodinu.",
+      "newTitle": "Nastavte nové heslo",
+      "newSubmit": "Uložit heslo",
+      "saved": "Heslo změněno. Přihlaste se novým heslem.",
+      "invalid": "Odkaz vypršel nebo už byl použit. Požádejte o nový."
+    },
+    "page": {
+      "title": "Můj účet",
+      "company": "Firma",
+      "taxId": "DIČ / VAT",
+      "email": "E-mail",
+      "companyHint": "Název firmy, daňové číslo a e-mail změní obchodní zástupce.",
+      "profile": "Kontaktní údaje",
+      "contactName": "Kontaktní osoba",
+      "phone": "Telefon",
+      "language": "Jazyk e-mailů",
+      "save": "Uložit",
+      "saving": "Ukládání…",
+      "saved": "Uloženo.",
+      "concurrent": "Údaje se mezitím změnily — obnovte stránku.",
+      "logout": "Odhlásit se",
+      "password": {
+        "title": "Změna hesla",
+        "current": "Současné heslo",
+        "new": "Nové heslo",
+        "submit": "Změnit heslo",
+        "changed": "Heslo změněno. Ostatní relace byly odhlášeny.",
+        "currentInvalid": "Současné heslo je nesprávné."
+      },
+      "sheets": {
+        "title": "Moje přehledy",
+        "empty": "Zatím nemáte žádné přehledy. Vyberte modely v katalogu a vytvořte PDF.",
+        "items": "{count, plural, one {# položka} few {# položky} other {# položek}}",
+        "download": "Stáhnout PDF",
+        "more": "Zobrazit starší"
+      }
+    }
   }
 }

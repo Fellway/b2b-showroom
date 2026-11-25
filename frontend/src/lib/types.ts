@@ -1,4 +1,4 @@
-/** Kształty odpowiedzi publicznego API `/api/v1` (zob. backend/README.md). */
+/** Kształty odpowiedzi publicznego API `/api/v1` (zob. backend/README.md). Ceny i EAN — tylko w API kupca (D23). */
 
 export type Price = { wholesale: number; retail: number; currency: string; markup: number };
 
@@ -12,14 +12,13 @@ export type ProductCard = {
   styleCode: string;
   name: string;
   categorySlug: string;
-  price: Price;
   featured: boolean;
   cover: ImageRef | null;
   colors: ColorSwatch[];
   sizes: string[];
 };
 
-export type VariantOption = { id: string; size: string; sku: string; ean: string };
+export type VariantOption = { id: string; size: string; sku: string };
 
 export type ColorOption = ColorSwatch & { variants: VariantOption[] };
 
@@ -32,7 +31,6 @@ export type ProductDetail = {
   materialComposition: string | null;
   careInstructions: string | null;
   category: { id: string; slug: string; name: string };
-  price: Price;
   colors: ColorOption[];
   images: ImageRef[];
 };
@@ -58,6 +56,34 @@ export type SalesRepresentative = { id: string; fullName: string; email: string;
 export type CatalogSort = "RECOMMENDED" | "NEWEST" | "PRICE_ASC" | "PRICE_DESC";
 
 export type CreatedLineSheet = { id: string; referenceNumber: string; pdfUrl: string };
+
+/** Ceny i EAN produktu — `GET /api/v1/buyer/catalog/pricing`, tylko dla zalogowanego kupca. */
+export type ProductPricing = { productId: string; price: Price; variants: { variantId: string; sku: string; ean: string }[] };
+
+export type BuyerStatus = "PENDING_EMAIL" | "PENDING_APPROVAL" | "ACTIVE" | "REJECTED" | "SUSPENDED";
+
+export type BuyerAccount = {
+  id: string;
+  email: string;
+  companyName: string;
+  countryCode: string;
+  taxId: string;
+  contactName: string;
+  phone: string;
+  language: string;
+  status: BuyerStatus;
+  createdAt: string;
+  version: number;
+};
+
+export type BuyerLineSheet = {
+  id: string;
+  publicId: string;
+  referenceNumber: string;
+  language: string;
+  itemCount: number;
+  createdAt: string;
+};
 
 /** RFC 9457 Problem Details z własnym, stabilnym kodem błędu. */
 export type Problem = { status: number; code?: string; detail?: string; errors?: { field: string; message: string }[] };

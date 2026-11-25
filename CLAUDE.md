@@ -26,7 +26,7 @@ etapów niżej; zmiana systemu wizualnego → `DESIGN.md`. Po zakończeniu etapu
 | 4b | Frontend: panel administracyjny (`/admin`: modele, słowniki, zestawienia, statystyki, opiekunowie, konta) | ✅ |
 | 5 | Wdrożenie: Dockerfile'e, `deploy/` (VPS + Compose + Caddy, kopie), GitHub Actions + obrazy w GHCR (`docs/deployment.md`) | 🟡 przygotowane, czeka na serwer i domenę (wstrzymane) |
 | 6a | Konta kupców — backend (D23): rejestracja + akceptacja, ceny/EAN/PDF tylko po zalogowaniu, e-maile transakcyjne (migracja V3) | ✅ |
-| 6b | Konta kupców — frontend: logowanie/rejestracja, ceny z `/api/v1/buyer/catalog/pricing`, „Moje zestawienia”, panel „Kupcy” | ⏳ następny (do tego czasu katalog na frontendzie nie działa) |
+| 6b | Konta kupców — frontend: logowanie/rejestracja, ceny z `/api/v1/buyer/catalog/pricing`, „Moje zestawienia”, panel „Kupcy” | ✅ |
 
 Pracujemy etapami — nie piszemy całego systemu naraz. Przed startem etapu zadajemy pytania doprecyzowujące,
 jeśli decyzja zmienia kształt rozwiązania.

@@ -92,11 +92,11 @@ Backend: `?lang=` → `Accept-Language` → `pl`. PDF w języku zestawienia. Pan
 
 | Ścieżka | Zawartość |
 |---|---|
-| `src/app/[locale]/` | katalog (`page.tsx`), karta produktu (`p/[slug]`), layout z nagłówkiem, stopką, szufladą zestawienia, banerem zgody |
+| `src/app/[locale]/` | katalog (`page.tsx`), karta produktu (`p/[slug]`), konto kupca (`account/…`), layout z nagłówkiem, stopką, szufladą zestawienia, banerem zgody |
 | `src/app/admin/` | logowanie, `(panel)/…` — modele, edytor, słowniki, zestawienia, statystyki, opiekunowie, konta |
-| `src/components/{catalog,selection,site}` | komponenty katalogu |
-| `src/components/admin/{ui,shell,product-list,product-editor,dictionaries,line-sheets,analytics,representatives,users}` | komponenty panelu (`ui/` — wspólne) |
-| `src/lib/` | API katalogu (server-only), formatowanie, analityka, zgoda, typy; `lib/admin/` — sesja, klient API, błędy, zapytania |
+| `src/components/{catalog,selection,site,account}` | komponenty katalogu i kont kupców (`catalog/pricing.tsx` — ceny po zalogowaniu) |
+| `src/components/admin/{ui,shell,product-list,product-editor,dictionaries,line-sheets,buyers,analytics,representatives,users}` | komponenty panelu (`ui/` — wspólne) |
+| `src/lib/` | API katalogu (server-only), formatowanie, analityka, zgoda, typy; `lib/admin/` — sesja, klient API, błędy, zapytania; `lib/buyer/` — sesja i klient API kupca, ceny |
 | `src/app/globals.css` | tokeny systemu wizualnego (opis: `DESIGN.md`) |
 
 ## Testy

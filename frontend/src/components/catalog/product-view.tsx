@@ -13,6 +13,8 @@ import { useHydrated } from "@/lib/use-hydrated";
 import { cn } from "@/lib/utils";
 import { useSelection, type SelectionLine } from "@/store/selection";
 import { RepresentativeContact } from "@/components/site/representative-contact";
+import { usePricing } from "@/lib/buyer/api";
+import { PriceGate } from "./pricing";
 
 type Picked = Record<string, number | null>;
 
@@ -35,6 +37,10 @@ export function ProductView({
     product.colors.find((c) => c.code === searchParams.get("color")) ?? product.colors[0];
   const [colorId, setColorId] = useState(initialColor?.id);
   const color = product.colors.find((c) => c.id === colorId) ?? product.colors[0];
+
+  const pricingState = usePricing([product.id]);
+  const pricing = pricingState.status === "ready" ? pricingState.byProduct.get(product.id) : undefined;
+  const eanByVariant = new Map(pricing?.variants.map((v) => [v.variantId, v.ean]) ?? []);
 
   const lines = useSelection((s) => s.lines);
   const replaceColor = useSelection((s) => s.replaceColor);
@@ -116,11 +122,7 @@ export function ProductView({
         colorHex: color.hex,
         size: variant.size,
         sizeOrder: index,
-        ean: variant.ean,
         imageUrl: cover,
-        wholesale: product.price.wholesale,
-        retail: product.price.retail,
-        currency: product.price.currency,
         quantity: source[variant.id] ?? null,
       }));
     for (const id of sourceIds.filter((id) => !(id in savedForColor))) {
@@ -163,16 +165,27 @@ export function ProductView({
           {t("styleCode", { code: product.styleCode })} · {product.category.name}
         </p>
 
-        <dl className="tabular mt-6 grid grid-cols-[auto_1fr] items-baseline gap-x-6 gap-y-1.5 border-y border-line py-4 text-small">
-          <dt className="text-ink-3">{t("wholesale")}</dt>
-          <dd className="text-right text-body font-medium">
-            {formatMoney(product.price.wholesale, product.price.currency, locale)}
-          </dd>
-          <dt className="text-ink-3">{t("retail")}</dt>
-          <dd className="text-right">{formatMoney(product.price.retail, product.price.currency, locale)}</dd>
-          <dt className="text-ink-3">{t("markup")}</dt>
-          <dd className="text-right">{formatMarkup(product.price.markup, locale)}</dd>
-        </dl>
+        {/* ceny i EAN tylko dla zalogowanego kupca (D23) — dociągane w przeglądarce */}
+        {pricingState.status === "anonymous" ? (
+          <PriceGate namespace="product" className="mt-6 sm:flex-col sm:items-start" />
+        ) : pricing ? (
+          <dl className="tabular mt-6 grid grid-cols-[auto_1fr] items-baseline gap-x-6 gap-y-1.5 border-y border-line py-4 text-small">
+            <dt className="text-ink-3">{t("wholesale")}</dt>
+            <dd className="text-right text-body font-medium">
+              {formatMoney(pricing.price.wholesale, pricing.price.currency, locale)}
+            </dd>
+            <dt className="text-ink-3">{t("retail")}</dt>
+            <dd className="text-right">{formatMoney(pricing.price.retail, pricing.price.currency, locale)}</dd>
+            <dt className="text-ink-3">{t("markup")}</dt>
+            <dd className="text-right">{formatMarkup(pricing.price.markup, locale)}</dd>
+          </dl>
+        ) : pricingState.status === "loading" ? (
+          <div aria-hidden className="mt-6 flex flex-col gap-2.5 border-y border-line py-4">
+            <div className="h-4 w-full bg-well" />
+            <div className="h-3.5 w-2/3 bg-well" />
+            <div className="h-3.5 w-1/3 bg-well" />
+          </div>
+        ) : null}
 
         <fieldset className="mt-6">
           <legend className="text-small">
@@ -351,7 +364,9 @@ export function ProductView({
                 {color.variants.map((variant) => (
                   <tr key={variant.id} className="border-t border-line">
                     <td className="py-1.5">{variant.size}</td>
-                    <td className="py-1.5 select-all">{variant.ean}</td>
+                    <td className={cn("py-1.5", eanByVariant.has(variant.id) ? "select-all" : "text-ink-3")}>
+                      {eanByVariant.get(variant.id) ?? (pricingState.status === "anonymous" ? t("eanLocked") : "—")}
+                    </td>
                     <td className="py-1.5 text-ink-2">{variant.sku}</td>
                   </tr>
                 ))}

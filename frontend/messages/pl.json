@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Fabian's Style — katalog hurtowy",
-    "description": "Katalog hurtowy odzieży damskiej Fabian's Style. Autorski design, szyte w Polsce. Ceny hurtowe, sugerowane ceny detaliczne i kody EAN."
+    "description": "Katalog hurtowy odzieży damskiej Fabian's Style. Autorski design, szyte w Polsce. Ceny hurtowe i kody EAN dla zarejestrowanych kupców."
   },
   "site": {
     "context": "Kolekcja hurtowa · Szyte w Polsce",
@@ -17,7 +17,9 @@
       "contactLead": "Zadzwoń lub napisz — przygotujemy warunki współpracy, terminy dostaw i próbki.",
       "social": "Marka w mediach społecznościowych",
       "rights": "© {year} Fabian's Style"
-    }
+    },
+    "account": "Konto",
+    "signIn": "Zaloguj się"
   },
   "catalog": {
     "title": "Kolekcja hurtowa",
@@ -48,7 +50,14 @@
     "previous": "Poprzednia",
     "next": "Następna",
     "pageOf": "Strona {page} z {total}",
-    "inSelection": "W zestawieniu: {count}"
+    "inSelection": "W zestawieniu: {count}",
+    "pricesLocked": "Ceny po zalogowaniu",
+    "gate": {
+      "title": "Ceny hurtowe widzą zarejestrowani kupcy",
+      "lead": "Załóż konto firmowe — po weryfikacji zobaczysz ceny hurtowe, sugerowane ceny detaliczne i kody EAN oraz przygotujesz zestawienie PDF.",
+      "signIn": "Zaloguj się",
+      "register": "Załóż konto"
+    }
   },
   "product": {
     "back": "Wróć do katalogu",
@@ -77,7 +86,14 @@
       "sizes": "{range} · {count, plural, one {# rozmiar} few {# rozmiary} many {# rozmiarów} other {# rozmiaru}}",
       "count": "Liczba paczek",
       "add": "{count, plural, one {Dodaj paczkę} few {Dodaj # paczki} many {Dodaj # paczek} other {Dodaj # paczki}}"
-    }
+    },
+    "gate": {
+      "title": "Ceny i kody EAN dla kupców hurtowych",
+      "lead": "Zaloguj się na konto firmowe, aby zobaczyć cenę hurtową, sugerowaną cenę detaliczną i kody EAN.",
+      "signIn": "Zaloguj się",
+      "register": "Załóż konto"
+    },
+    "eanLocked": "po zalogowaniu"
   },
   "selection": {
     "title": "Zestawienie",
@@ -100,26 +116,31 @@
     "continue": "Dalej: utwórz PDF",
     "limit": "Zestawienie może zawierać najwyżej {max} pozycji.",
     "form": {
-      "title": "Dane do zestawienia",
-      "lead": "Wszystkie pola są opcjonalne. Jeśli je wypełnisz, pojawią się w nagłówku PDF i pomogą opiekunowi handlowemu przygotować ofertę.",
-      "company": "Nazwa sklepu lub firmy",
-      "contactName": "Imię i nazwisko",
+      "title": "Zestawienie PDF",
+      "lead": "W nagłówku PDF pojawią się dane Twojej firmy z konta — opiekun handlowy zobaczy, kto przygotował ofertę.",
+      "company": "Firma",
+      "contactName": "Osoba kontaktowa",
       "email": "E-mail",
       "phone": "Telefon",
-      "taxId": "NIP / VAT UE",
-      "message": "Wiadomość do opiekuna",
-      "consent": "Zgadzam się na przetwarzanie podanych danych przez Fabian's Style w celu przygotowania zestawienia i kontaktu handlowego.",
-      "consentRequired": "Zaznacz zgodę, aby dołączyć swoje dane — albo usuń dane z formularza.",
+      "taxId": "NIP / VAT",
+      "message": "Wiadomość do opiekuna (opcjonalnie)",
       "back": "Wróć do pozycji",
       "submit": "Utwórz zestawienie PDF",
-      "submitting": "Tworzę zestawienie…"
+      "submitting": "Tworzę zestawienie…",
+      "editProfile": "Zmień dane kontaktowe",
+      "signInTitle": "Zaloguj się, aby utworzyć PDF",
+      "signInLead": "Zestawienie z cenami hurtowymi i kodami EAN przygotują zarejestrowani kupcy. Twój wybór zostanie zapamiętany.",
+      "signIn": "Zaloguj się",
+      "register": "Załóż konto"
     },
     "done": {
       "title": "Zestawienie <ref>{reference}</ref> gotowe",
-      "lead": "Pobierz PDF i prześlij go do swojego zespołu. Masz pytania o terminy lub warunki? Skontaktuj się z opiekunem.",
+      "lead": "Pobierz PDF i prześlij go do swojego zespołu. Zestawienie znajdziesz też w swoim koncie. Masz pytania o terminy lub warunki? Skontaktuj się z opiekunem.",
       "download": "Pobierz PDF",
       "newSheet": "Zacznij nowe zestawienie",
-      "keep": "Wróć do katalogu"
+      "keep": "Wróć do katalogu",
+      "downloading": "Pobieram…",
+      "mySheets": "Moje zestawienia"
     },
     "allSizesShort": "Wszystkie",
     "allSizesLabel": "wszystkie rozmiary"
@@ -134,7 +155,10 @@
     "validation": "Sprawdź pola formularza.",
     "notFoundTitle": "Nie znaleźliśmy tej strony",
     "notFoundLead": "Model mógł zostać wycofany z kolekcji.",
-    "notFoundBack": "Przejdź do katalogu"
+    "notFoundBack": "Przejdź do katalogu",
+    "notActive": "Twoje konto nie jest aktywne. Skontaktuj się z opiekunem handlowym.",
+    "sessionExpired": "Sesja wygasła. Zaloguj się ponownie.",
+    "download": "Nie udało się pobrać PDF. Spróbuj ponownie."
   },
   "languages": {
     "pl": "Polski",
@@ -153,5 +177,118 @@
     "currentGranted": "Obecnie: zgoda na statystyki udzielona.",
     "currentDenied": "Obecnie: bez zgody na statystyki.",
     "policy": "Polityka prywatności"
+  },
+  "account": {
+    "titles": {
+      "login": "Logowanie",
+      "register": "Rejestracja",
+      "verify": "Potwierdzenie adresu",
+      "reset": "Nowe hasło",
+      "account": "Moje konto"
+    },
+    "email": "E-mail",
+    "password": "Hasło",
+    "passwordHint": "Co najmniej 12 znaków — najlepiej kilka słów, które łatwo zapamiętać.",
+    "backToCatalog": "Wróć do katalogu",
+    "login": {
+      "title": "Zaloguj się",
+      "lead": "Konto firmowe w katalogu hurtowym Fabian's Style.",
+      "submit": "Zaloguj się",
+      "submitting": "Logowanie…",
+      "forgot": "Nie pamiętam hasła",
+      "noAccount": "Nie masz konta?",
+      "register": "Załóż konto firmowe",
+      "invalid": "Nieprawidłowy e-mail lub hasło.",
+      "status": {
+        "PENDING_EMAIL": "Potwierdź adres e-mail — wysłaliśmy link na Twoją skrzynkę.",
+        "PENDING_APPROVAL": "Twój wniosek czeka na akceptację. Gdy konto zostanie aktywowane, wyślemy e-mail.",
+        "REJECTED": "Nie możemy aktywować tego konta. Skontaktuj się z opiekunem handlowym.",
+        "SUSPENDED": "Konto jest zawieszone. Skontaktuj się z opiekunem handlowym.",
+        "ACTIVE": ""
+      },
+      "resend": "Wyślij link ponownie",
+      "resent": "Jeśli adres czeka na potwierdzenie, wysłaliśmy nowy link."
+    },
+    "register": {
+      "title": "Załóż konto firmowe",
+      "lead": "Katalog hurtowy jest dla sklepów i firm. Po potwierdzeniu adresu e-mail sprawdzimy wniosek i aktywujemy konto — wtedy zobaczysz ceny hurtowe i kody EAN.",
+      "company": "Firma",
+      "contact": "Osoba kontaktowa",
+      "access": "Dane logowania",
+      "companyName": "Nazwa firmy",
+      "country": "Kraj",
+      "countryPlaceholder": "Wybierz kraj",
+      "taxId": "NIP / numer VAT",
+      "taxIdHint": "W Polsce — 10 cyfr NIP.",
+      "contactName": "Imię i nazwisko",
+      "phone": "Telefon",
+      "terms": "Akceptuję warunki korzystania z katalogu hurtowego Fabian's Style.",
+      "privacy": "Zgadzam się na przetwarzanie podanych danych przez Fabian's Style w celu obsługi konta i kontaktu handlowego. <policy>Polityka prywatności</policy>",
+      "submit": "Załóż konto",
+      "submitting": "Wysyłanie…",
+      "haveAccount": "Masz już konto?",
+      "signIn": "Zaloguj się",
+      "doneTitle": "Sprawdź skrzynkę",
+      "doneLead": "Wysłaliśmy link potwierdzający na adres {email}. Po potwierdzeniu adresu wniosek trafi do naszego zespołu.",
+      "doneHint": "Nie widzisz wiadomości? Sprawdź folder spam albo wyślij link ponownie.",
+      "errors": {
+        "taxId": "Nieprawidłowy numer — sprawdź NIP / numer VAT i kraj.",
+        "phone": "Podaj numer telefonu (co najmniej 6 cyfr).",
+        "password": "Hasło musi mieć od 12 do 128 znaków.",
+        "email": "Podaj poprawny adres e-mail.",
+        "consent": "Zaznacz obie zgody, aby założyć konto.",
+        "country": "Wybierz kraj.",
+        "required": "Uzupełnij to pole."
+      }
+    },
+    "verify": {
+      "checking": "Potwierdzam adres…",
+      "doneTitle": "Adres potwierdzony",
+      "doneLead": "Wniosek trafił do naszego zespołu. Gdy konto zostanie aktywowane, wyślemy e-mail.",
+      "invalidTitle": "Link wygasł lub został już użyty",
+      "invalidLead": "Jeśli konto nadal czeka na potwierdzenie, wyślij nowy link.",
+      "toLogin": "Przejdź do logowania"
+    },
+    "reset": {
+      "requestTitle": "Nie pamiętasz hasła?",
+      "requestLead": "Podaj e-mail konta — wyślemy link do ustawienia nowego hasła.",
+      "requestSubmit": "Wyślij link",
+      "sent": "Jeśli konto o tym adresie istnieje, wysłaliśmy link. Jest ważny przez godzinę.",
+      "newTitle": "Ustaw nowe hasło",
+      "newSubmit": "Zapisz hasło",
+      "saved": "Hasło zmienione. Zaloguj się nowym hasłem.",
+      "invalid": "Link wygasł lub został już użyty. Poproś o nowy."
+    },
+    "page": {
+      "title": "Moje konto",
+      "company": "Firma",
+      "taxId": "NIP / VAT",
+      "email": "E-mail",
+      "companyHint": "Nazwę firmy, numer podatkowy i e-mail zmienia opiekun handlowy.",
+      "profile": "Dane kontaktowe",
+      "contactName": "Osoba kontaktowa",
+      "phone": "Telefon",
+      "language": "Język wiadomości e-mail",
+      "save": "Zapisz",
+      "saving": "Zapisywanie…",
+      "saved": "Zapisano.",
+      "concurrent": "Dane zmieniły się w międzyczasie — odśwież stronę.",
+      "logout": "Wyloguj się",
+      "password": {
+        "title": "Zmiana hasła",
+        "current": "Obecne hasło",
+        "new": "Nowe hasło",
+        "submit": "Zmień hasło",
+        "changed": "Hasło zmienione. Pozostałe sesje zostały wylogowane.",
+        "currentInvalid": "Obecne hasło jest nieprawidłowe."
+      },
+      "sheets": {
+        "title": "Moje zestawienia",
+        "empty": "Nie masz jeszcze zestawień. Wybierz modele w katalogu i utwórz PDF.",
+        "items": "{count, plural, one {# pozycja} few {# pozycje} many {# pozycji} other {# pozycji}}",
+        "download": "Pobierz PDF",
+        "more": "Pokaż starsze"
+      }
+    }
   }
 }

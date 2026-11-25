@@ -43,6 +43,13 @@ const MESSAGES: Record<string, string> = {
   "catalog.color.code-taken": "Ten kod koloru już istnieje.",
   "catalog.size.in-use": "Rozmiar jest używany w wariantach.",
   "catalog.size.code-taken": "Ten rozmiar już istnieje.",
+  "identity.buyer.not-found": "Nie znaleziono konta kupca — mogło zostać usunięte.",
+  "identity.buyer.concurrent-modification": "Ktoś inny zmienił to konto w międzyczasie. Odśwież dane i spróbuj ponownie.",
+  "identity.buyer.invalid-transition": "Ta operacja nie jest możliwa w obecnym stanie konta. Odśwież dane.",
+  "identity.buyer.email-not-verified": "Kupiec nie potwierdził jeszcze adresu e-mail — akceptacja będzie możliwa po potwierdzeniu.",
+  "identity.buyer.review-note": "Notatka może mieć najwyżej 500 znaków.",
+  "linesheet.not-found": "Nie znaleziono zestawienia.",
+  "linesheet.pdf.not-found": "Plik PDF tego zestawienia jest niedostępny.",
 };
 
 export function errorMessage(error: unknown): string {

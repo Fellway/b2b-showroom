@@ -63,6 +63,19 @@ export const adminApi = {
   delete: (path: string) => request<void>(path, { method: "DELETE" }),
   /** Multipart (np. zdjęcia) — przeglądarka sama ustawia granicę Content-Type. */
   upload: <T>(path: string, form: FormData) => request<T>(path, { method: "POST", body: form }),
+  /** Plik wymagający tokenu (np. PDF zestawienia z cenami, D23): fetch → blob → pobranie przez przeglądarkę. */
+  async download(path: string, fileName: string) {
+    const response = await send(path, {});
+    if (!response.ok) throw await toError(response);
+    const url = URL.createObjectURL(await response.blob());
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  },
 };
 
 export type Page<T> = { items: T[]; page: number; size: number; totalItems: number; totalPages: number };

@@ -1,14 +1,12 @@
 import Image from "next/image";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { formatMarkup, formatMoney } from "@/lib/format";
 import type { ProductCard as ProductCardData } from "@/lib/types";
 import { InSelectionMark } from "./in-selection-mark";
+import { CardPrice } from "./pricing";
 
 export async function ProductCard({ product, priority }: { product: ProductCardData; priority?: boolean }) {
   const t = await getTranslations("catalog");
-  const locale = await getLocale();
-  const { price } = product;
 
   return (
     <Link href={`/p/${product.slug}`} className="group block">
@@ -42,19 +40,8 @@ export async function ProductCard({ product, priority }: { product: ProductCardD
           </span>
           <InSelectionMark productId={product.id} />
         </div>
-        <p className="tabular mt-0.5 flex flex-wrap items-baseline gap-x-3 gap-y-0.5 text-small">
-          <span>
-            <span className="text-ink-3">{t("wholesale")} </span>
-            <span className="font-medium">{formatMoney(price.wholesale, price.currency, locale)}</span>
-          </span>
-          <span className="text-ink-2">
-            <span className="text-ink-3">{t("retail")} </span>
-            {formatMoney(price.retail, price.currency, locale)}
-          </span>
-          <span className="text-ink-3" title={t("markup")}>
-            {formatMarkup(price.markup, locale)}
-          </span>
-        </p>
+        {/* ceny dociąga przeglądarka zalogowanego kupca (D23) — strona katalogu zostaje wspólna dla wszystkich */}
+        <CardPrice productId={product.id} />
       </div>
     </Link>
   );

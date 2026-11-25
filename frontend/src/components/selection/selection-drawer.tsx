@@ -3,23 +3,19 @@
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { ArrowLeft, Download, Minus, Plus, X } from "lucide-react";
-import { useId, useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
-import { Link } from "@/i18n/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 import { formatMoney } from "@/lib/format";
-import { problemMessageKey, readProblem } from "@/lib/problem";
+import { problemMessageKey } from "@/lib/problem";
+import { BuyerApiError, buyerApi, useBuyerSession, usePricing } from "@/lib/buyer/api";
 import type { CreatedLineSheet, SalesRepresentative } from "@/lib/types";
 import { useHydrated } from "@/lib/use-hydrated";
-import { cn } from "@/lib/utils";
 import { groupLines, summarize, useSelection, type SelectionLine } from "@/store/selection";
 import { RepresentativeContact } from "@/components/site/representative-contact";
 import { track, visitorId } from "@/lib/analytics";
 
 type Step = "lines" | "form" | "done";
-
-type Contact = { companyName: string; contactName: string; email: string; phone: string; taxId: string; message: string };
-
-const EMPTY_CONTACT: Contact = { companyName: "", contactName: "", email: "", phone: "", taxId: "", message: "" };
 
 export function SelectionDrawer({ representatives }: { representatives: SalesRepresentative[] }) {
   const t = useTranslations("selection");
@@ -104,7 +100,16 @@ function LinesStep({ lines, onContinue }: { lines: SelectionLine[]; onContinue: 
   const removeGroup = useSelection((s) => s.removeGroup);
   const setOpen = useSelection((s) => s.setDrawerOpen);
   const groups = groupLines(lines);
-  const totals = summarize(lines);
+  const productIds = useMemo(() => [...new Set(lines.map((line) => line.productId))], [lines]);
+  const pricing = usePricing(productIds);
+  const prices = useMemo(
+    () =>
+      pricing.status === "ready"
+        ? new Map([...pricing.byProduct].map(([id, value]) => [id, value.price]))
+        : undefined,
+    [pricing],
+  );
+  const totals = summarize(lines, prices);
 
   const removeTracked = (line: SelectionLine) => {
     track({ type: "SELECTION_REMOVED", language: locale, productId: line.productId, variantId: line.variantId });
@@ -192,12 +197,16 @@ function LinesStep({ lines, onContinue }: { lines: SelectionLine[]; onContinue: 
             <>
               <dt className="text-ink-3">{t("summary.units")}</dt>
               <dd className="text-right">{totals.units}</dd>
-              <dt className="text-ink-3">{t("summary.value")}</dt>
-              <dd className="text-right font-medium">{formatMoney(totals.value, totals.currency, locale)}</dd>
+              {totals.hasValue && (
+                <>
+                  <dt className="text-ink-3">{t("summary.value")}</dt>
+                  <dd className="text-right font-medium">{formatMoney(totals.value, totals.currency, locale)}</dd>
+                </>
+              )}
             </>
           )}
         </dl>
-        {totals.partial && <p className="mt-2 text-meta text-ink-3">{t("summary.partial")}</p>}
+        {totals.partial && totals.hasValue && <p className="mt-2 text-meta text-ink-3">{t("summary.partial")}</p>}
         <button
           type="button"
           onClick={onContinue}
@@ -222,61 +231,47 @@ function FormStep({
   const t = useTranslations("selection");
   const tErrors = useTranslations("errors");
   const locale = useLocale();
-  const [contact, setContact] = useState<Contact>(EMPTY_CONTACT);
-  const [consent, setConsent] = useState(false);
+  const session = useBuyerSession();
+  const setOpen = useSelection((s) => s.setDrawerOpen);
+  const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [consentError, setConsentError] = useState(false);
-  const consentId = useId();
 
-  const hasData = Object.values(contact).some((value) => value.trim() !== "");
-  const field = (key: keyof Contact) => ({
-    value: contact[key],
-    onChange: (e: { target: { value: string } }) => setContact((c) => ({ ...c, [key]: e.target.value })),
-  });
+  if (session.status !== "authenticated") {
+    return <SignInStep onBack={onBack} loading={session.status === "loading"} />;
+  }
+  const buyer = session.buyer;
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     setError(null);
-    if (hasData && !consent) {
-      setConsentError(true);
-      return;
-    }
     setSubmitting(true);
-    const trimmed = Object.fromEntries(
-      Object.entries(contact).map(([key, value]) => [key, value.trim() === "" ? null : value.trim()]),
-    );
     try {
-      const response = await fetch(`/api/v1/line-sheets?lang=${locale}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({
-          items: lines.map((line) => ({ variantId: line.variantId, quantity: line.quantity })),
-          ...trimmed,
-          privacyAccepted: hasData && consent,
-          visitorId: visitorId() ?? null,
-        }),
+      const created = await buyerApi.post<CreatedLineSheet>(`/line-sheets?lang=${locale}`, {
+        items: lines.map((line) => ({ variantId: line.variantId, quantity: line.quantity })),
+        message: message.trim() === "" ? null : message.trim(),
+        visitorId: visitorId() ?? null,
       });
-      if (response.ok) {
-        onCreated((await response.json()) as CreatedLineSheet);
-        return;
+      onCreated(created);
+    } catch (failure) {
+      if (!(failure instanceof BuyerApiError)) {
+        setError(tErrors("network"));
+      } else if (failure.status === 429) {
+        setError(tErrors("rateLimited", { seconds: failure.retryAfter ?? 60 }));
+      } else if (failure.status === 401) {
+        setError(tErrors("sessionExpired"));
+      } else if (failure.problem.code === "linesheet.buyer.not-active") {
+        setError(tErrors("notActive"));
+      } else {
+        setError(tErrors(problemMessageKey(failure.problem).key));
       }
-      if (response.status === 429) {
-        const seconds = Number.parseInt(response.headers.get("Retry-After") ?? "60", 10);
-        setError(tErrors("rateLimited", { seconds: Number.isFinite(seconds) ? seconds : 60 }));
-        return;
-      }
-      const { key } = problemMessageKey(await readProblem(response));
-      setError(tErrors(key));
-    } catch {
-      setError(tErrors("network"));
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col" noValidate={false}>
+    <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
       <div className="flex-1 overflow-y-auto px-6 py-6">
         <button
           type="button"
@@ -289,47 +284,38 @@ function FormStep({
         <h3 className="mt-5 text-body font-medium">{t("form.title")}</h3>
         <p className="mt-1 text-small text-ink-2">{t("form.lead")}</p>
 
-        <div className="mt-6 grid gap-4">
-          <TextField label={t("form.company")} autoComplete="organization" maxLength={200} {...field("companyName")} />
-          <TextField label={t("form.contactName")} autoComplete="name" maxLength={120} {...field("contactName")} />
-          <div className="grid gap-4 sm:grid-cols-2">
-            <TextField label={t("form.email")} type="email" autoComplete="email" maxLength={254} {...field("email")} />
-            <TextField label={t("form.phone")} type="tel" autoComplete="tel" maxLength={32} {...field("phone")} />
-          </div>
-          <TextField label={t("form.taxId")} maxLength={32} {...field("taxId")} />
-          <label className="grid gap-1.5">
-            <span className="text-meta text-ink-3">{t("form.message")}</span>
-            <textarea
-              rows={3}
-              maxLength={2000}
-              {...field("message")}
-              className="resize-y border border-edge bg-transparent px-3 py-2 text-small outline-none focus-visible:border-foreground focus-visible:outline-none"
-            />
-          </label>
-          {hasData && (
-            <div className="grid gap-1.5">
-              <label htmlFor={consentId} className="flex cursor-pointer items-start gap-3 text-meta text-ink-2">
-                <input
-                  id={consentId}
-                  type="checkbox"
-                  checked={consent}
-                  onChange={(e) => {
-                    setConsent(e.target.checked);
-                    setConsentError(false);
-                  }}
-                  aria-invalid={consentError}
-                  className="mt-0.5 size-4 shrink-0 accent-foreground"
-                />
-                {t("form.consent")}
-              </label>
-              {consentError && (
-                <p className="text-meta text-danger" role="alert">
-                  {t("form.consentRequired")}
-                </p>
-              )}
-            </div>
-          )}
-        </div>
+        <dl className="mt-6 grid grid-cols-[auto_1fr] gap-x-6 gap-y-1.5 border-y border-line py-4 text-small">
+          <dt className="text-ink-3">{t("form.company")}</dt>
+          <dd>{buyer.companyName}</dd>
+          <dt className="text-ink-3">{t("form.taxId")}</dt>
+          <dd className="tabular">
+            {buyer.countryCode} {buyer.taxId}
+          </dd>
+          <dt className="text-ink-3">{t("form.contactName")}</dt>
+          <dd>{buyer.contactName}</dd>
+          <dt className="text-ink-3">{t("form.email")}</dt>
+          <dd className="break-all">{buyer.email}</dd>
+          <dt className="text-ink-3">{t("form.phone")}</dt>
+          <dd className="tabular">{buyer.phone}</dd>
+        </dl>
+        <Link
+          href="/account"
+          onClick={() => setOpen(false)}
+          className="mt-2 inline-block text-meta text-ink-3 underline underline-offset-4 hover:text-foreground"
+        >
+          {t("form.editProfile")}
+        </Link>
+
+        <label className="mt-6 grid gap-1.5">
+          <span className="text-meta text-ink-3">{t("form.message")}</span>
+          <textarea
+            rows={3}
+            maxLength={2000}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            className="resize-y border border-edge bg-transparent px-3 py-2 text-small outline-none focus-visible:border-foreground focus-visible:outline-none"
+          />
+        </label>
       </div>
 
       <div className="shrink-0 border-t border-line px-6 pb-6 pt-4">
@@ -350,6 +336,42 @@ function FormStep({
   );
 }
 
+/** Gość dochodzi do PDF z wyborem w ręku — logowanie wraca na tę samą stronę i otwiera zestawienie. */
+function SignInStep({ onBack, loading }: { onBack: () => void; loading: boolean }) {
+  const t = useTranslations("selection");
+  const pathname = usePathname();
+  const setOpen = useSelection((s) => s.setDrawerOpen);
+  const query = { next: pathname, selection: "1" };
+  return (
+    <div className="flex flex-1 flex-col px-6 py-6">
+      <button type="button" onClick={onBack} className="inline-flex items-center gap-1.5 self-start text-small text-ink-3 hover:text-foreground">
+        <ArrowLeft aria-hidden className="size-4" strokeWidth={1.5} />
+        {t("form.back")}
+      </button>
+      {!loading && (
+        <>
+          <h3 className="mt-5 text-body font-medium">{t("form.signInTitle")}</h3>
+          <p className="mt-1 text-small text-ink-2">{t("form.signInLead")}</p>
+          <Link
+            href={{ pathname: "/account/login", query }}
+            onClick={() => setOpen(false)}
+            className="mt-6 flex h-12 items-center justify-center bg-foreground px-6 text-small font-medium text-background transition-colors hover:bg-ink-2"
+          >
+            {t("form.signIn")}
+          </Link>
+          <Link
+            href={{ pathname: "/account/register", query }}
+            onClick={() => setOpen(false)}
+            className="mt-4 self-start text-small underline underline-offset-4 hover:no-underline"
+          >
+            {t("form.register")}
+          </Link>
+        </>
+      )}
+    </div>
+  );
+}
+
 function DoneStep({
   created,
   representatives,
@@ -362,6 +384,23 @@ function DoneStep({
   onClose: () => void;
 }) {
   const t = useTranslations("selection");
+  const tErrors = useTranslations("errors");
+  const [downloading, setDownloading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function download() {
+    setError(null);
+    setDownloading(true);
+    try {
+      // PDF zawiera ceny — pobierany z tokenem kupca (fetch → plik), nie zwykłym linkiem
+      await buyerApi.download(created.pdfUrl, `${created.referenceNumber}.pdf`);
+    } catch {
+      setError(tErrors("download"));
+    } finally {
+      setDownloading(false);
+    }
+  }
+
   return (
     <div className="flex flex-1 flex-col overflow-y-auto px-6 py-8">
       <h3 className="tabular text-title font-medium text-balance">
@@ -371,14 +410,20 @@ function DoneStep({
         })}
       </h3>
       <p className="mt-3 text-small text-ink-2">{t("done.lead")}</p>
-      <a
-        href={created.pdfUrl}
-        download
-        className="mt-6 flex h-12 items-center justify-center gap-2 bg-foreground px-6 text-small font-medium text-background transition-colors hover:bg-ink-2"
+      <button
+        type="button"
+        onClick={download}
+        disabled={downloading}
+        className="mt-6 flex h-12 items-center justify-center gap-2 bg-foreground px-6 text-small font-medium text-background transition-colors hover:bg-ink-2 disabled:cursor-wait"
       >
         <Download aria-hidden className="size-4" strokeWidth={1.5} />
-        {t("done.download")}
-      </a>
+        {downloading ? t("done.downloading") : t("done.download")}
+      </button>
+      {error && (
+        <p className="mt-3 text-small text-danger" role="alert">
+          {error}
+        </p>
+      )}
       {representatives.length > 0 && (
         <div className="mt-8 flex flex-col gap-5 border-t border-line pt-6">
           {representatives.map((rep) => (
@@ -390,6 +435,9 @@ function DoneStep({
         <button type="button" onClick={onClose} className="underline underline-offset-4 hover:no-underline">
           {t("done.keep")}
         </button>
+        <Link href="/account" onClick={onClose} className="underline underline-offset-4 hover:no-underline">
+          {t("done.mySheets")}
+        </Link>
         <button type="button" onClick={onRestart} className="text-ink-3 underline underline-offset-4 hover:text-foreground">
           {t("done.newSheet")}
         </button>
@@ -397,22 +445,6 @@ function DoneStep({
     </div>
   );
 }
-
-function TextField({ label, className, ...props }: React.ComponentProps<"input"> & { label: string }) {
-  return (
-    <label className="grid gap-1.5">
-      <span className="text-meta text-ink-3">{label}</span>
-      <input
-        {...props}
-        className={cn(
-          "h-11 border border-edge bg-transparent px-3 text-small outline-none focus-visible:border-foreground focus-visible:outline-none user-invalid:border-danger",
-          className,
-        )}
-      />
-    </label>
-  );
-}
-
 function MiniStepper({
   value,
   label,
