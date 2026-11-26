@@ -27,6 +27,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import pl.wizytowka.identity.application.port.in.BuyerLegalUseCase;
 import pl.wizytowka.identity.application.service.BuyerPolicy;
 import pl.wizytowka.identity.application.service.IdentityPolicy;
 import pl.wizytowka.identity.domain.LockoutPolicy;
@@ -53,7 +54,8 @@ class SecurityConfig {
     private static final int MIN_SECRET_BYTES = 32;
 
     @Bean
-    SecurityFilterChain apiSecurity(HttpSecurity http, JwtDecoder jwtDecoder, ObjectMapper objectMapper) throws Exception {
+    SecurityFilterChain apiSecurity(HttpSecurity http, JwtDecoder jwtDecoder, ObjectMapper objectMapper,
+                                    BuyerLegalUseCase buyerLegal) throws Exception {
         AuthenticationEntryPoint unauthenticated = (request, response, e) -> {
             response.setHeader("WWW-Authenticate", "Bearer");
             ProblemResponses.write(response, objectMapper, HttpStatus.UNAUTHORIZED, "auth.unauthenticated",
@@ -71,11 +73,13 @@ class SecurityConfig {
                 .requestCache(cache -> cache.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new AuthEndpointCsrfFilter(objectMapper), BearerTokenAuthenticationFilter.class)
+                // brama regulaminu (D25) — po uwierzytelnieniu tokenem, przed autoryzacją
+                .addFilterAfter(new BuyerTermsGateFilter(buyerLegal, objectMapper), BearerTokenAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .dispatcherTypeMatchers(ERROR, FORWARD).permitAll()
                         .requestMatchers("/error").permitAll()
                         // katalog publiczny bez cen i EAN (D23) — te są tylko pod /api/v1/buyer/**
-                        .requestMatchers(HttpMethod.GET, "/api/v1/catalog/**", "/api/v1/media/**", "/api/v1/contact/**",
+                        .requestMatchers(HttpMethod.GET, "/api/v1/catalog/**", "/api/v1/media/**", "/api/v1/contact/**", "/api/v1/legal/**",
                                 "/actuator/health", "/actuator/health/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/analytics/events",
                                 "/api/v1/admin/auth/login", "/api/v1/admin/auth/refresh",
@@ -87,6 +91,8 @@ class SecurityConfig {
                                 "/api/v1/buyer/auth/logout").permitAll()
                         .requestMatchers("/api/v1/buyer/**").hasRole(BUYER_ROLE)
                         .requestMatchers("/api/v1/admin/users/**").hasRole("ADMIN")
+                        // publikacja zmienia warunki dla wszystkich kupców — tylko ADMIN (D25)
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/legal/versions/*/publish").hasRole("ADMIN")
                         .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN", "EDITOR")
                         .anyRequest().denyAll())
                 .oauth2ResourceServer(oauth -> oauth

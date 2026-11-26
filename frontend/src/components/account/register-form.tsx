@@ -19,7 +19,6 @@ const OTHER_COUNTRIES = [
 ];
 const DEFAULT_COUNTRY: Record<string, string> = { pl: "PL", cs: "CZ", uk: "UA" };
 const COMPANY_COUNTRIES = new Set([...PRIMARY_COUNTRIES, ...OTHER_COUNTRIES]);
-const PRIVACY_POLICY_URL = process.env.NEXT_PUBLIC_PRIVACY_POLICY_URL;
 const PASSWORD_MIN = 12;
 const PASSWORD_MAX = 128;
 
@@ -49,8 +48,20 @@ const CODE_TO_FIELD: Record<string, [FieldKey, string]> = {
   "identity.buyer.consent-required": ["consent", "consent"],
 };
 
-/** @param suggestedCountry kraj z żądania (nagłówek proxy / Accept-Language) — tylko podpowiedź, do zmiany */
-export function RegisterForm({ suggestedCountry }: { suggestedCountry?: string | null }) {
+/** Wersje dokumentów pokazane w formularzu — trafiają do rejestru zgód (D25). */
+export type RegistrationDocuments = { termsVersionId: string | null; privacyVersionId: string | null };
+
+/**
+ * @param suggestedCountry kraj z żądania (nagłówek proxy / Accept-Language) — tylko podpowiedź, do zmiany
+ * @param documents        obowiązujące wersje regulaminu i polityki prywatności
+ */
+export function RegisterForm({
+  suggestedCountry,
+  documents,
+}: {
+  suggestedCountry?: string | null;
+  documents: RegistrationDocuments;
+}) {
   const t = useTranslations("account");
   const tErrors = useTranslations("errors");
   const locale = useLocale();
@@ -125,6 +136,7 @@ export function RegisterForm({ suggestedCountry }: { suggestedCountry?: string |
       // zawsze z numerem kierunkowym, np. „+48 600 111 222”
       phone: toInternational(phoneCountry, form.phone) ?? form.phone.trim(),
       email: form.email.trim(),
+      ...documents,
     };
     try {
       const response = await buyerAuthPost("/register", body, locale);
@@ -138,6 +150,11 @@ export function RegisterForm({ suggestedCountry }: { suggestedCountry?: string |
         return;
       }
       const problem = await readProblem(response);
+      if (problem.code === "identity.buyer.legal-version-outdated") {
+        // w międzyczasie opublikowano nową wersję — kupiec musi zobaczyć i zaakceptować aktualną
+        setFormError(t("register.errors.documentsChanged"));
+        return;
+      }
       const mapped = problem.code ? CODE_TO_FIELD[problem.code] : undefined;
       if (mapped) setErrors({ [mapped[0]]: t(`register.errors.${mapped[1]}`) });
       else setFormError(problem.code === "request.invalid" ? tErrors("validation") : tErrors("generic"));
@@ -279,19 +296,24 @@ export function RegisterForm({ suggestedCountry }: { suggestedCountry?: string |
 
         <div className="grid gap-3 border-t border-line pt-6">
           <CheckField
-            label={t("register.terms")}
+            label={t.rich("register.terms", {
+              terms: (chunks) => (
+                <Link href="/terms" target="_blank" className="underline underline-offset-4 hover:text-foreground">
+                  {chunks}
+                </Link>
+              ),
+            })}
             checked={form.termsAccepted}
             onChange={(e) => set("termsAccepted", e.target.checked)}
             invalid={Boolean(errors.consent) && !form.termsAccepted}
           />
           <CheckField
             label={t.rich("register.privacy", {
-              policy: (chunks) =>
-                PRIVACY_POLICY_URL ? (
-                  <a href={PRIVACY_POLICY_URL} target="_blank" rel="noopener" className="underline underline-offset-4 hover:text-foreground">
-                    {chunks}
-                  </a>
-                ) : null,
+              policy: (chunks) => (
+                <Link href="/privacy" target="_blank" className="underline underline-offset-4 hover:text-foreground">
+                  {chunks}
+                </Link>
+              ),
             })}
             checked={form.privacyAccepted}
             onChange={(e) => set("privacyAccepted", e.target.checked)}

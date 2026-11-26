@@ -40,9 +40,16 @@ async function toError(response: Response): Promise<BuyerApiError> {
   return new BuyerApiError(response.status, problem, Number.isFinite(retryAfter) ? retryAfter : undefined);
 }
 
+/** Brama regulaminu (D25): API odrzuciło żądanie, bo obowiązuje nowa wersja regulaminu — lib/buyer/legal.ts słucha. */
+export const TERMS_REQUIRED_EVENT = "buyer:terms-required";
+
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const response = await send(path, { ...init, headers: { Accept: "application/json", ...init.headers } });
-  if (!response.ok) throw await toError(response);
+  if (!response.ok) {
+    const error = await toError(response);
+    if (error.problem.code === "identity.buyer.terms-acceptance-required") window.dispatchEvent(new Event(TERMS_REQUIRED_EVENT));
+    throw error;
+  }
   if (response.status === 204) return undefined as T;
   const text = await response.text();
   return (text ? JSON.parse(text) : undefined) as T;
@@ -122,6 +129,20 @@ buyerSession.subscribe(() => {
   if (buyerSession.snapshot().status !== "authenticated") cache.clear();
 });
 
+let pricingRevision = 0;
+const revisionListeners = new Set<() => void>();
+const subscribeRevision = (listener: () => void) => {
+  revisionListeners.add(listener);
+  return () => revisionListeners.delete(listener);
+};
+
+/** Pobiera ceny od nowa (np. po akceptacji nowego regulaminu, gdy wcześniej brama je odrzuciła). */
+export function invalidatePricing() {
+  cache.clear();
+  pricingRevision += 1;
+  revisionListeners.forEach((listener) => listener());
+}
+
 export type PricingState =
   | { status: "anonymous" }
   | { status: "loading" }
@@ -134,20 +155,22 @@ export type PricingState =
  */
 export function usePricing(productIds: string[]): PricingState {
   const session = useBuyerSession();
-  const key = useMemo(() => [...new Set(productIds)].sort().join(","), [productIds]);
+  const revision = useSyncExternalStore(subscribeRevision, () => pricingRevision, () => 0);
+  const ids = useMemo(() => [...new Set(productIds)].sort().join(","), [productIds]);
+  const key = ids === "" ? "" : `#${revision}`;
   const [loaded, setLoaded] = useState<{ key: string; failed: boolean } | null>(null);
   const authenticated = session.status === "authenticated";
 
   useEffect(() => {
     if (!authenticated || key === "") return;
     let cancelled = false;
-    loadPricing(key.split(","))
+    loadPricing(ids.split(","))
       .then(() => !cancelled && setLoaded({ key, failed: false }))
       .catch(() => !cancelled && setLoaded({ key, failed: true }));
     return () => {
       cancelled = true;
     };
-  }, [authenticated, key]);
+  }, [authenticated, key, ids]);
 
   if (session.status === "loading") return { status: "loading" };
   if (!authenticated) return { status: "anonymous" };
@@ -155,7 +178,7 @@ export function usePricing(productIds: string[]): PricingState {
   if (loaded?.key !== key) return { status: "loading" };
   if (loaded.failed) return { status: "error" };
   const byProduct = new Map<string, ProductPricing>();
-  key.split(",").forEach((id) => {
+  ids.split(",").forEach((id) => {
     const pricing = cache.get(id);
     if (pricing) byProduct.set(id, pricing);
   });

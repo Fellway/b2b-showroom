@@ -8,6 +8,7 @@ import {
   ExternalLink,
   FileText,
   KeyRound,
+  Landmark,
   LogOut,
   Palette,
   Ruler,
@@ -45,6 +46,7 @@ const NAV: { title?: string; items: NavItem[] }[] = [
     title: "Ustawienia",
     items: [
       { href: "/admin/representatives", label: "Opiekunowie", icon: Users },
+      { href: "/admin/legal", label: "Dokumenty prawne", icon: Landmark },
       { href: "/admin/users", label: "Konta", icon: KeyRound, adminOnly: true },
     ],
   },

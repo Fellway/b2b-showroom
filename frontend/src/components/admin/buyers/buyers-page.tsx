@@ -289,11 +289,29 @@ function BuyerDetails({ buyer, onDeleted }: { buyer: BuyerDetail; onDeleted: () 
 
           <Block title="Historia">
             <Row label="Rejestracja">{formatDateTime(buyer.createdAt)}</Row>
-            <Row label="Zgody">{formatDateTime(buyer.privacyAcceptedAt)}</Row>
             <Row label="Potwierdzenie e-mail">{formatDateTime(buyer.emailVerifiedAt)}</Row>
             <Row label="Ostatnia decyzja">{formatDateTime(buyer.reviewedAt)}</Row>
             {buyer.reviewNote && <Row label="Notatka">{buyer.reviewNote}</Row>}
             <Row label="Ostatnie logowanie">{buyer.lastLoginAt ? formatDateTime(buyer.lastLoginAt) : "Nigdy"}</Row>
+          </Block>
+
+          <Block title="Zgody i dokumenty">
+            {buyer.consents.length === 0 ? (
+              <Row label="Rejestr">Brak — kupiec zaakceptuje regulamin przy logowaniu</Row>
+            ) : (
+              buyer.consents.map((consent) => (
+                <Row
+                  key={`${consent.documentVersionId}-${consent.acceptedAt}`}
+                  label={`${consent.documentType === "TERMS" ? "Regulamin" : "Polityka prywatności"} v${consent.versionNumber}`}
+                >
+                  <span className="tabular">{formatDateTime(consent.acceptedAt)}</span>
+                  <span className="text-ink-3">
+                    {" "}
+                    · {consent.context === "REGISTRATION" ? "rejestracja" : "nowa wersja"} · {consent.language.toLowerCase()}
+                  </span>
+                </Row>
+              ))
+            )}
           </Block>
 
           {takesNote && (

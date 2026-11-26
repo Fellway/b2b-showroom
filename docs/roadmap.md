@@ -1,6 +1,6 @@
 # Status i plan
 
-## Gdzie jesteśmy (2026-10-09)
+## Gdzie jesteśmy (2026-11-26)
 
 | Etap | Zakres | Status |
 |---|---|---|
@@ -12,9 +12,12 @@
 | — | Baner zgody na analitykę | ✅ |
 | — | Paczki rozmiarowe (D21) | ✅ |
 | 5 | Wdrożenie: obrazy Docker, `deploy/` (Caddy + compose + kopie), CI i obrazy w GHCR (D22) | 🟡 przygotowane 2026-11-24, czeka na serwer i domenę |
+| 6 | Konta kupców: ceny/EAN/PDF po zalogowaniu, rejestracja z akceptacją, e-maile przez Brevo (D23) | ✅ 2026-11-25 |
+| — | Telefon z numerem kierunkowym i podpowiedź kraju (D24) | ✅ 2026-11-25 |
+| — | Regulamin i polityka prywatności z wersjami, rejestr zgód, prawa z RODO w 
 
-Aplikacja działa lokalnie end-to-end na danych demonstracyjnych. Backend: 258 testów zielonych; frontend: typy,
-lint i build bez błędów. Repozytorium: [github.com/Fellway/b2b-showroom](https://github.com/Fellway/b2b-showroom).
+Aplikacja działa lokalnie end-to-end na danych demonstracyjnych (z kontami kupców i wysyłką e-maili przez Brevo).
+CI na GitHubie: testy backendu (z bazą w Testcontainers), typy/lint/build frontendu, obrazy w GHCR z `main`. Repozytorium: [github.com/Fellway/b2b-showroom](https://github.com/Fellway/b2b-showroom).
 
 ## Etap 6 — konta kupców (D23), plan
 
@@ -28,10 +31,8 @@ Priorytet biznesowy od 2026-11-24 — przed importem/eksportem Excela.
   reset hasła i „Moje konto” z „Moimi zestawieniami” (4 języki); katalog z cenami i EAN po zalogowaniu (dociągane
   w przeglądarce), dla gości pasek z logowaniem; zestawienie wymaga logowania (powrót do szuflady po zalogowaniu),
   PDF przez fetch → blob; panel: sekcja „Kupcy” z licznikiem wniosków. Sprawdzone end-to-end w przeglądarce
-  (rejestracja → potwierdzenie → akceptacja → ceny → PDF). Etap 6 jest na gałęzi `feature/buyer-accounts` —
-  6a i 6b trafiają na `main` razem.
-- **Do ustalenia z marką:** treść e-maili, regulamin i zgody przy rejestracji (polityka prywatności staje się
-  pilniejsza — zbieramy dane firm i osób), dostawca SMTP i adres nadawcy (SPF/DKIM na domenie).
+  (rejestracja → potwierdzenie → akceptacja → ceny → PDF). Scalone do `main` 2026-11-25.
+- **Do ustalenia z marką:** treść e-maili, domena nadawcy e-maili (SPF/DKIM w Brevo). Regulamin i polityka — D25.
 
 ## Następne kroki (propozycja kolejności)
 
@@ -43,8 +44,9 @@ Priorytet biznesowy od 2026-11-24 — przed importem/eksportem Excela.
    Full strict z certyfikatem Origin) albo subdomena `*.mikrus.cloud`; Caddy po HTTP na IPv6, `trusted_proxies`
    pośrednika i adres klienta z jego nagłówka (inaczej rate limiting liczy wszystkich jako jednego klienta).
    Do sprawdzenia na serwerze: `docker compose` w LXC.
-2. **Polityka prywatności** — strona z danymi administratora danych; po publikacji ustawić
-   `NEXT_PUBLIC_PRIVACY_POLICY_URL` (link w banerze i stopce). Szablon możemy przygotować; treść prawna i dane — od marki.
+2. ~~Polityka prywatności~~ — zrobione z regulaminem i rejestrem zgód (D25, 2026-11-26). Zostało po stronie marki:
+   uzupełnić pola w `[nawiasach]` we wzorach (panel → Dokumenty prawne), zatwierdzenie przez prawnika, okresy
+   przechowywania danych (potem ewentualnie automatyczne usuwanie starych kont i zestawień).
 3. **Import prawdziwych danych produktów** i packshotów (zamiast danych demonstracyjnych; potem `NEXT_PUBLIC_DEMO_NOTICE=false`).
 4. **Wersja mobilna** katalogu i panelu, potem aplikacja mobilna (API jest gotowe).
 
@@ -74,7 +76,6 @@ i zapisz decyzje w `decisions.md`.
 - **Monitoring i alerty** (logi, metryki, błędy) po wdrożeniu.
 
 ### Marka i prawo
-- **Polityka prywatności** — szablon do uzupełnienia przez markę / prawnika.
 - **Strona „O marce”** — szyte w Polsce, autorski design, warunki współpracy (ważne dla nowych kupców z Instagrama).
 - **Wersja mobilna** katalogu i panelu, potem aplikacja mobilna.
 
@@ -93,15 +94,15 @@ zestawienia jako mini-CRM.
 - [ ] SMTP dla e-maili kont kupców (`SMTP_*`, `SHOWROOM_MAIL_FROM`), SPF i DKIM na domenie nadawcy; test: rejestracja → e-mail dochodzi.
   Konto Brevo założone, wysyłka sprawdzona lokalnie (2026-11-25, nadawca tymczasowo z hotmail) — zostało: własna
   domena w Brevo z DKIM/DMARC i osobny klucz SMTP dla produkcji.
-- [ ] Regulamin i polityka prywatności podpięte w formularzu rejestracji kupca (zgody są wymagane)
+- [x] Regulamin i polityka prywatności podpięte w formularzu rejestracji kupca, rejestr zgód (D25)
 - [ ] Dane marki w PDF: `SHOWROOM_BRAND_*` (nazwa, firma, adres, kontakt), opcjonalnie logo
 - [ ] Prawdziwy opiekun handlowy w panelu (zamiast przykładowego)
 - [ ] `NEXT_PUBLIC_DEMO_NOTICE=false` po imporcie prawdziwych danych
-- [ ] Polityka prywatności opublikowana i podpięta
+- [ ] Regulamin i polityka prywatności: pola `[…]` uzupełnione, treść zatwierdzona przez prawnika, uwaga 
 
 ## Czeka na markę / właściciela
 
-- Polityka prywatności i dane administratora danych osobowych.
+- Dane administratora danych osobowych, okresy przechowywania i akceptacja treści regulaminu / polityki przez prawnika.
 - Prawdziwe dane produktów (nazwy, składy, rozmiarówki, EAN, ceny) i packshoty.
 - Adres grupy „Klienci hurtowi Fabian's Style” na Facebooku (do stopki).
 - Logo w wersji wektorowej (SVG).

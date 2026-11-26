@@ -85,5 +85,55 @@ export type BuyerLineSheet = {
   createdAt: string;
 };
 
+// ------------------------------------------------------------------ dokumenty prawne (D25)
+
+export type LegalDocumentType = "TERMS" | "PRIVACY_POLICY";
+
+/** Adres strony dokumentu i slug w API (`/api/v1/legal/{slug}`). */
+export const LEGAL_SLUG: Record<LegalDocumentType, "terms" | "privacy"> = { TERMS: "terms", PRIVACY_POLICY: "privacy" };
+
+/** Opublikowana wersja dokumentu w jednym języku (`language` = język treści, np. „PL” przy braku tłumaczenia). */
+export type LegalDocument = {
+  versionId: string;
+  type: LegalDocumentType;
+  versionNumber: number;
+  publishedAt: string;
+  acceptanceRequired: boolean;
+  language: string;
+  title: string;
+  body: string;
+  changeSummary: string | null;
+};
+
+export type LegalVersionSummary = {
+  id: string;
+  type: LegalDocumentType;
+  status: "DRAFT" | "PUBLISHED";
+  versionNumber: number | null;
+  acceptanceRequired: boolean;
+  publishedAt: string | null;
+  createdAt: string;
+};
+
+/** Dokument do zaakceptowania (`blocking` — regulamin) albo przyjęcia do wiadomości (polityka prywatności). */
+export type PendingDocument = {
+  type: LegalDocumentType;
+  versionId: string;
+  versionNumber: number;
+  blocking: boolean;
+  firstTime: boolean;
+};
+
+export type BuyerConsent = {
+  documentType: LegalDocumentType;
+  documentVersionId: string;
+  versionNumber: number;
+  language: string;
+  context: "REGISTRATION" | "UPDATE";
+  acceptedAt: string;
+};
+
+export type BuyerLegalStatus = { pending: PendingDocument[]; history: BuyerConsent[] };
+
 /** RFC 9457 Problem Details z własnym, stabilnym kodem błędu. */
 export type Problem = { status: number; code?: string; detail?: string; errors?: { field: string; message: string }[] };

@@ -124,6 +124,17 @@ showroom:
         path: /api/v1/buyer/me/password
         limits:
           - { capacity: 5, period: 1m }
+      - name: buyer-delete-account    # wymaga hasła — ochrona przed zgadywaniem jak przy zmianie hasła
+        method: POST
+        path: /api/v1/buyer/me/delete
+        limits:
+          - { capacity: 5, period: 1m }
+      - name: buyer-export            # zbiera wszystkie dane konta i zestawień
+        method: GET
+        path: /api/v1/buyer/me/export
+        limits:
+          - { capacity: 5, period: 1m }
+          - { capacity: 30, period: 1h }
       - name: analytics-events
         method: POST
         path: /api/v1/analytics/events
@@ -140,6 +151,10 @@ showroom:
         path: /api/v1/admin/auth/refresh
         limits:
           - { capacity: 30, period: 1m }
+  legal:                              # dokumenty prawne (D25)
+    # pusta baza → wzory regulaminu i polityki prywatności (classpath:legal/templates) jako wersja 1;
+    # wzory mają pola do uzupełnienia i wymagają weryfikacji prawnej przed produkcją
+    seed-templates: ${SHOWROOM_LEGAL_SEED_TEMPLATES:true}
   brand:                              # dane marki w zestawieniach PDF — placeholdery do czasu identyfikacji (Etap 4)
     name: ${SHOWROOM_BRAND_NAME:Brand Name}
     legal-name: ${SHOWROOM_BRAND_LEGAL_NAME:}

@@ -5,26 +5,34 @@ import org.junit.jupiter.api.Test;
 import pl.wizytowka.identity.application.port.in.AccountNotActiveException;
 import pl.wizytowka.identity.application.port.in.AuthenticationFailedException;
 import pl.wizytowka.identity.application.port.in.BuyerContactQuery.BuyerContact;
+import pl.wizytowka.identity.application.port.in.BuyerSelfServiceUseCase;
 import pl.wizytowka.identity.application.port.in.BuyerSession;
 import pl.wizytowka.identity.application.port.in.RegisterBuyerCommand;
 import pl.wizytowka.identity.domain.AdminRole;
 import pl.wizytowka.identity.domain.AdminUser;
 import pl.wizytowka.identity.domain.BuyerAccount;
+import pl.wizytowka.identity.domain.BuyerAccountDeleted;
 import pl.wizytowka.identity.domain.BuyerActionPurpose;
+import pl.wizytowka.identity.domain.BuyerConsent;
 import pl.wizytowka.identity.domain.BuyerStatus;
 import pl.wizytowka.identity.domain.LockoutPolicy;
+import pl.wizytowka.legal.domain.LegalDocumentType;
 import pl.wizytowka.shared.domain.CatalogLanguage;
 import pl.wizytowka.shared.domain.ConcurrentModificationException;
 import pl.wizytowka.shared.domain.InvalidValueException;
+import pl.wizytowka.shared.domain.ResourceConflictException;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 
 /** Rejestracja, potwierdzenie adresu, reset hasła, logowanie i decyzje marki — bez Springa i bazy. */
 class BuyerServicesTest {
@@ -38,11 +46,15 @@ class BuyerServicesTest {
     final IdentityFakes.Users staff = new IdentityFakes.Users();
     final IdentityFakes.RecordingMailer mailer = new IdentityFakes.RecordingMailer();
     final IdentityFakes.DeferredHooks hooks = new IdentityFakes.DeferredHooks();
+    final IdentityFakes.Consents consents = new IdentityFakes.Consents();
+    final IdentityFakes.Legal legalDocuments = new IdentityFakes.Legal();
+    final IdentityFakes.Events events = new IdentityFakes.Events();
     final AtomicReference<Instant> now = new AtomicReference<>(START);
 
     BuyerRegistrationService registration;
     BuyerAuthenticationService authentication;
     BuyerAdministrationService administration;
+    BuyerLegalService legal;
     AdminUser reviewer;
 
     @BeforeEach
@@ -67,18 +79,31 @@ class BuyerServicesTest {
                 Duration.ofHours(48), Duration.ofHours(1));
         IdentityFakes.Hasher hasher = new IdentityFakes.Hasher();
         IdentityFakes.SequentialTokens tokens = new IdentityFakes.SequentialTokens();
+        legalDocuments.publish(LegalDocumentType.TERMS, true);
+        legalDocuments.publish(LegalDocumentType.PRIVACY_POLICY, false);
+        legal = new BuyerLegalService(accounts, consents, legalDocuments, clock);
+        BuyerAccountRemoval removal = new BuyerAccountRemoval(accounts, events);
         registration = new BuyerRegistrationService(accounts, actionTokens, sessions, staff, hasher, tokens, mailer,
-                hooks, policy, clock);
+                hooks, policy, legal, clock);
         authentication = new BuyerAuthenticationService(accounts, sessions, hasher, new IdentityFakes.Issuer(), tokens,
-                policy, clock);
-        administration = new BuyerAdministrationService(accounts, sessions, mailer, hooks, clock);
+                policy, legal, removal, mailer, hooks, clock);
+        administration = new BuyerAdministrationService(accounts, sessions, mailer, hooks, legal, removal, clock);
         reviewer = IdentityFakes.user("editor@brand.pl", AdminRole.EDITOR, "editor-password-1");
         staff.save(reviewer);
     }
 
     RegisterBuyerCommand command(String email) {
         return new RegisterBuyerCommand(email, PASSWORD, "Boutique s.r.o.", "CZ", "CZ12345678", "Jana Nováková",
-                "+420 777 100 200", CatalogLanguage.CS, true, true);
+                "+420 777 100 200", CatalogLanguage.CS, true, true, legalDocuments.current(LegalDocumentType.TERMS),
+                legalDocuments.current(LegalDocumentType.PRIVACY_POLICY));
+    }
+
+    UUID terms() {
+        return legalDocuments.current(LegalDocumentType.TERMS);
+    }
+
+    UUID privacy() {
+        return legalDocuments.current(LegalDocumentType.PRIVACY_POLICY);
     }
 
     BuyerAccount registerAndVerify() {
@@ -135,13 +160,13 @@ class BuyerServicesTest {
     @Test
     void registrationValidatesPasswordTaxIdAndConsents() {
         assertThatThrownBy(() -> registration.register(new RegisterBuyerCommand("a@b.pl", "short", "Firma", "PL",
-                "1234563218", "Jan", "600100200", CatalogLanguage.PL, true, true)))
+                "1234563218", "Jan", "600100200", CatalogLanguage.PL, true, true, terms(), privacy())))
                 .hasFieldOrPropertyWithValue("code", "identity.password.policy");
         assertThatThrownBy(() -> registration.register(new RegisterBuyerCommand("a@b.pl", PASSWORD, "Firma", "PL",
-                "1234563219", "Jan", "600100200", CatalogLanguage.PL, true, true)))
+                "1234563219", "Jan", "600100200", CatalogLanguage.PL, true, true, terms(), privacy())))
                 .hasFieldOrPropertyWithValue("code", "identity.buyer.tax-id");
         assertThatThrownBy(() -> registration.register(new RegisterBuyerCommand("a@b.pl", PASSWORD, "Firma", "PL",
-                "1234563218", "Jan", "600100200", CatalogLanguage.PL, false, true)))
+                "1234563218", "Jan", "600100200", CatalogLanguage.PL, false, true, terms(), privacy())))
                 .hasFieldOrPropertyWithValue("code", "identity.buyer.consent-required");
         assertThat(accounts.store).isEmpty();
     }
@@ -332,5 +357,142 @@ class BuyerServicesTest {
 
         administration.delete(account.id());
         assertThat(accounts.store).isEmpty();
+        assertThat(events.published).as("dane osobowe znikają też z zestawień")
+                .containsExactly(new BuyerAccountDeleted(account.id().value()));
+    }
+
+    // ------------------------------------------------------------------ dokumenty prawne i zgody (D25)
+
+    @Test
+    void registrationRecordsAcceptedVersionsInConsentRegistry() {
+        BuyerAccount account = registerAndVerify();
+
+        assertThat(consents.findByBuyer(account.id()))
+                .extracting(BuyerConsent::documentType, BuyerConsent::versionNumber, BuyerConsent::language,
+                        BuyerConsent::context)
+                .containsExactlyInAnyOrder(
+                        tuple(LegalDocumentType.TERMS, 1, CatalogLanguage.CS, BuyerConsent.Context.REGISTRATION),
+                        tuple(LegalDocumentType.PRIVACY_POLICY, 1, CatalogLanguage.CS, BuyerConsent.Context.REGISTRATION));
+        assertThat(legal.status(account.id()).pending()).isEmpty();
+        assertThat(legal.mustAcceptTerms(account.id().value())).isFalse();
+    }
+
+    @Test
+    void registrationWithOutdatedDocumentVersionIsRejectedBeforeAnythingIsStored() {
+        UUID seenTerms = terms();
+        legalDocuments.publish(LegalDocumentType.TERMS, true);
+
+        assertThatThrownBy(() -> registration.register(new RegisterBuyerCommand("jana@boutique.cz", PASSWORD,
+                "Boutique s.r.o.", "CZ", "CZ12345678", "Jana Nováková", "+420 777 100 200", CatalogLanguage.CS,
+                true, true, seenTerms, privacy())))
+                .isInstanceOf(ResourceConflictException.class)
+                .hasFieldOrPropertyWithValue("code", "identity.buyer.legal-version-outdated");
+        assertThatThrownBy(() -> registration.register(new RegisterBuyerCommand("jana@boutique.cz", PASSWORD,
+                "Boutique s.r.o.", "CZ", "CZ12345678", "Jana Nováková", "+420 777 100 200", CatalogLanguage.CS,
+                true, true, null, null)))
+                .as("brak wersji, gdy dokumenty są opublikowane")
+                .hasFieldOrPropertyWithValue("code", "identity.buyer.legal-version-outdated");
+        assertThat(accounts.store).isEmpty();
+        assertThat(consents.store).isEmpty();
+    }
+
+    @Test
+    void newTermsVersionBlocksPricesUntilAcceptedButEditorialFixDoesNot() {
+        BuyerAccount account = activeBuyer();
+
+        legalDocuments.publish(LegalDocumentType.TERMS, false);
+        assertThat(legal.mustAcceptTerms(account.id().value())).as("poprawka redakcyjna").isFalse();
+
+        UUID v3 = legalDocuments.publish(LegalDocumentType.TERMS, true);
+        assertThat(legal.mustAcceptTerms(account.id().value())).isTrue();
+        assertThat(legal.status(account.id()).pending()).singleElement().satisfies(pending -> {
+            assertThat(pending.type()).isEqualTo(LegalDocumentType.TERMS);
+            assertThat(pending.versionId()).isEqualTo(v3);
+            assertThat(pending.versionNumber()).isEqualTo(3);
+            assertThat(pending.blocking()).isTrue();
+            assertThat(pending.firstTime()).isFalse();
+        });
+
+        now.set(START.plus(Duration.ofDays(2)));
+        legal.accept(account.id(), List.of(v3, v3), CatalogLanguage.EN);
+        legal.accept(account.id(), List.of(v3), CatalogLanguage.EN);
+
+        assertThat(legal.mustAcceptTerms(account.id().value())).isFalse();
+        assertThat(legal.status(account.id()).history()).first().satisfies(latest -> {
+            assertThat(latest.versionNumber()).isEqualTo(3);
+            assertThat(latest.language()).isEqualTo(CatalogLanguage.EN);
+            assertThat(latest.context()).isEqualTo(BuyerConsent.Context.UPDATE);
+            assertThat(latest.acceptedAt()).isEqualTo(START.plus(Duration.ofDays(2)));
+        });
+        assertThat(consents.store).as("ponowna akceptacja tej samej wersji nic nie dopisuje").hasSize(3);
+    }
+
+    @Test
+    void newPrivacyPolicyIsOnlyANoticeAndOldVersionsCannotBeAccepted() {
+        BuyerAccount account = activeBuyer();
+        UUID oldPrivacy = privacy();
+        UUID newPrivacy = legalDocuments.publish(LegalDocumentType.PRIVACY_POLICY, true);
+
+        assertThat(legal.mustAcceptTerms(account.id().value())).isFalse();
+        assertThat(legal.status(account.id()).pending()).singleElement().satisfies(pending -> {
+            assertThat(pending.type()).isEqualTo(LegalDocumentType.PRIVACY_POLICY);
+            assertThat(pending.blocking()).isFalse();
+        });
+        assertThatThrownBy(() -> legal.accept(account.id(), List.of(oldPrivacy), CatalogLanguage.PL))
+                .hasFieldOrPropertyWithValue("code", "identity.buyer.legal-version-outdated");
+        assertThatThrownBy(() -> legal.accept(account.id(), List.of(UUID.randomUUID()), CatalogLanguage.PL))
+                .hasFieldOrPropertyWithValue("code", "identity.buyer.legal-version-unknown");
+
+        legal.accept(account.id(), List.of(newPrivacy), CatalogLanguage.PL);
+        assertThat(legal.status(account.id()).pending()).isEmpty();
+    }
+
+    @Test
+    void accountWithoutAnyConsentMustAcceptCurrentTerms() {
+        BuyerAccount account = activeBuyer();
+        consents.store.clear();
+
+        assertThat(legal.mustAcceptTerms(account.id().value())).isTrue();
+        assertThat(legal.status(account.id()).pending())
+                .allSatisfy(pending -> assertThat(pending.firstTime()).isTrue());
+    }
+
+    // ------------------------------------------------------------------ prawa z RODO (D25)
+
+    @Test
+    void exportContainsAccountDataAndConsentHistory() {
+        BuyerAccount account = activeBuyer();
+        authentication.login("jana@boutique.cz", PASSWORD);
+
+        BuyerSelfServiceUseCase.BuyerDataExport export = authentication.export(account.id());
+
+        assertThat(export.account().email()).isEqualTo("jana@boutique.cz");
+        assertThat(export.account().taxId()).isEqualTo("12345678");
+        assertThat(export.emailVerifiedAt()).isEqualTo(START);
+        assertThat(export.lastLoginAt()).isEqualTo(START);
+        assertThat(export.consents()).hasSize(2);
+    }
+
+    @Test
+    void buyerDeletesOwnAccountOnlyWithCorrectPassword() {
+        BuyerAccount account = activeBuyer();
+        authentication.login("jana@boutique.cz", PASSWORD);
+        mailer.sent.clear();
+
+        assertThatThrownBy(() -> authentication.deleteAccount(account.id(), "not my password"))
+                .hasFieldOrPropertyWithValue("code", "identity.buyer.current-password-invalid");
+        assertThat(accounts.store).hasSize(1);
+        assertThat(accounts.only().failedLoginAttempts()).as("liczy się jak nieudane logowanie").isEqualTo(1);
+
+        authentication.deleteAccount(account.id(), PASSWORD);
+        assertThat(accounts.store).isEmpty();
+        assertThat(events.published).containsExactly(new BuyerAccountDeleted(account.id().value()));
+        assertThat(mailer.sent).as("potwierdzenie dopiero po commicie").isEmpty();
+        hooks.commit();
+        assertThat(mailer.sent).singleElement().satisfies(mail -> {
+            assertThat(mail.kind()).isEqualTo("deleted");
+            assertThat(mail.to()).isEqualTo("jana@boutique.cz");
+            assertThat(mail.language()).isEqualTo(CatalogLanguage.CS);
+        });
     }
 }

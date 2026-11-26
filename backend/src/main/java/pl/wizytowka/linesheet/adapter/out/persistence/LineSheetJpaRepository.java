@@ -4,6 +4,7 @@ import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import pl.wizytowka.linesheet.application.view.LineSheetSummaryView;
 import pl.wizytowka.linesheet.application.view.ProductLineSheetCount;
@@ -43,6 +44,23 @@ interface LineSheetJpaRepository extends JpaRepository<LineSheetJpaEntity, UUID>
             order by count(distinct s.id) desc, i.productId asc
             """)
     List<ProductLineSheetCount> topProducts(Instant from, Instant to, Limit limit);
+
+    @Query("select s.pdfStorageKey from LineSheetJpaEntity s where s.buyerAccountId = :buyerAccountId and s.pdfStorageKey is not null")
+    List<String> pdfKeysOfBuyer(UUID buyerAccountId);
+
+    /**
+     * Usuwa dane osoby kontaktowej z zestawień kupca (D25). Natywnie, bo kolumny migawki są w encji
+     * {@code updatable = false} — zwykły zapis encji ich nie zmienia. Wersja rośnie (optymistyczne blokowanie).
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = """
+            update line_sheet
+               set contact_name = null, email = null, phone = null, message = null, privacy_accepted_at = null,
+                   visitor_id = null, pdf_storage_key = null, pdf_generated_at = null, buyer_account_id = null,
+                   version = version + 1
+             where buyer_account_id = :buyerAccountId
+            """, nativeQuery = true)
+    int anonymizeOfBuyer(UUID buyerAccountId);
 
     @Query(value = "select nextval('line_sheet_number_seq')", nativeQuery = true)
     long nextSequenceNumber();

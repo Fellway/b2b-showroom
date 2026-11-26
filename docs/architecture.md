@@ -27,7 +27,8 @@ Server Components Next.js czytają katalog bezpośrednio z `API_INTERNAL_URL`; p
 | `linesheet` | zestawienia (line sheets): migawki pozycji, numeracja `LS-RRRR-NNNNNN`, generowanie i przechowywanie PDF |
 | `analytics` | zdarzenia (append-only) i podsumowania/rankingi |
 | `contact` | opiekunowie handlowi |
-| `identity` | konta panelu i konta kupców (D23): rejestracja, potwierdzenie adresu, akceptacja przez markę, logowanie, rotowane sesje, blokady, reset hasła, e-maile transakcyjne |
+| `identity` | konta panelu i konta kupców (D23): rejestracja, potwierdzenie adresu, akceptacja przez markę, logowanie, rotowane sesje, blokady, reset hasła, e-maile transakcyjne, rejestr zgód (D25), eksport danych i usunięcie konta |
+| `legal` | wersjonowane dokumenty prawne — regulamin i polityka prywatności w 4 językach: szkic → publikacja (niezmienna), wymagania wobec kupców (D25) |
 | `shared` | jądro: języki, ceny, UUIDv7, hierarchia `DomainException`, porty plików i transakcji, wspólne adaptery web (błędy, język, media, rate limiting) |
 | `config` | konfiguracja bezpieczeństwa i zegara |
 

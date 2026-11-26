@@ -92,8 +92,6 @@ class BuyerAccountPersistenceAdapter implements BuyerAccountRepository {
     private static BuyerAccountJpaEntity newEntity(BuyerAccount account) {
         BuyerAccountJpaEntity entity = new BuyerAccountJpaEntity(account.id().value());
         entity.email = account.email();
-        entity.termsAcceptedAt = account.termsAcceptedAt();
-        entity.privacyAcceptedAt = account.privacyAcceptedAt();
         entity.createdAt = account.createdAt();
         return entity;
     }
@@ -118,8 +116,6 @@ class BuyerAccountPersistenceAdapter implements BuyerAccountRepository {
                 .phone(e.phone)
                 .language(e.language)
                 .status(e.status)
-                .termsAcceptedAt(e.termsAcceptedAt)
-                .privacyAcceptedAt(e.privacyAcceptedAt)
                 .emailVerifiedAt(e.emailVerifiedAt)
                 .reviewedAt(e.reviewedAt)
                 .reviewedBy(e.reviewedBy == null ? null : AdminUserId.of(e.reviewedBy))

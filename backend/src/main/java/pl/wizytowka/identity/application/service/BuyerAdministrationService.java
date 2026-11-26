@@ -32,14 +32,19 @@ class BuyerAdministrationService implements ManageBuyersUseCase, BuyerContactQue
     private final BuyerRefreshTokenRepository sessions;
     private final BuyerMailer mailer;
     private final TransactionalHooks transactionalHooks;
+    private final BuyerLegalService legal;
+    private final BuyerAccountRemoval removal;
     private final Clock clock;
 
     BuyerAdministrationService(BuyerAccountRepository accounts, BuyerRefreshTokenRepository sessions, BuyerMailer mailer,
-                               TransactionalHooks transactionalHooks, Clock clock) {
+                               TransactionalHooks transactionalHooks, BuyerLegalService legal,
+                               BuyerAccountRemoval removal, Clock clock) {
         this.accounts = accounts;
         this.sessions = sessions;
         this.mailer = mailer;
         this.transactionalHooks = transactionalHooks;
+        this.legal = legal;
+        this.removal = removal;
         this.clock = clock;
     }
 
@@ -52,7 +57,7 @@ class BuyerAdministrationService implements ManageBuyersUseCase, BuyerContactQue
     @Override
     @Transactional(readOnly = true)
     public AdminBuyerView get(BuyerAccountId id) {
-        return AdminBuyerView.of(load(id));
+        return AdminBuyerView.of(load(id), legal.history(id));
     }
 
     @Override
@@ -100,8 +105,8 @@ class BuyerAdministrationService implements ManageBuyersUseCase, BuyerContactQue
     @Override
     @Transactional
     public void delete(BuyerAccountId id) {
-        load(id);
-        accounts.delete(id);
+        // dane osobowe kupca znikają też z jego zestawień (BuyerAccountDeleted)
+        removal.remove(load(id));
     }
 
     @Override

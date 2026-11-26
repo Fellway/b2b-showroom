@@ -27,6 +27,9 @@ public interface BuyerMailer {
 
     void sendPasswordReset(String to, CatalogLanguage language, String rawToken);
 
+    /** Potwierdzenie, że kupiec usunął konto (D25) — bez linków z tokenem. */
+    void sendAccountDeleted(String to, CatalogLanguage language);
+
     /** Powiadomienie zespołu marki o nowym wniosku czekającym na akceptację (bez danych kupca w treści). */
     void notifyStaffAboutPendingBuyer(List<String> staffEmails);
 }

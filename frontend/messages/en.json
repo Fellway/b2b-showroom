@@ -176,7 +176,8 @@
     "close": "Close privacy settings",
     "currentGranted": "Current setting: statistics consent given.",
     "currentDenied": "Current setting: no statistics consent.",
-    "policy": "Privacy policy"
+    "policy": "Privacy policy",
+    "terms": "Terms of service"
   },
   "account": {
     "titles": {
@@ -222,8 +223,8 @@
       "taxIdHint": "Poland: 10-digit NIP.",
       "contactName": "Full name",
       "phone": "Phone",
-      "terms": "I accept the terms of use of the Fabian's Style wholesale catalogue.",
-      "privacy": "I agree to Fabian's Style processing the data I provide to manage my account and for business contact. <policy>Privacy policy</policy>",
+      "terms": "I accept the <terms>terms of service</terms> of the Fabian's Style wholesale showroom.",
+      "privacy": "I have read the <policy>privacy policy</policy> and know how Fabian's Style processes account data.",
       "submit": "Create account",
       "submitting": "Sending…",
       "haveAccount": "Already have an account?",
@@ -238,7 +239,8 @@
         "email": "Enter a valid e-mail address.",
         "consent": "Tick both consents to create an account.",
         "country": "Choose a country.",
-        "required": "Please fill in this field."
+        "required": "Please fill in this field.",
+        "documentsChanged": "Our terms of service or privacy policy have just changed. Refresh the page, review the current version and submit the form again."
       }
     },
     "verify": {
@@ -287,7 +289,8 @@
         "empty": "You have no line sheets yet. Choose products in the catalogue and create a PDF.",
         "items": "{count, plural, one {# item} other {# items}}",
         "download": "Download PDF",
-        "more": "Show older"
+        "more": "Show older",
+        "blocked": "Line sheets will be available once you accept the current terms of service."
       }
     },
     "phone": {
@@ -295,6 +298,69 @@
       "search": "Search country or dialling code",
       "list": "Countries",
       "noResults": "No matching country."
+    },
+    "privacy": {
+      "title": "Privacy and documents",
+      "history": "Accepted documents",
+      "documents": "Current: <terms>terms of service</terms> and <privacy>privacy policy</privacy>.",
+      "historyEmpty": "No acceptances recorded.",
+      "historyError": "Could not load your consent history.",
+      "termsVersion": "Terms of service, version {number}",
+      "privacyVersion": "Privacy policy, version {number}",
+      "accepted": "accepted",
+      "acknowledged": "acknowledged",
+      "contextRegistration": "at registration",
+      "contextUpdate": "new version",
+      "exportTitle": "Download your data",
+      "exportLead": "A JSON file with your account data, history of accepted documents and list of line sheets.",
+      "export": "Download data (JSON)",
+      "exporting": "Preparing…",
+      "deleteTitle": "Delete account",
+      "deleteLead": "We will delete your account, sign-in details and consent history. Line sheets stay with us as a record of the offer, but without the contact person's details and without PDF files. This cannot be undone.",
+      "deleteOpen": "I want to delete my account",
+      "deleteConfirm": "I understand that deleting the account cannot be undone.",
+      "deleteSubmit": "Delete account permanently",
+      "deleting": "Deleting…",
+      "deleteCancel": "Cancel",
+      "deletedTitle": "Your account has been deleted",
+      "deletedLead": "We have sent a confirmation to your e-mail address. If you would like to come back, you can create a new account at any time."
+    }
+  },
+  "legal": {
+    "termsTitle": "Terms of service",
+    "privacyTitle": "Privacy policy",
+    "versionMeta": "Version {number} · effective from {date}",
+    "archived": "This is an archived version of the document.",
+    "seeCurrent": "See the current version",
+    "notTranslated": "This version has not been translated yet — the Polish text is shown.",
+    "history": "Document versions",
+    "versionLabel": "Version {number}",
+    "currentBadge": "current",
+    "update": {
+      "title": "We have updated our terms of service",
+      "titleFirst": "Accept the showroom terms of service",
+      "lead": "To keep seeing wholesale prices and preparing line sheets, please review the changes and accept the new version.",
+      "leadFirst": "To see wholesale prices and prepare line sheets, please read and accept the terms of service.",
+      "noticeTitle": "We have updated our privacy policy",
+      "noticeLead": "Please read the new version — you do not need to accept anything.",
+      "terms": "Terms of service",
+      "privacy": "Privacy policy",
+      "version": "version {number}",
+      "read": "Read in full",
+      "confirm": "I have read the documents and accept the terms of service.",
+      "accept": "Accept",
+      "acknowledge": "Got it",
+      "accepting": "Saving…",
+      "outdated": "A newer version has just been published — please review it and accept again.",
+      "error": "We could not save your acceptance. Please try again.",
+      "alternatives": "Don't want to accept? You can <logout>sign out</logout> or, in <account>My account</account>, download your data or delete your account."
+    },
+    "notice": {
+      "label": "Privacy policy update",
+      "text": "We have updated our privacy policy (version {number}).",
+      "read": "Read it",
+      "dismiss": "Got it",
+      "error": "Could not save — please try again."
     }
   }
 }

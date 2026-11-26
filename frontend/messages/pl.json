@@ -176,7 +176,8 @@
     "close": "Zamknij ustawienia prywatności",
     "currentGranted": "Obecnie: zgoda na statystyki udzielona.",
     "currentDenied": "Obecnie: bez zgody na statystyki.",
-    "policy": "Polityka prywatności"
+    "policy": "Polityka prywatności",
+    "terms": "Regulamin"
   },
   "account": {
     "titles": {
@@ -222,8 +223,8 @@
       "taxIdHint": "W Polsce — 10 cyfr NIP.",
       "contactName": "Imię i nazwisko",
       "phone": "Telefon",
-      "terms": "Akceptuję warunki korzystania z katalogu hurtowego Fabian's Style.",
-      "privacy": "Zgadzam się na przetwarzanie podanych danych przez Fabian's Style w celu obsługi konta i kontaktu handlowego. <policy>Polityka prywatności</policy>",
+      "terms": "Akceptuję <terms>Regulamin</terms> showroomu hurtowego Fabian's Style.",
+      "privacy": "Zapoznałem(-am) się z <policy>Polityką prywatności</policy> — wiem, jak Fabian's Style przetwarza dane konta.",
       "submit": "Załóż konto",
       "submitting": "Wysyłanie…",
       "haveAccount": "Masz już konto?",
@@ -238,7 +239,8 @@
         "email": "Podaj poprawny adres e-mail.",
         "consent": "Zaznacz obie zgody, aby założyć konto.",
         "country": "Wybierz kraj.",
-        "required": "Uzupełnij to pole."
+        "required": "Uzupełnij to pole.",
+        "documentsChanged": "W międzyczasie zmieniliśmy regulamin lub politykę prywatności. Odśwież stronę, zapoznaj się z aktualną wersją i wyślij formularz ponownie."
       }
     },
     "verify": {
@@ -287,7 +289,8 @@
         "empty": "Nie masz jeszcze zestawień. Wybierz modele w katalogu i utwórz PDF.",
         "items": "{count, plural, one {# pozycja} few {# pozycje} many {# pozycji} other {# pozycji}}",
         "download": "Pobierz PDF",
-        "more": "Pokaż starsze"
+        "more": "Pokaż starsze",
+        "blocked": "Zestawienia będą dostępne po akceptacji aktualnego regulaminu."
       }
     },
     "phone": {
@@ -295,6 +298,69 @@
       "search": "Szukaj kraju lub numeru kierunkowego",
       "list": "Kraje",
       "noResults": "Brak pasującego kraju."
+    },
+    "privacy": {
+      "title": "Prywatność i dokumenty",
+      "history": "Zaakceptowane dokumenty",
+      "documents": "Obowiązujące: <terms>Regulamin</terms> i <privacy>Polityka prywatności</privacy>.",
+      "historyEmpty": "Brak zapisanych akceptacji.",
+      "historyError": "Nie udało się wczytać historii zgód.",
+      "termsVersion": "Regulamin, wersja {number}",
+      "privacyVersion": "Polityka prywatności, wersja {number}",
+      "accepted": "zaakceptowany",
+      "acknowledged": "przyjęta do wiadomości",
+      "contextRegistration": "przy rejestracji",
+      "contextUpdate": "nowa wersja",
+      "exportTitle": "Pobierz swoje dane",
+      "exportLead": "Plik JSON z danymi konta, historią zaakceptowanych dokumentów i listą zestawień.",
+      "export": "Pobierz dane (JSON)",
+      "exporting": "Przygotowywanie…",
+      "deleteTitle": "Usuń konto",
+      "deleteLead": "Usuniemy konto, dane logowania i historię zgód. Zestawienia zostaną u nas jako ślad oferty, ale bez danych osoby kontaktowej i bez plików PDF. Tej operacji nie można cofnąć.",
+      "deleteOpen": "Chcę usunąć konto",
+      "deleteConfirm": "Rozumiem, że usunięcia konta nie można cofnąć.",
+      "deleteSubmit": "Usuń konto na stałe",
+      "deleting": "Usuwanie…",
+      "deleteCancel": "Anuluj",
+      "deletedTitle": "Konto zostało usunięte",
+      "deletedLead": "Wysłaliśmy potwierdzenie na Twój adres e-mail. Jeśli zechcesz wrócić, możesz w każdej chwili założyć nowe konto."
+    }
+  },
+  "legal": {
+    "termsTitle": "Regulamin",
+    "privacyTitle": "Polityka prywatności",
+    "versionMeta": "Wersja {number} · obowiązuje od {date}",
+    "archived": "To archiwalna wersja dokumentu.",
+    "seeCurrent": "Zobacz obowiązującą wersję",
+    "notTranslated": "Ta wersja nie ma jeszcze tłumaczenia — pokazujemy treść po polsku.",
+    "history": "Wersje dokumentu",
+    "versionLabel": "Wersja {number}",
+    "currentBadge": "obowiązująca",
+    "update": {
+      "title": "Zaktualizowaliśmy regulamin",
+      "titleFirst": "Zaakceptuj regulamin showroomu",
+      "lead": "Aby dalej widzieć ceny hurtowe i przygotowywać zestawienia, zapoznaj się ze zmianami i zaakceptuj nową wersję.",
+      "leadFirst": "Aby widzieć ceny hurtowe i przygotowywać zestawienia, zapoznaj się z regulaminem i go zaakceptuj.",
+      "noticeTitle": "Zaktualizowaliśmy politykę prywatności",
+      "noticeLead": "Zapoznaj się z nową wersją — nie musisz niczego akceptować.",
+      "terms": "Regulamin",
+      "privacy": "Polityka prywatności",
+      "version": "wersja {number}",
+      "read": "Przeczytaj całość",
+      "confirm": "Zapoznałem(-am) się z dokumentami i akceptuję regulamin.",
+      "accept": "Akceptuję",
+      "acknowledge": "Rozumiem",
+      "accepting": "Zapisywanie…",
+      "outdated": "W międzyczasie opublikowaliśmy kolejną wersję — sprawdź ją i zaakceptuj ponownie.",
+      "error": "Nie udało się zapisać akceptacji. Spróbuj ponownie.",
+      "alternatives": "Nie chcesz akceptować? Możesz <logout>wylogować się</logout> albo w <account>Moim koncie</account> pobrać swoje dane lub usunąć konto."
+    },
+    "notice": {
+      "label": "Zmiana polityki prywatności",
+      "text": "Zaktualizowaliśmy politykę prywatności (wersja {number}).",
+      "read": "Przeczytaj",
+      "dismiss": "Rozumiem",
+      "error": "Nie udało się zapisać — spróbuj ponownie."
     }
   }
 }

@@ -12,11 +12,9 @@ RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
 FROM node:22-alpine AS build
 WORKDIR /app
 ARG NEXT_PUBLIC_DEMO_NOTICE=true
-ARG NEXT_PUBLIC_PRIVACY_POLICY_URL=
 # Adres backendu w sieci docker compose — trafia do rewrite'u /api (używa go optymalizator next/image).
 ARG API_INTERNAL_URL=http://backend:8080
 ENV NEXT_PUBLIC_DEMO_NOTICE=$NEXT_PUBLIC_DEMO_NOTICE \
-    NEXT_PUBLIC_PRIVACY_POLICY_URL=$NEXT_PUBLIC_PRIVACY_POLICY_URL \
     API_INTERNAL_URL=$API_INTERNAL_URL \
     NEXT_TELEMETRY_DISABLED=1
 COPY --from=deps /app/node_modules ./node_modules

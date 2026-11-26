@@ -62,7 +62,7 @@ class BuyerPersistenceTest {
         assertThat(loaded.taxId()).isEqualTo(TaxId.of("PL", "1234563218"));
         assertThat(loaded.status()).isEqualTo(BuyerStatus.PENDING_EMAIL);
         assertThat(loaded.language()).isEqualTo(CatalogLanguage.PL);
-        assertThat(loaded.termsAcceptedAt()).isEqualTo(NOW);
+        assertThat(loaded.createdAt()).isEqualTo(NOW);
         assertThat(loaded.version()).isZero();
         assertThat(accounts.existsByEmail("jan@sklep.pl")).isTrue();
 

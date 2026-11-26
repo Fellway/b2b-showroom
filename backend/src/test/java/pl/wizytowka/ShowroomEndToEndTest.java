@@ -121,12 +121,25 @@ class ShowroomEndToEndTest {
         mvc.perform(post("/api/v1/buyer/line-sheets").contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().isUnauthorized());
 
+        // --- dokumenty prawne: wzory opublikowane przy starcie jako wersja 1 (D25)
+        String terms = mvc.perform(get("/api/v1/legal/terms").param("lang", "en"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.versionNumber").value(1))
+                .andExpect(jsonPath("$.language").value("EN"))
+                .andExpect(jsonPath("$.title").value(org.hamcrest.Matchers.containsString("terms of service")))
+                .andReturn().getResponse().getContentAsString();
+        String privacy = mvc.perform(get("/api/v1/legal/privacy")).andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String termsV1 = JsonPath.read(terms, "$.versionId");
+        String privacyV1 = JsonPath.read(privacy, "$.versionId");
+
         // --- kupiec: rejestracja → potwierdzenie adresu → akceptacja marki → logowanie
         mvc.perform(buyerAuth("/register").param("lang", "en").content("""
                         {"email":"Buyer@Boutique.cz","password":"correct horse battery staple",
                          "companyName":"Boutique s.r.o.","countryCode":"CZ","taxId":"CZ12345678",
                          "contactName":"Jana Nováková","phone":"+420 777 100 200",
-                         "termsAccepted":true,"privacyAccepted":true}"""))
+                         "termsAccepted":true,"privacyAccepted":true,
+                         "termsVersionId":"%s","privacyVersionId":"%s"}""".formatted(termsV1, privacyV1)))
                 .andExpect(status().isAccepted());
         ArgumentCaptor<String> verificationToken = ArgumentCaptor.forClass(String.class);
         verify(mailer).sendEmailVerification(eq("buyer@boutique.cz"), eq(CatalogLanguage.EN), verificationToken.capture());
@@ -180,6 +193,41 @@ class ShowroomEndToEndTest {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                 .andExpect(status().isForbidden());
 
+        // --- nowa wersja regulaminu: ceny i zestawienia zablokowane do akceptacji (D25)
+        String draft = mvc.perform(post("/api/v1/admin/legal/terms/drafts").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        mvc.perform(post("/api/v1/admin/legal/versions/" + JsonPath.read(draft, "$.id") + "/publish")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"version":%d,"requireAcceptance":true}""".formatted(
+                                ((Number) JsonPath.read(draft, "$.version")).longValue())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.versionNumber").value(2));
+        mvc.perform(get("/api/v1/buyer/catalog/pricing").param("product", productId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + buyerToken))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("identity.buyer.terms-acceptance-required"));
+        String legal = mvc.perform(get("/api/v1/buyer/me/legal").header(HttpHeaders.AUTHORIZATION, "Bearer " + buyerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pending[0].type").value("TERMS"))
+                .andExpect(jsonPath("$.pending[0].blocking").value(true))
+                .andExpect(jsonPath("$.history.length()").value(2))
+                .andReturn().getResponse().getContentAsString();
+        mvc.perform(post("/api/v1/buyer/me/legal/accept").param("lang", "en")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + buyerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"versionIds":["%s"]}""".formatted((String) JsonPath.read(legal, "$.pending[0].versionId"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pending.length()").value(0))
+                .andExpect(jsonPath("$.history[0].versionNumber").value(2))
+                .andExpect(jsonPath("$.history[0].context").value("UPDATE"));
+        mvc.perform(get("/api/v1/admin/buyers/" + buyerId).header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.consents.length()").value(3));
+
         MvcResult created = mvc.perform(post("/api/v1/buyer/line-sheets").param("lang", "en")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + buyerToken)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -222,6 +270,31 @@ class ShowroomEndToEndTest {
                 .andExpect(jsonPath("$.lineSheetsCreated").value(1))
                 .andExpect(jsonPath("$.topViewedProducts[0].productId").value(productId))
                 .andExpect(jsonPath("$.topLineSheetProducts[0].productId").value(productId));
+
+        // --- prawa z RODO: eksport danych i usunięcie konta (D25)
+        mvc.perform(get("/api/v1/buyer/me/export").header(HttpHeaders.AUTHORIZATION, "Bearer " + buyerToken))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, startsWith("attachment")))
+                .andExpect(jsonPath("$.account.email").value("buyer@boutique.cz"))
+                .andExpect(jsonPath("$.consents.length()").value(3))
+                .andExpect(jsonPath("$.lineSheets[0].email").value("buyer@boutique.cz"));
+        mvc.perform(post("/api/v1/buyer/me/delete").header(HttpHeaders.AUTHORIZATION, "Bearer " + buyerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"currentPassword":"correct horse battery staple"}"""))
+                .andExpect(status().isNoContent())
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("Max-Age=0")));
+        verify(mailer).sendAccountDeleted("buyer@boutique.cz", CatalogLanguage.EN);
+        mvc.perform(buyerAuth("/login").content(BUYER_LOGIN)).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/v1/admin/line-sheets").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[0].companyName").value("Boutique s.r.o."))
+                .andExpect(jsonPath("$.items[0].email").doesNotExist())
+                .andExpect(jsonPath("$.items[0].contactName").doesNotExist())
+                .andExpect(jsonPath("$.items[0].buyerAccountId").doesNotExist());
+        mvc.perform(get("/api/v1/admin/line-sheets/" + JsonPath.read(lineSheets, "$.items[0].id") + "/pdf")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isNotFound());
 
         // --- granice dostępu
         mvc.perform(get("/api/v1/admin/products")).andExpect(status().isUnauthorized());

@@ -83,7 +83,7 @@ darmowego konta i klucza licencyjnego). Nagłówek wpływa tylko na podpowiedź 
 
 ## Zmienne frontendu wpisywane przy buildzie
 
-`NEXT_PUBLIC_DEMO_NOTICE` (domyślnie `true`) i `NEXT_PUBLIC_PRIVACY_POLICY_URL` ustawiasz w repozytorium:
+`NEXT_PUBLIC_DEMO_NOTICE` (domyślnie `true`) ustawiasz w repozytorium:
 GitHub → Settings → Secrets and variables → Actions → **Variables**. Zmiana działa po ponownym zbudowaniu obrazu
 (nowy push na `main` albo *Actions → CI → Run workflow* na `main`).
 

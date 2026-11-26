@@ -46,7 +46,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
 ## Unresolved
 
-- Polityka prywatności / administrator danych — brak danych prawnych marki (link w banerze i stopce pojawi się po ustawieniu NEXT_PUBLIC_PRIVACY_POLICY_URL).
+- Polityka prywatności i regulamin — strony `/privacy` i `/terms` z wersjonowanych dokumentów (D25); dane administratora to pola do uzupełnienia przez markę.
 
 ## Decisions
 

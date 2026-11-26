@@ -11,6 +11,7 @@ import pl.wizytowka.identity.application.port.in.BuyerSelfServiceUseCase;
 import pl.wizytowka.identity.application.port.in.BuyerSession;
 import pl.wizytowka.identity.application.port.out.AccessTokenIssuer;
 import pl.wizytowka.identity.application.port.out.BuyerAccountRepository;
+import pl.wizytowka.identity.application.port.out.BuyerMailer;
 import pl.wizytowka.identity.application.port.out.BuyerRefreshTokenRepository;
 import pl.wizytowka.identity.application.port.out.PasswordHasher;
 import pl.wizytowka.identity.application.port.out.SecureTokenGenerator;
@@ -19,6 +20,7 @@ import pl.wizytowka.identity.domain.BuyerAccountId;
 import pl.wizytowka.identity.domain.PasswordPolicy;
 import pl.wizytowka.identity.domain.RefreshToken;
 import pl.wizytowka.identity.domain.TokenHashing;
+import pl.wizytowka.shared.application.port.out.TransactionalHooks;
 import pl.wizytowka.shared.domain.CatalogLanguage;
 import pl.wizytowka.shared.domain.ConcurrentModificationException;
 import pl.wizytowka.shared.domain.InvalidValueException;
@@ -49,19 +51,29 @@ class BuyerAuthenticationService implements BuyerAuthenticationUseCase, BuyerSel
     private final AccessTokenIssuer accessTokenIssuer;
     private final SecureTokenGenerator tokenGenerator;
     private final BuyerPolicy policy;
+    private final BuyerLegalService legal;
+    private final BuyerAccountRemoval removal;
+    private final BuyerMailer mailer;
+    private final TransactionalHooks transactionalHooks;
     private final Clock clock;
     /** Hash porównywany przy nieznanym e-mailu, by czas odpowiedzi nie zdradzał istnienia konta. */
     private final String dummyPasswordHash;
 
     BuyerAuthenticationService(BuyerAccountRepository accounts, BuyerRefreshTokenRepository sessions,
                                PasswordHasher passwordHasher, AccessTokenIssuer accessTokenIssuer,
-                               SecureTokenGenerator tokenGenerator, BuyerPolicy policy, Clock clock) {
+                               SecureTokenGenerator tokenGenerator, BuyerPolicy policy, BuyerLegalService legal,
+                               BuyerAccountRemoval removal, BuyerMailer mailer, TransactionalHooks transactionalHooks,
+                               Clock clock) {
         this.accounts = accounts;
         this.sessions = sessions;
         this.passwordHasher = passwordHasher;
         this.accessTokenIssuer = accessTokenIssuer;
         this.tokenGenerator = tokenGenerator;
         this.policy = policy;
+        this.legal = legal;
+        this.removal = removal;
+        this.mailer = mailer;
+        this.transactionalHooks = transactionalHooks;
         this.clock = clock;
         this.dummyPasswordHash = passwordHasher.hash(tokenGenerator.generate());
     }
@@ -164,6 +176,31 @@ class BuyerAuthenticationService implements BuyerAuthenticationUseCase, BuyerSel
         accounts.save(account);
         sessions.revokeAllOfBuyer(account.id(), now);
         return issueSession(account, Uuids.v7(), now);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public BuyerDataExport export(BuyerAccountId id) {
+        BuyerAccount account = load(id);
+        return new BuyerDataExport(BuyerAccountView.of(account), account.emailVerifiedAt(), account.reviewedAt(),
+                account.lastLoginAt(), legal.history(id));
+    }
+
+    @Override
+    @Transactional(noRollbackFor = InvalidValueException.class)
+    public void deleteAccount(BuyerAccountId id, String currentPassword) {
+        Instant now = clock.instant();
+        BuyerAccount account = load(id);
+        boolean currentMatches = currentPassword != null && passwordHasher.matches(currentPassword, account.passwordHash());
+        if (!currentMatches || account.isLocked(now)) {
+            account.recordFailedLogin(now, policy.lockout());
+            accounts.save(account);
+            throw new InvalidValueException(CURRENT_PASSWORD_INVALID, "Current password is incorrect");
+        }
+        String email = account.email();
+        CatalogLanguage language = account.language();
+        removal.remove(account);
+        transactionalHooks.afterCommit(() -> mailer.sendAccountDeleted(email, language));
     }
 
     // ------------------------------------------------------------------ pomocnicze

@@ -27,6 +27,7 @@ etapów niżej; zmiana systemu wizualnego → `DESIGN.md`. Po zakończeniu etapu
 | 5 | Wdrożenie: Dockerfile'e, `deploy/` (VPS + Compose + Caddy, kopie), GitHub Actions + obrazy w GHCR (`docs/deployment.md`) | 🟡 przygotowane, czeka na serwer i domenę (wstrzymane) |
 | 6a | Konta kupców — backend (D23): rejestracja + akceptacja, ceny/EAN/PDF tylko po zalogowaniu, e-maile transakcyjne (migracja V3) | ✅ |
 | 6b | Konta kupców — frontend: logowanie/rejestracja, ceny z `/api/v1/buyer/catalog/pricing`, „Moje zestawienia”, panel „Kupcy” | ✅ |
+| — | Regulamin i polityka prywatności z wersjami (moduł `legal`, migracja V4), rejestr zgód, brama regulaminu, eksport danych i usunięcie konta (D25) | ✅ — treść do weryfikacji prawnej |
 
 Pracujemy etapami — nie piszemy całego systemu naraz. Przed startem etapu zadajemy pytania doprecyzowujące,
 jeśli decyzja zmienia kształt rozwiązania.
@@ -43,6 +44,7 @@ jeśli decyzja zmienia kształt rozwiązania.
 - **Języki:** `pl` (bazowy i fallback), `en`, `cs`, `uk` — interfejs i treści produktów. Język żądania: `?lang=` → `Accept-Language` → `pl`.
 - **Zestawienie PDF:** 1–200 różnych wariantów, opcjonalna ilość orientacyjna, kody EAN, zdjęcia, ceny hurtowe i sugerowane. Pozycje to **migawki** z chwili generowania. Klient tylko pobiera PDF (bez wysyłki e-mail). Podanie jakichkolwiek danych kontaktowych wymaga zgody RODO.
   Układ PDF: kompaktowa tabela (wiersz na wariant z miniaturą); dane marki to placeholdery w `showroom.brand.*` do dopracowania w Etapie 4. Domyślnie przypisywany pierwszy aktywny opiekun handlowy.
+- **Dokumenty prawne (D25):** regulamin i polityka prywatności wersjonowane w panelu (4 języki, opublikowana wersja niezmienna, publikuje ADMIN). Rejestr `buyer_consent` — kto, który dokument, wersja, kiedy, język (bez IP). Nowa istotna wersja regulaminu blokuje ceny i zestawienia do akceptacji (w API); nowa polityka = tylko informacja. Kupiec sam pobiera dane (JSON) i usuwa konto — z jego zestawień znikają dane osoby kontaktowej i PDF. Wzory treści wymagają weryfikacji prawnej.
 - **Analityka:** odwiedziny (unikalni odwiedzający — tylko po zgodzie z banera prywatności; bez zgody zdarzenia w pełni anonimowe, nic nie zapisujemy w przeglądarce), najczęściej oglądane produkty, najczęściej dodawane do wyboru, najczęściej występujące w zestawieniach, liczba zestawień. Bez IP i User-Agenta. Zdarzenia z przeglądarki: paczki ≤50, czas nadaje serwer; typy `LINE_SHEET_*` tylko z serwera. Dashboard: domyślnie 30 dni, max 366.
 
 ## Stos technologiczny
@@ -58,7 +60,7 @@ jeśli decyzja zmienia kształt rozwiązania.
 ## Architektura backendu — heksagonalna z czystą domeną
 
 ```
-pl.wizytowka.<moduł>            moduły: catalog, linesheet, analytics, contact, identity (+ shared, config)
+pl.wizytowka.<moduł>            moduły: catalog, linesheet, analytics, contact, identity, legal (+ shared, config)
 ├── domain/                     czysta Java — ZERO Springa, JPA, Jacksona, jakarta.*
 ├── application/port/in/        przypadki użycia = publiczne API modułu
 ├── application/port/out/       repozytoria, storage, PDF, tokeny…

@@ -25,7 +25,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 class HexagonalArchitectureTest {
 
     private static final String ROOT = "pl.wizytowka";
-    private static final List<String> MODULES = List.of("catalog", "linesheet", "analytics", "contact", "identity");
+    private static final List<String> MODULES = List.of("catalog", "linesheet", "analytics", "contact", "identity", "legal");
     private static final Pattern MODULE_PACKAGE = Pattern.compile("^pl\\.wizytowka\\.([a-z]+)(\\..*)?$");
 
     private static JavaClasses classes;

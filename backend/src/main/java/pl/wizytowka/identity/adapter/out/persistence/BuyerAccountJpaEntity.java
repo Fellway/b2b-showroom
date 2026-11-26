@@ -49,12 +49,6 @@ class BuyerAccountJpaEntity {
     @Column(name = "status", nullable = false, length = 20)
     BuyerStatus status;
 
-    @Column(name = "terms_accepted_at", nullable = false, updatable = false)
-    Instant termsAcceptedAt;
-
-    @Column(name = "privacy_accepted_at", nullable = false, updatable = false)
-    Instant privacyAcceptedAt;
-
     @Column(name = "email_verified_at")
     Instant emailVerifiedAt;
 

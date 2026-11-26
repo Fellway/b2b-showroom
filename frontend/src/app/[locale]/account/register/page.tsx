@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { RegisterForm } from "@/components/account/register-form";
+import { fetchLegalDocument } from "@/lib/api";
 import { suggestedCountry } from "@/lib/request-country";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/account/register">): Promise<Metadata> {
@@ -17,10 +18,18 @@ export default async function Page({ params }: PageProps<"/[locale]/account/regi
   const { locale } = await params;
   setRequestLocale(locale);
   // podpowiedź kraju firmy i numeru kierunkowego na podstawie żądania (zob. lib/request-country.ts)
-  const country = await suggestedCountry(locale);
+  const [country, terms, privacy] = await Promise.all([
+    suggestedCountry(locale),
+    // zgody dotyczą konkretnych wersji dokumentów — tych, do których prowadzą linki w formularzu (D25)
+    fetchLegalDocument(locale, "terms", true).catch(() => null),
+    fetchLegalDocument(locale, "privacy", true).catch(() => null),
+  ]);
   return (
     <Suspense>
-      <RegisterForm suggestedCountry={country} />
+      <RegisterForm
+        suggestedCountry={country}
+        documents={{ termsVersionId: terms?.versionId ?? null, privacyVersionId: privacy?.versionId ?? null }}
+      />
     </Suspense>
   );
 }

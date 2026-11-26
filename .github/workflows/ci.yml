@@ -105,4 +105,3 @@ jobs:
           # NEXT_PUBLIC_* są wpisywane w kod przy buildzie — ustawiasz je w Settings → Variables → Actions repozytorium
           build-args: |
             NEXT_PUBLIC_DEMO_NOTICE=${{ vars.NEXT_PUBLIC_DEMO_NOTICE || 'true' }}
-            NEXT_PUBLIC_PRIVACY_POLICY_URL=${{ vars.NEXT_PUBLIC_PRIVACY_POLICY_URL }}

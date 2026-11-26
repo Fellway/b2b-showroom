@@ -3,6 +3,7 @@ package pl.wizytowka.linesheet.application.port.out;
 import pl.wizytowka.linesheet.domain.LineSheet;
 import pl.wizytowka.linesheet.domain.LineSheetId;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,4 +19,10 @@ public interface LineSheetRepository {
      * @throws pl.wizytowka.shared.domain.ConcurrentModificationException przy niezgodności wersji
      */
     void save(LineSheet lineSheet);
+
+    /**
+     * Usuwa dane osoby kontaktowej, wiadomość, zgodę i odwołanie do PDF z zestawień kupca oraz odłącza je od konta.
+     * @return klucze plików PDF, które należy usunąć z magazynu
+     */
+    List<String> anonymizeOfBuyer(UUID buyerAccountId);
 }

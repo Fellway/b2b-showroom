@@ -26,6 +26,13 @@ administracyjny pod `/admin`.
   nagłówek proxy `CF-IPCountry` / `X-Country-Code` → `Accept-Language` → język strony).
 - „Moje konto” po otwarciu pobiera `/api/v1/buyer/me` — dane konta w sesji są z chwili logowania i mają nieaktualną
   wersję (logowanie zapisuje czas logowania), a edycja wymaga bieżącej.
+- Dokumenty prawne (D25): strony `/terms` i `/privacy` (obowiązująca wersja, `?version=<id>` — archiwalna, historia
+  wersji) renderowane z ograniczonego Markdownu bez HTML-a (`components/legal/legal-markdown.tsx`). Rejestracja wysyła
+  id wersji pokazanych w formularzu (pobranych bez cache). Stan zgód kupca: `lib/buyer/legal.ts` — po zalogowaniu
+  i po odpowiedzi `identity.buyer.terms-acceptance-required` z API. Nowy regulamin = okno bez możliwości pominięcia
+  (`components/account/legal-notices.tsx`; wyjście: wylogowanie albo „Moje konto”), nowa polityka = pasek pod
+  nagłówkiem. Po akceptacji ceny pobierane od nowa (`invalidatePricing`). „Moje konto”: akceptacja w treści strony,
+  historia zgód, pobranie danych (JSON), usunięcie konta z hasłem (`components/account/account-privacy.tsx`).
 
 ## Panel administracyjny (`/admin`)
 
@@ -36,7 +43,8 @@ administracyjny pod `/admin`.
 - Ekrany: Modele (lista z szybką ceną i ukrywaniem, kolumna „Braki”), edytor modelu w krokach (dane, tłumaczenia
   wklejane obok polskiego wzorca, kolory × rozmiary z SKU/EAN, zdjęcia), Kategorie / Kolory / Rozmiary, Zestawienia
   (leady z kontaktem i PDF), Kupcy (wnioski do akceptacji z licznikiem w nawigacji, akceptacja / odrzucenie /
-  zawieszenie / usunięcie konta), Statystyki, Opiekunowie, Konta (tylko ADMIN).
+  zawieszenie / usunięcie konta, rejestr zgód), Statystyki, Opiekunowie, Dokumenty prawne (szkic w 4 językach
+  z podglądem → publikacja wersji, tylko ADMIN; `?edit=<id>`), Konta (tylko ADMIN).
 - Wspólne komponenty panelu: `src/components/admin/ui/` (pola, tabela, nagłówek strony, panel boczny z formularzem,
   statusy, potwierdzenie, komunikat „Zapisano”).
 
@@ -56,7 +64,6 @@ Na Windowsie: `scripts\dev-up.ps1 -Seed -Frontend` stawia bazę, backend, dane d
 |---|---|
 | `API_INTERNAL_URL` | adres Spring Boot widziany z serwera Next.js (domyślnie `http://localhost:8080`) |
 | `NEXT_PUBLIC_DEMO_NOTICE` | `true` pokazuje pasek „katalog demonstracyjny” — dopóki dane są przykładowe |
-| `NEXT_PUBLIC_PRIVACY_POLICY_URL` | adres polityki prywatności marki; pusty = brak linku w banerze zgody i stopce |
 
 ## Jak to działa
 

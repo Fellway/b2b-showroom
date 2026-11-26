@@ -12,7 +12,7 @@ import java.util.Map;
  */
 final class MailTemplates {
 
-    enum Kind { VERIFY_EMAIL, ACCOUNT_EXISTS, ACCOUNT_APPROVED, ACCOUNT_REJECTED, PASSWORD_RESET }
+    enum Kind { VERIFY_EMAIL, ACCOUNT_EXISTS, ACCOUNT_APPROVED, ACCOUNT_REJECTED, PASSWORD_RESET, ACCOUNT_DELETED }
 
     record Message(String subject, String body) {
     }
@@ -64,7 +64,15 @@ final class MailTemplates {
                         {link}
 
                         Link jest ważny przez {validity} i można go użyć tylko raz. Jeśli to nie Ty, zignoruj tę \
-                        wiadomość — hasło pozostanie bez zmian.""")));
+                        wiadomość — hasło pozostanie bez zmian."""),
+                Kind.ACCOUNT_DELETED, new Template("Konto usunięte — {brand} B2B", """
+                        Dzień dobry,
+
+                        zgodnie z Twoją prośbą usunęliśmy konto w showroomie hurtowym {brand} razem z danymi konta \
+                        i historią zgód. Z Twoich zestawień usunęliśmy dane osoby kontaktowej i pliki PDF.
+
+                        Jeśli zechcesz wrócić do współpracy, możesz w każdej chwili założyć nowe konto:
+                        {link}""")));
 
         TEMPLATES.put(CatalogLanguage.EN, Map.of(
                 Kind.VERIFY_EMAIL, new Template("Confirm your e-mail address — {brand} B2B", """
@@ -107,7 +115,16 @@ final class MailTemplates {
                         {link}
 
                         The link is valid for {validity} and can be used only once. If this was not you, please ignore \
-                        this message — your password will stay the same.""")));
+                        this message — your password will stay the same."""),
+                Kind.ACCOUNT_DELETED, new Template("Account deleted — {brand} B2B", """
+                        Hello,
+
+                        as requested, we have deleted your {brand} wholesale showroom account together with the \
+                        account data and consent history. Contact person details and PDF files have been removed \
+                        from your line sheets.
+
+                        If you would like to work with us again, you can create a new account at any time:
+                        {link}""")));
 
         TEMPLATES.put(CatalogLanguage.CS, Map.of(
                 Kind.VERIFY_EMAIL, new Template("Potvrďte e-mailovou adresu — {brand} B2B", """
@@ -150,7 +167,15 @@ final class MailTemplates {
                         {link}
 
                         Odkaz je platný {validity} a lze jej použít pouze jednou. Pokud jste to nebyli vy, tuto zprávu \
-                        ignorujte — heslo zůstane beze změny.""")));
+                        ignorujte — heslo zůstane beze změny."""),
+                Kind.ACCOUNT_DELETED, new Template("Účet smazán — {brand} B2B", """
+                        Dobrý den,
+
+                        na vaši žádost jsme smazali účet ve velkoobchodním showroomu {brand} včetně údajů účtu \
+                        a historie souhlasů. Z vašich přehledů jsme odstranili údaje kontaktní osoby a soubory PDF.
+
+                        Pokud budete chtít znovu spolupracovat, můžete si kdykoli založit nový účet:
+                        {link}""")));
 
         TEMPLATES.put(CatalogLanguage.UK, Map.of(
                 Kind.VERIFY_EMAIL, new Template("Підтвердьте адресу електронної пошти — {brand} B2B", """
@@ -193,7 +218,16 @@ final class MailTemplates {
                         {link}
 
                         Посилання дійсне протягом {validity}, і його можна використати лише один раз. Якщо це були \
-                        не ви, проігноруйте цей лист — пароль залишиться без змін.""")));
+                        не ви, проігноруйте цей лист — пароль залишиться без змін."""),
+                Kind.ACCOUNT_DELETED, new Template("Обліковий запис видалено — {brand} B2B", """
+                        Добрий день,
+
+                        на ваш запит ми видалили обліковий запис в оптовому шоурумі {brand} разом із даними \
+                        облікового запису та історією згод. З ваших добірок ми видалили дані контактної особи \
+                        та PDF-файли.
+
+                        Якщо ви захочете знову співпрацювати, ви будь-коли можете створити новий обліковий запис:
+                        {link}""")));
     }
 
     /** Powiadomienie zespołu marki — zawsze po polsku (panel jest tylko po polsku). */

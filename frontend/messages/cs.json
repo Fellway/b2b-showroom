@@ -176,7 +176,8 @@
     "close": "Zavřít nastavení soukromí",
     "currentGranted": "Aktuálně: souhlas se statistikami udělen.",
     "currentDenied": "Aktuálně: bez souhlasu se statistikami.",
-    "policy": "Zásady ochrany soukromí"
+    "policy": "Zásady ochrany soukromí",
+    "terms": "Obchodní podmínky"
   },
   "account": {
     "titles": {
@@ -222,8 +223,8 @@
       "taxIdHint": "V Polsku — 10místné NIP.",
       "contactName": "Jméno a příjmení",
       "phone": "Telefon",
-      "terms": "Přijímám podmínky používání velkoobchodního katalogu Fabian's Style.",
-      "privacy": "Souhlasím se zpracováním uvedených údajů společností Fabian's Style za účelem správy účtu a obchodního kontaktu. <policy>Zásady ochrany osobních údajů</policy>",
+      "terms": "Přijímám <terms>obchodní podmínky</terms> velkoobchodního showroomu Fabian's Style.",
+      "privacy": "Seznámil(a) jsem se se <policy>zásadami ochrany osobních údajů</policy> a vím, jak Fabian's Style zpracovává údaje účtu.",
       "submit": "Založit účet",
       "submitting": "Odesílání…",
       "haveAccount": "Už máte účet?",
@@ -238,7 +239,8 @@
         "email": "Zadejte platnou e-mailovou adresu.",
         "consent": "Pro založení účtu zaškrtněte oba souhlasy.",
         "country": "Vyberte zemi.",
-        "required": "Vyplňte toto pole."
+        "required": "Vyplňte toto pole.",
+        "documentsChanged": "Mezitím jsme změnili obchodní podmínky nebo zásady ochrany osobních údajů. Obnovte stránku, seznamte se s aktuální verzí a odešlete formulář znovu."
       }
     },
     "verify": {
@@ -287,7 +289,8 @@
         "empty": "Zatím nemáte žádné přehledy. Vyberte modely v katalogu a vytvořte PDF.",
         "items": "{count, plural, one {# položka} few {# položky} other {# položek}}",
         "download": "Stáhnout PDF",
-        "more": "Zobrazit starší"
+        "more": "Zobrazit starší",
+        "blocked": "Přehledy budou dostupné po přijetí aktuálních obchodních podmínek."
       }
     },
     "phone": {
@@ -295,6 +298,69 @@
       "search": "Hledat zemi nebo předvolbu",
       "list": "Země",
       "noResults": "Žádná odpovídající země."
+    },
+    "privacy": {
+      "title": "Soukromí a dokumenty",
+      "history": "Přijaté dokumenty",
+      "documents": "Platné: <terms>obchodní podmínky</terms> a <privacy>zásady ochrany osobních údajů</privacy>.",
+      "historyEmpty": "Žádná zaznamenaná přijetí.",
+      "historyError": "Historii souhlasů se nepodařilo načíst.",
+      "termsVersion": "Obchodní podmínky, verze {number}",
+      "privacyVersion": "Zásady ochrany osobních údajů, verze {number}",
+      "accepted": "přijato",
+      "acknowledged": "vzato na vědomí",
+      "contextRegistration": "při registraci",
+      "contextUpdate": "nová verze",
+      "exportTitle": "Stáhnout svá data",
+      "exportLead": "Soubor JSON s údaji účtu, historií přijatých dokumentů a seznamem přehledů.",
+      "export": "Stáhnout data (JSON)",
+      "exporting": "Připravujeme…",
+      "deleteTitle": "Smazat účet",
+      "deleteLead": "Smažeme účet, přihlašovací údaje a historii souhlasů. Přehledy u nás zůstanou jako záznam nabídky, ale bez údajů kontaktní osoby a bez souborů PDF. Tuto akci nelze vrátit.",
+      "deleteOpen": "Chci smazat účet",
+      "deleteConfirm": "Rozumím, že smazání účtu nelze vrátit.",
+      "deleteSubmit": "Trvale smazat účet",
+      "deleting": "Mazání…",
+      "deleteCancel": "Zrušit",
+      "deletedTitle": "Účet byl smazán",
+      "deletedLead": "Na váš e-mail jsme poslali potvrzení. Pokud se budete chtít vrátit, můžete si kdykoli založit nový účet."
+    }
+  },
+  "legal": {
+    "termsTitle": "Obchodní podmínky",
+    "privacyTitle": "Zásady ochrany osobních údajů",
+    "versionMeta": "Verze {number} · platí od {date}",
+    "archived": "Toto je archivní verze dokumentu.",
+    "seeCurrent": "Zobrazit platnou verzi",
+    "notTranslated": "Tato verze zatím není přeložena — zobrazujeme polské znění.",
+    "history": "Verze dokumentu",
+    "versionLabel": "Verze {number}",
+    "currentBadge": "platná",
+    "update": {
+      "title": "Aktualizovali jsme obchodní podmínky",
+      "titleFirst": "Přijměte obchodní podmínky showroomu",
+      "lead": "Abyste i nadále viděli velkoobchodní ceny a mohli připravovat přehledy, seznamte se se změnami a přijměte novou verzi.",
+      "leadFirst": "Abyste viděli velkoobchodní ceny a mohli připravovat přehledy, seznamte se s obchodními podmínkami a přijměte je.",
+      "noticeTitle": "Aktualizovali jsme zásady ochrany osobních údajů",
+      "noticeLead": "Seznamte se s novou verzí — nemusíte nic přijímat.",
+      "terms": "Obchodní podmínky",
+      "privacy": "Zásady ochrany osobních údajů",
+      "version": "verze {number}",
+      "read": "Přečíst celé",
+      "confirm": "Seznámil(a) jsem se s dokumenty a přijímám obchodní podmínky.",
+      "accept": "Přijímám",
+      "acknowledge": "Rozumím",
+      "accepting": "Ukládání…",
+      "outdated": "Mezitím jsme zveřejnili další verzi — zkontrolujte ji a přijměte znovu.",
+      "error": "Přijetí se nepodařilo uložit. Zkuste to znovu.",
+      "alternatives": "Nechcete přijmout? Můžete se <logout>odhlásit</logout> nebo v sekci <account>Můj účet</account> stáhnout svá data či smazat účet."
+    },
+    "notice": {
+      "label": "Změna zásad ochrany osobních údajů",
+      "text": "Aktualizovali jsme zásady ochrany osobních údajů (verze {number}).",
+      "read": "Přečíst",
+      "dismiss": "Rozumím",
+      "error": "Nepodařilo se uložit — zkuste to znovu."
     }
   }
 }

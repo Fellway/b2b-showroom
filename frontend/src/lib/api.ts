@@ -1,5 +1,14 @@
 import "server-only";
-import type { Category, Facets, Page, ProductCard, ProductDetail, SalesRepresentative } from "./types";
+import type {
+  Category,
+  Facets,
+  LegalDocument,
+  LegalVersionSummary,
+  Page,
+  ProductCard,
+  ProductDetail,
+  SalesRepresentative,
+} from "./types";
 
 const API = process.env.API_INTERNAL_URL ?? "http://localhost:8080";
 
@@ -8,12 +17,12 @@ const REVALIDATE_SECONDS = 60;
 
 export class NotFoundError extends Error {}
 
-async function get<T>(path: string, lang: string, params?: URLSearchParams): Promise<T> {
+async function get<T>(path: string, lang: string, params?: URLSearchParams, fresh = false): Promise<T> {
   const query = new URLSearchParams(params);
   query.set("lang", lang);
   const response = await fetch(`${API}/api/v1${path}?${query}`, {
     headers: { Accept: "application/json" },
-    next: { revalidate: REVALIDATE_SECONDS },
+    ...(fresh ? { cache: "no-store" as const } : { next: { revalidate: REVALIDATE_SECONDS } }),
   });
   if (response.status === 404) {
     throw new NotFoundError(path);
@@ -55,3 +64,15 @@ export const fetchCategories = (lang: string) => get<Category[]>("/catalog/categ
 export const fetchFacets = (lang: string) => get<Facets>("/catalog/facets", lang);
 
 export const fetchRepresentatives = (lang: string) => get<SalesRepresentative[]>("/contact/representatives", lang);
+
+// ------------------------------------------------------------------ dokumenty prawne (D25)
+
+/** @param fresh bez pamięci podręcznej — formularz rejestracji musi wskazać dokładnie obowiązującą wersję */
+export const fetchLegalDocument = (lang: string, slug: "terms" | "privacy", fresh = false) =>
+  get<LegalDocument>(`/legal/${slug}`, lang, undefined, fresh);
+
+export const fetchLegalVersion = (lang: string, versionId: string) =>
+  get<LegalDocument>(`/legal/versions/${encodeURIComponent(versionId)}`, lang);
+
+export const fetchLegalVersions = (lang: string, slug: "terms" | "privacy") =>
+  get<LegalVersionSummary[]>(`/legal/${slug}/versions`, lang);

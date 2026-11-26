@@ -27,8 +27,7 @@ class BuyerAccountTest {
 
         assertThat(account.status()).isEqualTo(BuyerStatus.PENDING_EMAIL);
         assertThat(account.email()).isEqualTo("jana@boutique.cz");
-        assertThat(account.termsAcceptedAt()).isEqualTo(NOW);
-        assertThat(account.privacyAcceptedAt()).isEqualTo(NOW);
+        assertThat(account.createdAt()).isEqualTo(NOW);
         assertThat(account.isActive()).isFalse();
 
         assertThatThrownBy(() -> BuyerAccount.register("a@b.pl", "{fake}x", "Firma", TaxId.of("PL", "1234563218"),

@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 import { consent, useConsent } from "@/lib/consent";
 import { cn } from "@/lib/utils";
 
@@ -11,9 +12,6 @@ import { cn } from "@/lib/utils";
  * Pytanie o zgodę na analitykę. Nie blokuje strony (katalog działa tak samo bez zgody), a obie odpowiedzi
  * mają równą wagę wizualną — odmowa jest tak samo łatwa jak zgoda. Wraca na żądanie z linku w stopce.
  */
-/** Adres polityki prywatności marki — link pojawia się dopiero, gdy marka ją dostarczy (nie tworzymy treści prawnych). */
-const PRIVACY_POLICY_URL = process.env.NEXT_PUBLIC_PRIVACY_POLICY_URL;
-
 export function ConsentBanner() {
   const t = useTranslations("consent");
   const { state, settingsOpen } = useConsent();
@@ -56,14 +54,10 @@ export function ConsentBanner() {
       <p className="mt-2 text-small text-ink-2">{t("body")}</p>
       <p className="mt-2 text-meta text-ink-3">
         {t("necessary")}
-        {PRIVACY_POLICY_URL && (
-          <>
-            {" "}
-            <a href={PRIVACY_POLICY_URL} className="text-ink-2 underline underline-offset-4 hover:text-foreground">
-              {t("policy")}
-            </a>
-          </>
-        )}
+        {" "}
+        <Link href="/privacy" className="text-ink-2 underline underline-offset-4 hover:text-foreground">
+          {t("policy")}
+        </Link>
       </p>
       {state !== "unknown" && (
         <p className="mt-3 text-meta text-ink-2" aria-live="polite">
@@ -85,12 +79,13 @@ export function ConsentBanner() {
 export function ConsentSettingsLink({ className }: { className?: string }) {
   const t = useTranslations("consent");
   return (
-    <span className="flex items-center gap-6">
-      {PRIVACY_POLICY_URL && (
-        <a href={PRIVACY_POLICY_URL} className={cn("underline-offset-4 hover:underline", className)}>
-          {t("policy")}
-        </a>
-      )}
+    <span className="flex flex-wrap items-center gap-x-6 gap-y-2">
+      <Link href="/terms" className={cn("underline-offset-4 hover:underline", className)}>
+        {t("terms")}
+      </Link>
+      <Link href="/privacy" className={cn("underline-offset-4 hover:underline", className)}>
+        {t("policy")}
+      </Link>
       <button
         type="button"
         onClick={(event) => consent.openSettings(event.currentTarget)}

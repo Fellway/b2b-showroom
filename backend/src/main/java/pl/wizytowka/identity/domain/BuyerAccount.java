@@ -30,8 +30,6 @@ public final class BuyerAccount {
     private String phone;
     private CatalogLanguage language;
     private BuyerStatus status;
-    private final Instant termsAcceptedAt;
-    private final Instant privacyAcceptedAt;
     private Instant emailVerifiedAt;
     private Instant reviewedAt;
     private AdminUserId reviewedBy;
@@ -52,8 +50,6 @@ public final class BuyerAccount {
         this.phone = phone(b.phone);
         this.language = Objects.requireNonNull(b.language, "language");
         this.status = Objects.requireNonNull(b.status, "status");
-        this.termsAcceptedAt = Objects.requireNonNull(b.termsAcceptedAt, "termsAcceptedAt");
-        this.privacyAcceptedAt = Objects.requireNonNull(b.privacyAcceptedAt, "privacyAcceptedAt");
         this.emailVerifiedAt = b.emailVerifiedAt;
         this.reviewedAt = b.reviewedAt;
         this.reviewedBy = b.reviewedBy;
@@ -86,9 +82,7 @@ public final class BuyerAccount {
         b.phone = phone;
         b.language = language;
         b.status = BuyerStatus.PENDING_EMAIL;
-        b.termsAcceptedAt = Objects.requireNonNull(now, "now");
-        b.privacyAcceptedAt = now;
-        b.createdAt = now;
+        b.createdAt = Objects.requireNonNull(now, "now");
         return new BuyerAccount(b);
     }
 
@@ -214,8 +208,6 @@ public final class BuyerAccount {
         private String phone;
         private CatalogLanguage language;
         private BuyerStatus status;
-        private Instant termsAcceptedAt;
-        private Instant privacyAcceptedAt;
         private Instant emailVerifiedAt;
         private Instant reviewedAt;
         private AdminUserId reviewedBy;
@@ -238,8 +230,6 @@ public final class BuyerAccount {
         public Builder phone(String phone) { this.phone = phone; return this; }
         public Builder language(CatalogLanguage language) { this.language = language; return this; }
         public Builder status(BuyerStatus status) { this.status = status; return this; }
-        public Builder termsAcceptedAt(Instant termsAcceptedAt) { this.termsAcceptedAt = termsAcceptedAt; return this; }
-        public Builder privacyAcceptedAt(Instant privacyAcceptedAt) { this.privacyAcceptedAt = privacyAcceptedAt; return this; }
         public Builder emailVerifiedAt(Instant emailVerifiedAt) { this.emailVerifiedAt = emailVerifiedAt; return this; }
         public Builder reviewedAt(Instant reviewedAt) { this.reviewedAt = reviewedAt; return this; }
         public Builder reviewedBy(AdminUserId reviewedBy) { this.reviewedBy = reviewedBy; return this; }
@@ -266,8 +256,6 @@ public final class BuyerAccount {
     public String phone() { return phone; }
     public CatalogLanguage language() { return language; }
     public BuyerStatus status() { return status; }
-    public Instant termsAcceptedAt() { return termsAcceptedAt; }
-    public Instant privacyAcceptedAt() { return privacyAcceptedAt; }
     public Instant emailVerifiedAt() { return emailVerifiedAt; }
     public Instant reviewedAt() { return reviewedAt; }
     public AdminUserId reviewedBy() { return reviewedBy; }

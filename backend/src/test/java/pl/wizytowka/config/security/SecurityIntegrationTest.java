@@ -132,6 +132,14 @@ class SecurityIntegrationTest {
         mvc.perform(get("/api/v1/admin/users").header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].email", org.hamcrest.Matchers.hasItem(editorEmail)));
+        // dokumenty prawne (D25): EDITOR przygotowuje szkic, publikuje tylko ADMIN
+        mvc.perform(get("/api/v1/admin/legal").header("Authorization", "Bearer " + editorToken))
+                .andExpect(status().isOk());
+        mvc.perform(post("/api/v1/admin/legal/versions/" + java.util.UUID.randomUUID() + "/publish")
+                        .header("Authorization", "Bearer " + editorToken)
+                        .contentType("application/json").content("{\"version\":0}"))
+                .andExpect(status().isForbidden());
+        mvc.perform(get("/api/v1/legal/terms")).andExpect(status().isOk());
     }
 
     // ------------------------------------------------------------------ sesja
@@ -178,6 +186,11 @@ class SecurityIntegrationTest {
                 .andExpect(status().isForbidden());
         mvc.perform(get("/api/v1/buyer/line-sheets").header("Authorization", "Bearer " + signWithRoles(List.of("ADMIN"), now)))
                 .andExpect(status().isForbidden());
+        // brama regulaminu (D25): kupiec bez akceptacji obowiązującej wersji nie dostaje cen ani zestawień
+        mvc.perform(get("/api/v1/buyer/catalog/pricing").param("product", UUID.randomUUID().toString())
+                        .header("Authorization", "Bearer " + buyerToken))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("identity.buyer.terms-acceptance-required"));
         // dawny publiczny link do PDF nie istnieje (D23) — ścieżka spoza listy jest zabroniona
         mvc.perform(get("/api/v1/line-sheets/" + UUID.randomUUID() + "/pdf")).andExpect(status().isUnauthorized());
     }

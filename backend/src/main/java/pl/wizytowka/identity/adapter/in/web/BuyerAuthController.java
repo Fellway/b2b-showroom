@@ -22,6 +22,8 @@ import pl.wizytowka.identity.adapter.in.web.BuyerSessionCookies.SessionResponse;
 import pl.wizytowka.shared.adapter.in.web.RequestedLanguage;
 import pl.wizytowka.shared.domain.CatalogLanguage;
 
+import java.util.UUID;
+
 /**
  * Publiczne endpointy kont kupców (bez logowania). Wszystkie wymagają nagłówka {@code X-Requested-With}
  * (AuthEndpointCsrfFilter) i mają limity zapytań. Rejestracja, ponowna wysyłka i prośba o reset zwracają
@@ -110,11 +112,13 @@ class BuyerAuthController {
                            @NotBlank @Size(max = 120) String contactName,
                            @NotBlank @Size(max = 32) String phone,
                            boolean termsAccepted,
-                           boolean privacyAccepted) {
+                           boolean privacyAccepted,
+                           UUID termsVersionId,
+                           UUID privacyVersionId) {
 
         RegisterBuyerCommand toCommand(CatalogLanguage language) {
             return new RegisterBuyerCommand(email, password, companyName, countryCode, taxId, contactName, phone,
-                    language, termsAccepted, privacyAccepted);
+                    language, termsAccepted, privacyAccepted, termsVersionId, privacyVersionId);
         }
 
         @Override

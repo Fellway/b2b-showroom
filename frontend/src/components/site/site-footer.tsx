@@ -32,9 +32,9 @@ export async function SiteFooter({ representatives }: { representatives: SalesRe
           </ul>
         </div>
       </div>
-      <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-6 border-t border-line px-5 py-6 text-meta text-ink-3 md:px-8">
+      <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-line px-5 py-6 text-meta text-ink-3 md:px-8">
         <Image src="/brand/fabians-style-logo.png" alt="" width={866} height={191} className="h-5 w-auto opacity-80" />
-        <div className="flex items-center gap-6">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
           <ConsentSettingsLink />
           <p>{t("footer.rights", { year: new Date().getFullYear() })}</p>
         </div>

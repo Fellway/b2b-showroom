@@ -1,10 +1,12 @@
 package pl.wizytowka.identity.application.service;
 
+import org.springframework.context.ApplicationEventPublisher;
 import pl.wizytowka.identity.application.port.in.AccessToken;
 import pl.wizytowka.identity.application.port.in.BuyerFilter;
 import pl.wizytowka.identity.application.port.out.AccessTokenIssuer;
 import pl.wizytowka.identity.application.port.out.BuyerAccountRepository;
 import pl.wizytowka.identity.application.port.out.BuyerActionTokenRepository;
+import pl.wizytowka.identity.application.port.out.BuyerConsentRepository;
 import pl.wizytowka.identity.application.port.out.BuyerMailer;
 import pl.wizytowka.identity.application.port.out.BuyerRefreshTokenRepository;
 import pl.wizytowka.identity.application.port.out.AdminUserRepository;
@@ -18,8 +20,15 @@ import pl.wizytowka.identity.domain.BuyerAccount;
 import pl.wizytowka.identity.domain.BuyerAccountId;
 import pl.wizytowka.identity.domain.BuyerActionPurpose;
 import pl.wizytowka.identity.domain.BuyerActionToken;
+import pl.wizytowka.identity.domain.BuyerConsent;
 import pl.wizytowka.identity.domain.BuyerStatus;
 import pl.wizytowka.identity.domain.RefreshToken;
+import pl.wizytowka.legal.application.port.in.LegalDocumentQuery;
+import pl.wizytowka.legal.application.view.LegalDocumentView;
+import pl.wizytowka.legal.application.view.LegalRequirement;
+import pl.wizytowka.legal.application.view.LegalVersionRef;
+import pl.wizytowka.legal.application.view.LegalVersionSummary;
+import pl.wizytowka.legal.domain.LegalDocumentType;
 import pl.wizytowka.shared.application.PageQuery;
 import pl.wizytowka.shared.application.PageResult;
 import pl.wizytowka.shared.application.port.out.TransactionalHooks;
@@ -275,6 +284,11 @@ final class IdentityFakes {
         }
 
         @Override
+        public void sendAccountDeleted(String to, CatalogLanguage language) {
+            sent.add(new Sent("deleted", to, language, null));
+        }
+
+        @Override
         public void notifyStaffAboutPendingBuyer(List<String> staffEmails) {
             staffEmails.forEach(to -> sent.add(new Sent("staff", to, CatalogLanguage.PL, null)));
         }
@@ -309,6 +323,101 @@ final class IdentityFakes {
 
         void rollback() {
             onCommit.clear();
+        }
+    }
+
+    // ------------------------------------------------------------------ dokumenty prawne i zgody (D25)
+
+    static final class Consents implements BuyerConsentRepository {
+        final List<BuyerConsent> store = new ArrayList<>();
+
+        @Override
+        public void save(BuyerConsent consent) {
+            store.add(consent);
+        }
+
+        @Override
+        public List<BuyerConsent> findByBuyer(BuyerAccountId buyer) {
+            return store.stream().filter(c -> c.buyerAccountId().equals(buyer))
+                    .sorted(Comparator.comparing(BuyerConsent::acceptedAt).reversed()).toList();
+        }
+
+        @Override
+        public boolean hasAccepted(BuyerAccountId buyer, LegalDocumentType type, int minimumVersionNumber) {
+            return store.stream().anyMatch(c -> c.buyerAccountId().equals(buyer) && c.documentType() == type
+                    && c.versionNumber() >= minimumVersionNumber);
+        }
+    }
+
+    /** Opublikowane wersje dokumentów — tylko to, czego potrzebuje rejestr zgód. */
+    static final class Legal implements LegalDocumentQuery {
+        final List<LegalVersionRef> published = new ArrayList<>();
+        final List<LegalVersionRef> requiringAcceptance = new ArrayList<>();
+
+        /** Publikuje kolejną wersję i zwraca jej identyfikator. */
+        UUID publish(LegalDocumentType type, boolean requireAcceptance) {
+            int number = (int) published.stream().filter(v -> v.type() == type).count() + 1;
+            LegalVersionRef ref = new LegalVersionRef(UUID.randomUUID(), type, number);
+            published.add(ref);
+            if (type.canRequireAcceptance() && (requireAcceptance || number == 1)) {
+                requiringAcceptance.add(ref);
+            }
+            return ref.id();
+        }
+
+        UUID current(LegalDocumentType type) {
+            return requirement(type).orElseThrow().currentVersionId();
+        }
+
+        @Override
+        public Optional<LegalDocumentView> current(LegalDocumentType type, CatalogLanguage language) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<LegalDocumentView> publishedVersion(UUID versionId, CatalogLanguage language) {
+            return Optional.empty();
+        }
+
+        @Override
+        public List<LegalVersionSummary> publishedVersions(LegalDocumentType type) {
+            return List.of();
+        }
+
+        @Override
+        public List<LegalRequirement> requirements() {
+            return java.util.Arrays.stream(LegalDocumentType.values()).map(this::requirement)
+                    .flatMap(Optional::stream).toList();
+        }
+
+        @Override
+        public Optional<LegalRequirement> requirement(LegalDocumentType type) {
+            List<LegalVersionRef> ofType = published.stream().filter(v -> v.type() == type).toList();
+            if (ofType.isEmpty()) {
+                return Optional.empty();
+            }
+            LegalVersionRef current = ofType.getLast();
+            int minimum = type.canRequireAcceptance()
+                    ? requiringAcceptance.stream().filter(v -> v.type() == type).mapToInt(LegalVersionRef::versionNumber)
+                            .max().orElse(current.versionNumber())
+                    : current.versionNumber();
+            return Optional.of(new LegalRequirement(type, current.id(), current.versionNumber(), minimum,
+                    type.canRequireAcceptance()));
+        }
+
+        @Override
+        public Optional<LegalVersionRef> publishedVersionRef(UUID versionId) {
+            return published.stream().filter(v -> v.id().equals(versionId)).findFirst();
+        }
+    }
+
+    /** Zapamiętuje opublikowane zdarzenia aplikacji. */
+    static final class Events implements ApplicationEventPublisher {
+        final List<Object> published = new ArrayList<>();
+
+        @Override
+        public void publishEvent(Object event) {
+            published.add(event);
         }
     }
 

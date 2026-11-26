@@ -61,7 +61,7 @@ co widać na zdjęciach.
 
 ## Architektura heksagonalna
 
-Moduły (bounded contexts): `catalog`, `linesheet`, `analytics`, `contact`, `identity` + `shared` (kernel).
+Moduły (bounded contexts): `catalog`, `linesheet`, `analytics`, `contact`, `identity`, `legal` + `shared` (kernel).
 Każdy moduł ma tę samą strukturę:
 
 ```
@@ -105,7 +105,7 @@ Kluczowe decyzje:
 - Hasła: PBKDF2-HMAC-SHA256 (600 000 iteracji), polityka 12–128 znaków. Blokada konta po 5 nieudanych logowaniach na 15 minut. Odpowiedź przy błędnym logowaniu nie zdradza, czy konto istnieje (także czasem odpowiedzi).
 - Role: `ADMIN` (wszystko, łącznie z kontami) i `EDITOR` (katalog, treści, zestawienia, analityka, wnioski kupców); `BUYER` — zaakceptowany kupiec (`/api/v1/buyer/**`). Każda niewymieniona ścieżka → `denyAll`.
 - Nagłówki: HSTS, `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy: no-referrer`, CSP `default-src 'none'`.
-- RODO: analityka nie zapisuje adresów IP ani User-Agenta; zgody (regulamin, polityka prywatności) kupiec składa przy rejestracji (z datą); konto można trwale usunąć w panelu (zestawienia zostają jako migawki bez właściciela).
+- RODO (D25): analityka nie zapisuje adresów IP ani User-Agenta. Regulamin i polityka prywatności są wersjonowane (moduł `legal`, wzory z `resources/legal/templates` publikowane jako wersja 1 przy pustej bazie — do weryfikacji prawnej); rejestr `buyer_consent` zapisuje, którą wersję kupiec zaakceptował (bez IP). Nowa istotna wersja regulaminu blokuje `/buyer/catalog/**` i `/buyer/line-sheets**` (`BuyerTermsGateFilter`, `403 identity.buyer.terms-acceptance-required`). Kupiec sam pobiera dane (JSON) i usuwa konto; usunięcie (także przez markę) usuwa z jego zestawień dane osoby kontaktowej i pliki PDF (zdarzenie `BuyerAccountDeleted`).
 - **Rate limiting** (Bucket4j, per adres klienta; IPv6 per /64; kubełki w ograniczonym cache), filtr przed Spring Security, odpowiedź `429` + `Retry-After` + Problem Details `request.rate-limited`:
 
   | Endpoint | Limit |
@@ -115,7 +115,8 @@ Kluczowe decyzje:
   | `POST /api/v1/buyer/auth/verify-email` · `/password-reset/confirm` | 10/min |
   | `POST /api/v1/buyer/auth/login` | 10/min i 50/h |
   | `POST /api/v1/buyer/auth/refresh` | 30/min |
-  | `POST /api/v1/buyer/me/password` | 5/min |
+  | `POST /api/v1/buyer/me/password` · `/buyer/me/delete` | po 5/min |
+  | `GET /api/v1/buyer/me/export` | 5/min i 30/h |
   | `POST /api/v1/analytics/events` | 60/min |
   | `POST /api/v1/admin/auth/login` | 10/min i 50/h |
   | `POST /api/v1/admin/auth/refresh` | 30/min |
@@ -144,13 +145,14 @@ Publiczne (bez cen i EAN — D23):
 | GET | `/catalog/categories` · `/catalog/facets` | drzewo kategorii · filtry z liczbą produktów |
 | GET | `/media/products/**` | zdjęcia produktów (cache `immutable`) |
 | GET | `/contact/representatives` | opiekunowie handlowi |
+| GET | `/legal/{terms|privacy}` · `/legal/{terms|privacy}/versions` · `/legal/versions/{id}` | obowiązująca wersja dokumentu w języku żądania · historia wersji · konkretna opublikowana wersja (D25) |
 | POST | `/analytics/events` | paczka zdarzeń z przeglądarki (max 50) |
 
 Konta kupców — bez logowania (`X-Requested-With` wymagany, język e-maili z `?lang=` / `Accept-Language`):
 
 | Metoda | Ścieżka | Opis |
 |---|---|---|
-| POST | `/buyer/auth/register` | `{email, password, companyName, countryCode, taxId, contactName, phone, termsAccepted, privacyAccepted}` → `202` (zawsze) |
+| POST | `/buyer/auth/register` | `{email, password, companyName, countryCode, taxId, contactName, phone, termsAccepted, privacyAccepted, termsVersionId, privacyVersionId}` → `202` (zawsze); wersje inne niż obowiązujące → `409 identity.buyer.legal-version-outdated` |
 | POST | `/buyer/auth/verify-email` · `/buyer/auth/resend-verification` | `{token}` → `204` · `{email}` → `202` |
 | POST | `/buyer/auth/password-reset/request` · `/confirm` | `{email}` → `202` · `{token, password}` → `204` (kończy sesje) |
 | POST | `/buyer/auth/login` · `/refresh` · `/logout` | sesja jak w panelu; `403 identity.buyer.not-active` + `status` dla nieaktywnego konta |
@@ -161,6 +163,10 @@ Zalogowany kupiec (rola `BUYER`):
 |---|---|---|
 | GET/PUT | `/buyer/me` | konto; zmiana osoby kontaktowej, telefonu, języka (`version`) |
 | POST | `/buyer/me/password` | `{currentPassword, newPassword}` → nowa sesja, pozostałe zakończone |
+| GET | `/buyer/me/legal` | `{pending:[{type, versionId, versionNumber, blocking, firstTime}], history:[…]}` — dokumenty do akceptacji i historia zgód |
+| POST | `/buyer/me/legal/accept?lang=` | `{versionIds}` — akceptacja obowiązujących wersji (`409` dla nieaktualnej) |
+| GET | `/buyer/me/export` | pobranie danych (JSON, `attachment`): konto, zgody, zestawienia |
+| POST | `/buyer/me/delete` | `{currentPassword}` → `204`, konto usunięte, ciasteczko wyczyszczone, e-mail z potwierdzeniem |
 | GET | `/buyer/catalog/pricing?product=…` | ceny i EAN aktywnych wariantów (maks. 100 produktów, `no-store`) |
 | POST | `/buyer/line-sheets` | zestawienie PDF z danymi konta: `{items:[{variantId, quantity?}], message?, salesRepresentativeId?, visitorId?}` |
 | GET | `/buyer/line-sheets` · `/buyer/line-sheets/{publicId}/pdf` | „Moje zestawienia” · PDF (tylko właściciel; żądanie z tokenem) |
@@ -176,7 +182,8 @@ Panel (`/admin`, JWT):
 | Słowniki | `/admin/categories`, `/admin/colors`, `/admin/sizes` (GET, POST, PUT `/{id}`, DELETE `/{id}`) |
 | Opiekunowie | `/admin/sales-representatives` (CRUD) |
 | Zestawienia | `GET /admin/line-sheets`, `GET /admin/line-sheets/{id}`, `GET /admin/line-sheets/{id}/pdf` |
-| Kupcy | `GET /admin/buyers?status=&q=`, `GET /admin/buyers/pending-count`, `GET /admin/buyers/{id}`, `POST …/{id}/approve` · `/reject` · `/suspend` · `/reactivate` (`{version, note?}`), `DELETE /admin/buyers/{id}` |
+| Dokumenty prawne | `GET /admin/legal`, `GET/PUT/DELETE /admin/legal/versions/{id}` (szkic), `POST /admin/legal/{terms|privacy}/drafts`, `POST /admin/legal/versions/{id}/publish` (`{version, requireAcceptance}`, tylko ADMIN) |
+| Kupcy | `GET /admin/buyers?status=&q=`, `GET /admin/buyers/pending-count`, `GET /admin/buyers/{id}` (z rejestrem zgód), `POST …/{id}/approve` · `/reject` · `/suspend` · `/reactivate` (`{version, note?}`), `DELETE /admin/buyers/{id}` |
 | Analityka | `GET /admin/analytics/summary?from=&to=` |
 | Konta (ADMIN) | `GET/POST /admin/users`, `PUT /admin/users/{id}`, `POST /admin/users/{id}/enable` · `/disable` · `/password` |
 

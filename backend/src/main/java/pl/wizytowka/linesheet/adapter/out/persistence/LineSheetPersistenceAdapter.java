@@ -57,6 +57,12 @@ class LineSheetPersistenceAdapter implements LineSheetRepository, LineSheetReadM
     }
 
     @Override
+    public List<String> anonymizeOfBuyer(UUID buyerAccountId) {
+        List<String> pdfKeys = repository.pdfKeysOfBuyer(buyerAccountId);
+        repository.anonymizeOfBuyer(buyerAccountId);
+        return pdfKeys;
+    }
+    @Override
     public PageResult<LineSheetSummaryView> findSummaries(PageQuery page) {
         Page<LineSheetSummaryView> result = repository.findSummaries(PageRequest.of(page.page(), page.size()));
         return new PageResult<>(result.getContent(), page.page(), page.size(), result.getTotalElements());

@@ -9,7 +9,9 @@ import { buyerSession } from "@/lib/buyer/session";
 import type { BuyerAccount, BuyerLineSheet, Page } from "@/lib/types";
 import { routing } from "@/i18n/routing";
 import { isSupportedCountry, splitPhone, toInternational } from "@/lib/phone";
-import { FormMessage, SelectField, SubmitButton, TextField } from "./fields";
+import { useBuyerLegal } from "@/lib/buyer/legal";
+import { AccountColumn, FormMessage, SelectField, SubmitButton, TextField } from "./fields";
+import { PendingDocumentsPanel, PrivacySection } from "./account-privacy";
 import { PhoneField } from "./phone-field";
 
 const SHEETS_PAGE_SIZE = 10;
@@ -19,10 +21,12 @@ export function AccountPage() {
   const state = useBuyerSession();
   const router = useRouter();
   const pathname = usePathname();
+  const legal = useBuyerLegal();
+  const [deleted, setDeleted] = useState(false);
 
   useEffect(() => {
-    if (state.status === "anonymous") router.replace({ pathname: "/account/login", query: { next: pathname } });
-  }, [state.status, router, pathname]);
+    if (state.status === "anonymous" && !deleted) router.replace({ pathname: "/account/login", query: { next: pathname } });
+  }, [state.status, router, pathname, deleted]);
 
   // Dane konta z sesji pochodzą z chwili logowania (sprzed zapisania czasu logowania), więc ich `version` bywa
   // nieaktualna — przed edycją pobieramy bieżący stan, inaczej zapis kończy się konfliktem wersji.
@@ -35,10 +39,21 @@ export function AccountPage() {
       .catch(() => undefined);
   }, [authenticated]);
 
+  if (deleted) {
+    return (
+      <AccountColumn title={t("privacy.deletedTitle")} lead={t("privacy.deletedLead")}>
+        <Link href="/" className="text-small underline underline-offset-4 hover:no-underline">
+          {t("backToCatalog")}
+        </Link>
+      </AccountColumn>
+    );
+  }
   if (state.status !== "authenticated") {
     return <div className="min-h-[60vh]" aria-busy="true" />;
   }
   const buyer = state.buyer;
+  const pending = legal.status === "ready" ? legal.data.pending : [];
+  const blocked = pending.some((p) => p.blocking);
 
   return (
     <div className="mx-auto w-full max-w-[1100px] px-5 pb-20 pt-10 md:px-8 md:pt-14">
@@ -59,12 +74,21 @@ export function AccountPage() {
         </button>
       </div>
 
+      {pending.length > 0 && <PendingDocumentsPanel pending={pending} />}
+
       <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
-        <MyLineSheets />
+        {/* do akceptacji regulaminu API nie wydaje zestawień (D25) — lista wraca po akceptacji */}
+        <MyLineSheets key={blocked ? "blocked" : "open"} blocked={blocked} />
         <div className="flex flex-col gap-12">
           <CompanyDetails buyer={buyer} />
           <ProfileForm key={buyer.id} buyer={buyer} />
           <PasswordForm />
+          <PrivacySection
+            onDeleted={() => {
+              setDeleted(true);
+              buyerSession.expire();
+            }}
+          />
         </div>
       </div>
     </div>
@@ -237,7 +261,7 @@ function buyerEmail() {
   return state.status === "authenticated" ? state.buyer.email : "";
 }
 
-function MyLineSheets() {
+function MyLineSheets({ blocked }: { blocked: boolean }) {
   const t = useTranslations("account.page.sheets");
   const tAccount = useTranslations("account");
   const tErrors = useTranslations("errors");
@@ -251,6 +275,7 @@ function MyLineSheets() {
     buyerApi.get<Page<BuyerLineSheet>>(`/line-sheets?page=${page}&size=${SHEETS_PAGE_SIZE}`);
 
   useEffect(() => {
+    if (blocked) return;
     let cancelled = false;
     fetchPage(0)
       .then((first) => !cancelled && setPages([first]))
@@ -258,6 +283,7 @@ function MyLineSheets() {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- jedno pobranie na zamontowanie (key resetuje komponent)
   }, []);
 
   async function loadMore(page: number) {
@@ -287,7 +313,9 @@ function MyLineSheets() {
 
   return (
     <Section title={t("title")}>
-      {failed ? (
+      {blocked ? (
+        <p className="max-w-[46ch] text-ink-2">{t("blocked")}</p>
+      ) : failed ? (
         <FormMessage tone="error">{tErrors("generic")}</FormMessage>
       ) : !last ? (
         <div aria-busy="true" className="flex flex-col">

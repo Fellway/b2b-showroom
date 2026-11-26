@@ -258,6 +258,11 @@ class LineSheetServiceTest {
         public void save(LineSheet lineSheet) {
             store.put(lineSheet.id(), lineSheet);
         }
+
+        @Override
+        public List<String> anonymizeOfBuyer(UUID buyerAccountId) {
+            throw new UnsupportedOperationException("not used in these tests");
+        }
     }
 
     static final class InMemoryStorage implements FileStorage {

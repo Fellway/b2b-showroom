@@ -20,12 +20,15 @@ import pl.wizytowka.identity.domain.PasswordPolicy;
 import pl.wizytowka.identity.domain.TaxId;
 import pl.wizytowka.identity.domain.TokenHashing;
 import pl.wizytowka.shared.application.port.out.TransactionalHooks;
+import pl.wizytowka.legal.application.view.LegalVersionRef;
+import pl.wizytowka.legal.domain.LegalDocumentType;
 import pl.wizytowka.shared.domain.InvalidValueException;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -47,12 +50,14 @@ class BuyerRegistrationService implements BuyerRegistrationUseCase {
     private final BuyerMailer mailer;
     private final TransactionalHooks transactionalHooks;
     private final BuyerPolicy policy;
+    private final BuyerLegalService legal;
     private final Clock clock;
 
     BuyerRegistrationService(BuyerAccountRepository accounts, BuyerActionTokenRepository actionTokens,
                              BuyerRefreshTokenRepository sessions, AdminUserRepository staff,
                              PasswordHasher passwordHasher, SecureTokenGenerator tokenGenerator, BuyerMailer mailer,
-                             TransactionalHooks transactionalHooks, BuyerPolicy policy, Clock clock) {
+                             TransactionalHooks transactionalHooks, BuyerPolicy policy, BuyerLegalService legal,
+                             Clock clock) {
         this.accounts = accounts;
         this.actionTokens = actionTokens;
         this.sessions = sessions;
@@ -62,6 +67,7 @@ class BuyerRegistrationService implements BuyerRegistrationUseCase {
         this.mailer = mailer;
         this.transactionalHooks = transactionalHooks;
         this.policy = policy;
+        this.legal = legal;
         this.clock = clock;
     }
 
@@ -76,6 +82,9 @@ class BuyerRegistrationService implements BuyerRegistrationUseCase {
         BuyerAccount account = BuyerAccount.register(email, passwordHash, command.companyName(), taxId,
                 command.contactName(), command.phone(), command.language(), command.termsAccepted(),
                 command.privacyAccepted(), now);
+        // zgody dotyczą wersji widzianych w formularzu — sprawdzane zanim cokolwiek zapiszemy (D25)
+        Map<LegalDocumentType, LegalVersionRef> acceptedDocuments =
+                legal.requireCurrentForRegistration(command.termsVersionId(), command.privacyVersionId());
 
         Optional<BuyerAccount> existing = accounts.findByEmail(email);
         if (existing.isPresent()) {
@@ -84,6 +93,7 @@ class BuyerRegistrationService implements BuyerRegistrationUseCase {
             return;
         }
         accounts.save(account);
+        legal.recordRegistration(account.id(), acceptedDocuments, account.language(), now);
         String rawToken = issueToken(account, BuyerActionPurpose.EMAIL_VERIFICATION, policy.emailVerificationTtl(), now);
         transactionalHooks.afterCommit(() -> mailer.sendEmailVerification(account.email(), account.language(), rawToken));
     }

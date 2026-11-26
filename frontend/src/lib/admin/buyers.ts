@@ -1,6 +1,7 @@
 "use client";
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import type { BuyerConsent } from "@/lib/types";
 import { adminApi, query, type Page } from "./api";
 
 /** Konta kupców (D23) — `GET /api/v1/admin/buyers`. */
@@ -20,14 +21,14 @@ export type BuyerSummary = {
 export type BuyerDetail = BuyerSummary & {
   phone: string;
   language: string;
-  termsAcceptedAt: string;
-  privacyAcceptedAt: string;
   emailVerifiedAt: string | null;
   reviewedAt: string | null;
   reviewedBy: string | null;
   reviewNote: string | null;
   lastLoginAt: string | null;
   lockedUntil: string | null;
+  /** Rejestr zgód (D25), od najnowszej. */
+  consents: BuyerConsent[];
   version: number;
 };
 

@@ -155,3 +155,33 @@ można je rewidować, jeśli zmienią się okoliczności. Nowe decyzje dopisuj n
   opuszcza serwera: nagłówek kraju od proxy/CDN (`CF-IPCountry`, `X-Country-Code`), potem region z
   `Accept-Language`, na końcu język strony. Kupiec zawsze może zmienić wybór.
 - Backend sprawdza telefon jak dotąd (format, min. 6 cyfr) — dokładniejsza walidacja jest po stronie formularza.
+
+## D25. Regulamin, polityka prywatności i rejestr zgód *(użytkownik, 2026-11-25)*
+- **Dlaczego:** zbieramy dane firm i osób kontaktowych; RODO (art. 7 ust. 1, art. 5 ust. 2) wymaga, żeby dało się
+  wykazać, **którą wersję** dokumentu kupiec zaakceptował — same daty przy koncie (`terms_accepted_at`,
+  `privacy_accepted_at`) tego nie dawały, a dokumentów nie było.
+- **Dokumenty w panelu, z wersjami** (moduł `legal`): marka edytuje szkic (4 języki, Markdown w ograniczonym
+  zakresie, renderowany bez HTML-a) i publikuje go jako kolejną wersję. Opublikowana treść jest niezmienna (także na
+  poziomie adaptera), poprzednie wersje zostają publiczne (`/terms?version=…`). Szkic edytuje ADMIN i EDITOR,
+  publikuje tylko ADMIN. Publikacja wymaga treści we wszystkich językach.
+- **Regulamin ≠ polityka prywatności:** regulamin to umowa — kupiec go *akceptuje*; polityka to obowiązek informacyjny
+  (art. 13) — kupiec ją *przyjmuje do wiadomości*. Nowa wersja regulaminu oznaczona jako istotna **blokuje ceny,
+  EAN i zestawienia** (także w API — filtr `BuyerTermsGateFilter`, `403 identity.buyer.terms-acceptance-required`),
+  dopóki kupiec jej nie zaakceptuje; poprawka redakcyjna nie wymaga ponownej akceptacji. Nowa polityka = pasek
+  z informacją („Rozumiem” zapisuje przyjęcie do wiadomości). Pobranie danych i usunięcie konta działają zawsze.
+- **Rejestr zgód** (`buyer_consent`, tylko dopisywany): konto, dokument, wersja, data, język, okoliczność
+  (rejestracja / nowa wersja) — bez IP i User-Agenta. Rejestracja wysyła identyfikatory wersji pokazanych w formularzu;
+  gdy w międzyczasie opublikowano nowszą — `409`, formularz prosi o odświeżenie. Migracja V4 usuwa stare kolumny
+  dat; konta sprzed rejestru akceptują obowiązującą wersję przy najbliższym logowaniu (dane wyłącznie deweloperskie).
+- **Wzory treści** (PL + EN/CS/UK) w `backend/src/main/resources/legal/templates`, publikowane jako wersja 1 przy pustej
+  bazie (`showroom.legal.seed-templates`). Opisują faktyczne działanie aplikacji (dane konta, zestawienia, rejestr,
+  sesja, statystyki za zgodą, Brevo jako odbiorca), mają pola w `[nawiasach]` i uwagę o weryfikacji prawnej —
+  **przed produkcją treść musi zatwierdzić prawnik marki**. To nie jest porada prawna.
+- **Prawa z RODO w „Moim koncie”:** historia zgód, pobranie danych (JSON: konto, zgody, zestawienia — art. 15 i 20),
+  usunięcie konta z hasłem (art. 17) + e-mail z potwierdzeniem. Usunięcie (przez kupca albo markę) publikuje zdarzenie
+  `BuyerAccountDeleted`; moduł zestawień w tej samej transakcji usuwa z zestawień kupca dane osoby kontaktowej,
+  wiadomość i plik PDF — zestawienie zostaje jako ślad oferty (numer, data, pozycje, firma i numer podatkowy).
+- Zmienna `NEXT_PUBLIC_PRIVACY_POLICY_URL` usunięta — linki w stopce, banerze zgody i rejestracji prowadzą do `/terms`
+  i `/privacy`.
+- **Do uzupełnienia przez markę:** dane administratora, okresy przechowywania (konta niepotwierdzone/odrzucone,
+  zestawienia, statystyki — dziś bez automatycznego usuwania), dostawca hostingu.

@@ -82,6 +82,11 @@ class TransactionalBuyerMailer implements BuyerMailer {
     }
 
     @Override
+    public void sendAccountDeleted(String to, CatalogLanguage language) {
+        send(to, MailTemplates.render(MailTemplates.Kind.ACCOUNT_DELETED, language, brand, link(language, ""), null));
+    }
+
+    @Override
     public void notifyStaffAboutPendingBuyer(List<String> staffEmails) {
         MailTemplates.Message message = MailTemplates.staffPendingBuyer(properties.publicBaseUrl() + "/admin/buyers");
         staffEmails.forEach(to -> send(to, message));
