@@ -11,7 +11,7 @@ export async function SiteHeader({ categories }: { categories: Category[] }) {
   const t = await getTranslations("site");
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-background">
-      <div className="mx-auto flex h-(--header-height) max-w-[1600px] items-center gap-8 px-5 md:px-8">
+      <div className="mx-auto flex h-(--header-height) max-w-[1600px] items-center gap-4 px-5 md:gap-8 md:px-8">
         <Link href="/" aria-label={t("home")} className="shrink-0">
           <Image
             src="/brand/fabians-style-logo.png"
@@ -23,7 +23,7 @@ export async function SiteHeader({ categories }: { categories: Category[] }) {
           />
         </Link>
         <CategoryNav categories={categories} className="hidden lg:flex" />
-        <div className="ml-auto flex items-center gap-1">
+        <div className="-mr-2 ml-auto flex items-center sm:mr-0 sm:gap-1">
           <LocaleSwitcher />
           <AccountLink />
           <SelectionButton />

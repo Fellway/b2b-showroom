@@ -8,7 +8,7 @@ budują zestawienie wariantów i pobierają PDF z cenami hurtowymi, MSRP i kodam
 | Pytanie | Dokument |
 |---|---|
 | Od czego zacząć, zasady pracy, konwencje kodu, bezpieczeństwo (czytane automatycznie przez Claude Code) | [`../CLAUDE.md`](../CLAUDE.md) |
-| **Dlaczego** coś jest zrobione tak, a nie inaczej | [decisions.md](decisions.md) — rejestr decyzji D1–D25 |
+| **Dlaczego** coś jest zrobione tak, a nie inaczej | [decisions.md](decisions.md) — rejestr decyzji D1–D26 |
 | Jak części systemu współpracują, przepływy (zestawienie PDF, sesja panelu, zdjęcia, zgoda) | [architecture.md](architecture.md) |
 | Jak uruchomić, przetestować, pułapki środowiska | [development.md](development.md) |
 | Wdrożenie na serwer, aktualizacja, kopie zapasowe, odtwarzanie | [deployment.md](deployment.md) |

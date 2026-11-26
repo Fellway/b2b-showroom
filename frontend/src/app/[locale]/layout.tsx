@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Golos_Text } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
@@ -32,9 +32,14 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
   return {
     title: { default: t("title"), template: `%s · Fabian's Style` },
     description: t("description"),
-    icons: { icon: "/brand/favicon.png" },
+    icons: { icon: "/brand/favicon.png", apple: "/pwa/apple-touch-icon.png" },
+    manifest: "/manifest.webmanifest",
+    appleWebApp: { capable: true, title: "Fabian's Style", statusBarStyle: "default" },
   };
 }
+
+/** `viewport-fit=cover` — przyklejone paski (zestawienie, przycisk dodania) omijają wcięcie ekranu przez safe-area. */
+export const viewport: Viewport = { themeColor: "#ffffff", viewportFit: "cover" };
 
 export default async function LocaleLayout({ children, params }: LayoutProps<"/[locale]">) {
   const { locale } = await params;

@@ -35,7 +35,7 @@ export function StatusAction({ product }: { product: ProductListItem }) {
           run();
         }}
         disabled={change.isPending}
-        className="inline-flex h-8 items-center gap-1.5 px-2 text-ink-2 hover:text-foreground disabled:text-ink-3"
+        className="-mr-2 inline-flex h-10 items-center gap-1.5 px-2 text-ink-2 hover:text-foreground disabled:text-ink-3 md:mr-0 md:h-8"
       >
         {hide ? <EyeOff aria-hidden className="size-4" strokeWidth={1.5} /> : <Eye aria-hidden className="size-4" strokeWidth={1.5} />}
         {change.isPending ? "Zapisywanie…" : hide ? "Ukryj" : "Publikuj"}

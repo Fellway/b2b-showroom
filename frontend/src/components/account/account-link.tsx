@@ -16,10 +16,10 @@ export function AccountLink() {
   return (
     <Link
       href={authenticated ? "/account" : "/account/login"}
-      className="flex h-9 items-center gap-1.5 px-2 text-small text-ink-2 transition-colors hover:text-foreground"
+      className="flex h-11 min-w-11 items-center justify-center gap-1.5 px-2 text-small sm:h-9 sm:min-w-0 text-ink-2 transition-colors hover:text-foreground"
       title={authenticated ? state.buyer.companyName : undefined}
     >
-      <CircleUserRound aria-hidden className="size-4" strokeWidth={1.5} />
+      <CircleUserRound aria-hidden className="size-[18px] sm:size-4" strokeWidth={1.5} />
       <span className="hidden sm:inline">{authenticated ? t("account") : t("signIn")}</span>
       <span className="sr-only sm:hidden">{authenticated ? t("account") : t("signIn")}</span>
     </Link>

@@ -297,7 +297,14 @@ export function ProductView({
           )}
         </fieldset>
 
-        <div className="mt-6 flex flex-col gap-3">
+        {/* na telefonie, gdy kupiec wybrał rozmiary, przycisk przykleja się do dołu ekranu — nie trzeba go szukać pod listą */}
+        <div
+          className={cn(
+            "mt-6 flex flex-col gap-3",
+            changed &&
+              "sticky bottom-0 z-10 -mx-5 border-t border-line bg-background px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 md:static md:mx-0 md:border-0 md:p-0",
+          )}
+        >
           <button
             type="button"
             onClick={() => commit()}

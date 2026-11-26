@@ -26,8 +26,8 @@ export function ProductFilters({
   };
 
   return (
-    <div className="flex flex-wrap items-end gap-3 pb-6">
-      <form onSubmit={submit} role="search" className="relative w-full max-w-sm">
+    <div className="grid grid-cols-2 items-end gap-3 pb-6 md:flex md:flex-wrap">
+      <form onSubmit={submit} role="search" className="relative col-span-2 w-full md:max-w-sm">
         <Search aria-hidden className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-3" strokeWidth={1.5} />
         <input
           type="search"
@@ -40,7 +40,7 @@ export function ProductFilters({
           className="h-10 w-full border border-edge bg-background pl-9 pr-3 text-small outline-none transition-colors placeholder:text-ink-3 hover:border-foreground focus-visible:border-foreground focus-visible:outline-none"
         />
       </form>
-      <div className="w-44">
+      <div className="md:w-44">
         <Select aria-label="Status" value={filter.status ?? ""} onChange={(e) => onChange({ status: e.target.value || undefined })}>
           <option value="">Wszystkie statusy</option>
           {STATUSES.map((status) => (
@@ -50,7 +50,7 @@ export function ProductFilters({
           ))}
         </Select>
       </div>
-      <div className="w-56">
+      <div className="md:w-56">
         <Select
           aria-label="Kategoria"
           value={filter.categoryId ?? ""}
@@ -72,7 +72,7 @@ export function ProductFilters({
             setSearch("");
             onChange({ q: undefined, status: undefined, categoryId: undefined });
           }}
-          className="h-10 px-1 text-meta underline underline-offset-4 hover:no-underline"
+          className="col-span-2 h-10 justify-self-start px-1 text-meta underline underline-offset-4 hover:no-underline"
         >
           Wyczyść filtry
         </button>

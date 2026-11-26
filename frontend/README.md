@@ -34,6 +34,16 @@ administracyjny pod `/admin`.
   nagłówkiem. Po akceptacji ceny pobierane od nowa (`invalidatePricing`). „Moje konto”: akceptacja w treści strony,
   historia zgód, pobranie danych (JSON), usunięcie konta z hasłem (`components/account/account-privacy.tsx`).
 
+## Telefon i PWA (D26)
+
+- Katalog: w nagłówku poniżej `sm` ikony konta i zestawienia (pola dotyku 44 px), zawijany wiersz karty produktu,
+  przyklejony przycisk dodania na karcie produktu po wybraniu rozmiarów; `viewport-fit=cover` + `env(safe-area-inset-*)`.
+- Panel poniżej `lg`: górny pasek z menu, dolny pasek (Zestawienia, Kupcy z licznikiem, Modele, Więcej), pełna
+  nawigacja w panelu wysuwanym z lewej (`components/admin/shell/admin-shell.tsx`). Poniżej `md` zestawienia, kupcy
+  i modele to listy kart (tabela od `md`); szybka zmiana ceny i publikacji działa z listy.
+- PWA: `src/app/manifest.ts` (katalog, start `/`) i `public/admin.webmanifest` (panel, start `/admin/line-sheets`,
+  zakres `/admin/`), ikony w `public/pwa` wygenerowane z logotypu. Bez service workera — brak trybu offline.
+
 ## Panel administracyjny (`/admin`)
 
 - Osobny layout po polsku, poza routingiem językowym (`src/proxy.ts` pomija `/admin`), `noindex`.

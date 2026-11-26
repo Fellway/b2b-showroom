@@ -68,7 +68,15 @@ export function BuyersPage() {
       <PageHeader title="Kupcy" meta={data ? `${data.totalItems}` : undefined} />
       <PageBody>
         <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4 pb-6">
-          <nav aria-label="Status kont" className="flex flex-wrap gap-1">
+          {/* na telefonie zakładki statusów przewijają się w poziomie */}
+          <nav
+            aria-label="Status kont"
+            ref={(nav) => {
+              // aktywna zakładka zawsze widoczna w przewijanym pasku (telefon)
+              nav?.querySelector<HTMLElement>("[aria-current]")?.scrollIntoView({ block: "nearest", inline: "nearest" });
+            }}
+            className="-mx-5 flex gap-1 overflow-x-auto px-5 [scrollbar-width:none] md:mx-0 md:flex-wrap md:overflow-visible md:px-0"
+          >
             {BUYER_FILTERS.map((filter) => {
               const active = filter.value === status;
               return (
@@ -78,7 +86,7 @@ export function BuyersPage() {
                   aria-current={active ? "true" : undefined}
                   onClick={() => navigate({ status: filter.value === "PENDING_APPROVAL" ? null : filter.value, page: null })}
                   className={cn(
-                    "h-9 px-3 transition-colors",
+                    "h-10 shrink-0 whitespace-nowrap px-3 transition-colors md:h-9",
                     active ? "bg-foreground text-background" : "text-ink-2 hover:bg-well hover:text-foreground",
                   )}
                 >
@@ -87,7 +95,7 @@ export function BuyersPage() {
               );
             })}
           </nav>
-          <form onSubmit={submitSearch} role="search" className="flex w-full max-w-xs items-center gap-2">
+          <form onSubmit={submitSearch} role="search" className="flex w-full items-center gap-2 md:max-w-xs">
             <TextInput
               type="search"
               aria-label="Szukaj kupca"
@@ -114,7 +122,32 @@ export function BuyersPage() {
           </EmptyState>
         ) : (
           <>
-            <Table>
+            <ul className="divide-y divide-line border-y border-line md:hidden">
+              {data.items.map((buyer) => (
+                <li key={buyer.id}>
+                  <button
+                    type="button"
+                    onClick={() => navigate({ buyer: buyer.id })}
+                    className="flex w-full flex-col gap-1 py-3.5 text-left active:bg-well"
+                  >
+                    <span className="flex items-baseline justify-between gap-3">
+                      <span className="min-w-0 font-medium">{buyer.companyName}</span>
+                      <span className="tabular shrink-0 text-meta text-ink-3">{formatDateTime(buyer.createdAt)}</span>
+                    </span>
+                    <span className="break-all text-meta text-ink-3">
+                      {buyer.contactName} · {buyer.email}
+                    </span>
+                    <span className="flex items-center justify-between gap-3 text-meta">
+                      <BuyerStatusLabel status={buyer.status} />
+                      <span className="tabular text-ink-3">
+                        {buyer.countryCode} {buyer.taxId}
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <Table className="hidden md:table">
               <thead>
                 <tr>
                   <Th>Firma</Th>
@@ -182,7 +215,7 @@ function BuyerSheet({ id, onClose }: { id: string | null; onClose: () => void })
         closeLabel="Zamknij"
         className="w-full gap-0 border-line p-0 shadow-panel data-[side=right]:w-full data-[side=right]:sm:max-w-[560px]"
       >
-        <div className="flex h-(--header-height) shrink-0 items-center border-b border-line px-6 pr-14">
+        <div className="flex h-(--header-height) shrink-0 items-center border-b border-line px-5 pr-14 md:px-6">
           <SheetTitle className="truncate text-body font-medium">{buyer?.companyName ?? "Kupiec"}</SheetTitle>
         </div>
         <SheetDescription className="sr-only">Dane konta kupca i decyzja o dostępie do cen</SheetDescription>
@@ -238,7 +271,7 @@ function BuyerDetails({ buyer, onDeleted }: { buyer: BuyerDetail; onDeleted: () 
 
   return (
     <>
-      <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+      <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 md:px-6">
         <div className="flex flex-col gap-6">
           <div>
             <BuyerStatusLabel status={buyer.status} />
@@ -322,7 +355,7 @@ function BuyerDetails({ buyer, onDeleted }: { buyer: BuyerDetail; onDeleted: () 
         </div>
       </div>
 
-      <div className="flex shrink-0 flex-col gap-3 border-t border-line px-6 py-4">
+      <div className="flex shrink-0 flex-col gap-3 border-t border-line px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 md:px-6">
         {(decision.error || removal.error) && (
           <p role="alert" className="text-small text-danger">
             {errorMessage(decision.error ?? removal.error)}
@@ -381,7 +414,7 @@ function Block({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="flex flex-col gap-2 border-t border-line pt-4">
       <h3 className="text-small font-medium">{title}</h3>
-      <dl className="grid grid-cols-[minmax(0,10rem)_1fr] gap-x-4 gap-y-1.5">{children}</dl>
+      <dl className="grid grid-cols-[minmax(0,7.5rem)_1fr] gap-x-3 gap-y-1.5 md:grid-cols-[minmax(0,10rem)_1fr] md:gap-x-4">{children}</dl>
     </section>
   );
 }

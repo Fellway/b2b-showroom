@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Mail, Phone } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { PageBody, PageHeader } from "@/components/admin/ui/page-header";
 import { EmptyState, ErrorState, LoadingRows } from "@/components/admin/ui/states";
@@ -37,7 +38,44 @@ export function LineSheetList() {
           </EmptyState>
         ) : (
           <>
-            <Table>
+            {/* telefon: karta leada — kontakt z kupcem jednym dotknięciem */}
+            <ul className="divide-y divide-line border-y border-line md:hidden">
+              {data.items.map((sheet) => (
+                <li key={sheet.id} className="py-3.5">
+                  <Link href={`/admin/line-sheets/${sheet.id}`} className="flex flex-col gap-1 active:bg-well">
+                    <span className="flex items-baseline justify-between gap-3">
+                      <span className="min-w-0 font-medium">{sheet.companyName ?? "Zestawienie anonimowe"}</span>
+                      <span className="tabular shrink-0 text-meta text-ink-3">{formatDateTime(sheet.createdAt)}</span>
+                    </span>
+                    <span className="tabular text-meta text-ink-3">
+                      {sheet.referenceNumber} · {sheet.itemCount} poz. · {LANGUAGE_NAME[sheet.language] ?? sheet.language}
+                      {sheet.contactName && <> · {sheet.contactName}</>}
+                    </span>
+                  </Link>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    {sheet.phone && (
+                      <a
+                        href={`tel:${sheet.phone.replace(/[^\d+]/g, "")}`}
+                        className="inline-flex h-10 items-center gap-2 border border-edge px-3 text-small"
+                      >
+                        <Phone aria-hidden className="size-4" strokeWidth={1.5} />
+                        Zadzwoń
+                      </a>
+                    )}
+                    {sheet.email && (
+                      <a href={`mailto:${sheet.email}`} className="inline-flex h-10 items-center gap-2 border border-edge px-3 text-small">
+                        <Mail aria-hidden className="size-4" strokeWidth={1.5} />
+                        E-mail
+                      </a>
+                    )}
+                    <span className="ml-auto">
+                      <PdfButton id={sheet.id} referenceNumber={sheet.referenceNumber} />
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <Table className="hidden md:table">
               <thead>
                 <tr>
                   <Th>Numer</Th>

@@ -24,10 +24,10 @@ export async function ProductCard({ product, priority }: { product: ProductCardD
       </div>
       <div className="flex flex-col gap-1 pt-3">
         <h2 className="text-small font-medium underline-offset-4 group-hover:underline">{product.name}</h2>
-        <div className="flex items-center gap-2 text-meta text-ink-3">
-          <span>{product.styleCode}</span>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-meta text-ink-3">
+          <span className="whitespace-nowrap">{product.styleCode}</span>
           <span aria-hidden>·</span>
-          <span className="flex items-center gap-1" aria-label={product.colors.map((c) => c.name).join(", ")}>
+          <span className="flex items-center gap-1 whitespace-nowrap" aria-label={product.colors.map((c) => c.name).join(", ")}>
             {product.colors.slice(0, 5).map((color) => (
               <span
                 key={color.id}

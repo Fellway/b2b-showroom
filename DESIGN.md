@@ -267,7 +267,7 @@ Siatka katalogu: 2 kolumny (odstęp 12 px) → 3 kolumny od `md` (16 px) → 4 k
 
 Rytm pionowy w panelach danych: 24 px między grupami (cena, kolor, rozmiary, akcja), 12 px między etykietą grupy a kontrolkami, 6 px między kontrolkami w siatce rozmiarów. Panele boczne mają poziomy padding 24 px, nagłówek o wysokości paska strony i stopkę akcji odciętą linią.
 
-Panel administracyjny: od `lg` dwie kolumny — nawigacja 232 px przyklejona na pełną wysokość okna, odcięta linią z prawej, i treść. Poniżej `lg` nawigacja staje się górnym paskiem przewijanym poziomo (bez etykiet grup), układ nie rozsypuje się na tablecie. Treść strony: margines 32 px, padding pionowy 32 px, szerokość do 1400 px (formularze wąskie do 48rem). Edytor modelu: kolumna kroków 180 px + odstęp 48 px + treść; sekcje edytora rozdzielone linią i paddingiem 40 px. Rankingi statystyk: trzy kolumny od `xl` z odstępem 48 px.
+Panel administracyjny: od `lg` dwie kolumny — nawigacja 232 px przyklejona na pełną wysokość okna, odcięta linią z prawej, i treść. Poniżej `lg` (telefon, tablet — D26): górny pasek 56 px z logo i przyciskiem menu, przyklejony dolny pasek z trzema najczęstszymi sekcjami (Zestawienia, Kupcy, Modele) i „Więcej”, pełna nawigacja w wysuwanym z lewej panelu (pozycje 44 px). Treść strony: margines 32 px (20 px poniżej `md`), padding pionowy 32 px (24 px poniżej `md`), szerokość do 1400 px (formularze wąskie do 48rem). Edytor modelu: kolumna kroków 180 px + odstęp 48 px + treść; sekcje edytora rozdzielone linią i paddingiem 40 px. Rankingi statystyk: trzy kolumny od `xl` z odstępem 48 px.
 
 ### Named Rules
 **The Dwie-gęstości Rule.** Obraz oddycha (40–56 px między rzędami, 64 px przed stopką strony), dane są zwarte (wiersze 6 px, odstęp w siatce kontrolek 6 px). Nie rozrzedzamy danych dla „powietrza” ani nie zagęszczamy siatki zdjęć dla „wydajności”.
@@ -343,6 +343,8 @@ Prostokąt min. 20 × 20 px, Meta, Data. Z wartością: negatyw `ink`/`paper` (p
 Panel 0 px, obrys `line`, cień „Menu”, szerokość 288 px (przełącznik języka 192 px), odstęp 6–8 px od wyzwalacza. Pozycje: Small, padding 8 × 12 px, hover `well`, zaznaczenie ikoną check 16 px po prawej (niewidoczna, ale rezerwująca miejsce, gdy niewybrana). Wyzwalacz: tekst + chevron 14 px w `ink-3`; otwarty dostaje podkreślenie.
 
 ### Navigation
+Na telefonie (poniżej `sm`) w nagłówku katalogu ikony zamiast słów: konto (`CircleUserRound`) i zestawienie (`ClipboardList` z licznikiem), pola dotyku 44 px — logo, język, konto i licznik mieszczą się bez łamania. Na karcie produktu, gdy kupiec wybrał rozmiary, przycisk dodania przykleja się do dołu ekranu (linia górna, `paper`, margines safe-area).
+
 Linki kategorii w Small `ink-2`, odstęp 24 px, pełna wysokość paska. Hover: `ink`. Aktywny: `ink` + linia 1 px `ink` u dołu, rozwijana od lewej (`scale-x`, 300 ms `ease-out-expo`). Paginacja: tekst „poprzednia / strona n z m / następna” ze strzałkami Lucide nad linią górną, bez numerów stron w kafelkach.
 
 ### Nawigacja panelu
@@ -350,6 +352,9 @@ Kolumna 232 px na `paper`, odcięta linią z prawej. U góry pas 64 px z logo (r
 
 ### Nagłówek strony panelu
 Przyklejony u góry treści, `paper`, linia dolna, min. wysokość 64 px, padding 12 × 32 px. Po lewej tytuł Body 500 i obok, na linii bazowej, meta w Meta `ink-3` (licznik, zakres dat); nad tytułem opcjonalny powrót: Meta `ink-3` ze strzałką Lucide 14 px. Po prawej akcje z odstępem 8 px — co najwyżej jedna czarna.
+
+### Lista kart (panel na telefonie)
+Poniżej `md` tabele zestawień, kupców i modeli zamieniają się w listę kart oddzielonych linią: tytuł Small 500 z datą Meta `ink-3` po prawej, wiersz meta w Meta `ink-3`, status i akcje pod spodem. Akcje kontaktu (Zadzwoń, E-mail) jako przyciski z obrysem 40 px z ikoną; szybkie zmiany (cena, publikacja) z polem dotyku min. 40 px i ikoną edycji widoczną zawsze (brak najechania). Zakładki statusów przewijają się w poziomie, aktywna zawsze widoczna. Edytor modelu, słowniki i statystyki pozostają pełnymi widokami — na telefonie działają, ale są projektowane pod komputer.
 
 ### Tabela panelu
 Gramatyka wiersza danych w pełnej tabeli: Small, nagłówki Meta `ink-3` 400 bez tła, wiersze z linią górną, komórki 12 px pionowo i 12 px poziomo (pierwsza i ostatnia bez zewnętrznego paddingu). Liczby `.tabular` wyrównane do prawej. Miniatura modelu 32 × 48 px (2:3) na `well`, przy braku zdjęcia ikona 14 px `ink-3`. Nazwa Small 500, pod nią kod w Meta `ink-3`; nazwa jest linkiem z podkreśleniem przy hover. Wiersz interaktywny (cały otwiera rekord): hover i fokus wewnątrz tła `well` w 60%. Akcje wiersza tekstem z ikoną po prawej.

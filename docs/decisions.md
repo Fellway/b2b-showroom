@@ -185,3 +185,21 @@ można je rewidować, jeśli zmienią się okoliczności. Nowe decyzje dopisuj n
   i `/privacy`.
 - **Do uzupełnienia przez markę:** dane administratora, okresy przechowywania (konta niepotwierdzone/odrzucone,
   zestawienia, statystyki — dziś bez automatycznego usuwania), dostawca hostingu.
+
+## D26. Wersja mobilna: strona responsywna + PWA *(użytkownik, 2026-11-26)*
+- **Dlaczego:** nowi kupcy przychodzą z mediów społecznościowych na telefonie, a marka chce reagować na wnioski
+  i zestawienia w biegu. Aplikacja natywna odłożona — jedna baza kodu, bez sklepów z aplikacjami, API jest gotowe,
+  gdyby była potrzebna później.
+- **Zakres (użytkownik):** część dla kupców dopracowana na telefonie (nagłówek z ikonami konta i zestawienia,
+  zawijany wiersz karty produktu, przyklejony przycisk dodania na karcie produktu, safe-area). W panelu wygodne na
+  telefonie trzy czynności: **akceptacja kupców, zestawienia (leady), szybkie zmiany modeli** (publikacja / ukrycie,
+  cena hurtowa). Edytor modelu, słowniki i statystyki działają, ale zostają projektowane pod komputer.
+- **Panel poniżej `lg`:** górny pasek z menu, przyklejony dolny pasek (Zestawienia, Kupcy z licznikiem wniosków,
+  Modele, Więcej), pełna nawigacja w wysuwanym panelu; poniżej `md` tabele zestawień, kupców i modeli jako listy
+  kart (kontakt z kupcem jednym dotknięciem: Zadzwoń / E-mail).
+- **PWA:** dwa manifesty — katalog (`app/manifest.ts`, start `/`) i panel (`public/admin.webmanifest`, start
+  `/admin/line-sheets`, zakres `/admin/`), ikony z logotypu w `public/pwa` (zwykłe, maskable, Apple),
+  `viewport-fit=cover`. **Bez service workera i trybu offline** — ceny, zestawienia i decyzje zawsze z aktualnego API;
+  współczesne przeglądarki nie wymagają service workera do instalacji. Powiadomienia push — ewentualnie później
+  (np. o nowym wniosku kupca).
+- **Do poprawy, gdy marka dostarczy logo w SVG:** ikony PWA (dziś wygenerowane z rastrowego logotypu).

@@ -11,7 +11,7 @@ export function InSelectionMark({ productId }: { productId: string }) {
   const count = useSelection((s) => s.lines.filter((l) => l.productId === productId).length);
   if (!hydrated || count === 0) return null;
   return (
-    <span className="tabular ml-auto inline-flex items-center gap-1.5 text-foreground">
+    <span className="tabular inline-flex basis-full items-center gap-1.5 whitespace-nowrap text-foreground sm:ml-auto sm:basis-auto">
       <span aria-hidden className="size-1.5 rounded-full bg-foreground" />
       {t("inSelection", { count })}
     </span>

@@ -64,10 +64,11 @@ export function PriceCell({ product }: { product: ProductListItem }) {
           start();
         }}
         aria-label={`Zmień cenę hurtową: ${product.name}`}
-        className="group/price -mr-1 inline-flex items-center gap-1.5 px-1 py-1 tabular hover:bg-background"
+        className="group/price -mr-1 inline-flex min-h-10 items-center gap-1.5 px-1 tabular hover:bg-background md:min-h-0 md:py-1"
       >
         {formatPln(product.price.wholesale, product.price.currency)}
-        <Pencil aria-hidden className="size-3.5 text-ink-3 opacity-0 transition-opacity group-hover/price:opacity-100 group-focus-visible/price:opacity-100" strokeWidth={1.5} />
+        {/* na ekranie dotykowym nie ma najechania — ołówek widoczny zawsze */}
+        <Pencil aria-hidden className="size-3.5 text-ink-3 transition-opacity md:opacity-0 md:group-hover/price:opacity-100 md:group-focus-visible/price:opacity-100" strokeWidth={1.5} />
       </button>
     );
   }
@@ -84,12 +85,12 @@ export function PriceCell({ product }: { product: ProductListItem }) {
           aria-label={`Nowa cena hurtowa netto: ${product.name}`}
           aria-invalid={Boolean(error) || undefined}
           disabled={update.isPending}
-          className="tabular h-8 w-24 border border-foreground bg-background px-2 text-right text-small outline-none aria-invalid:border-danger"
+          className="tabular h-10 w-24 border border-foreground bg-background px-2 text-right text-small outline-none aria-invalid:border-danger md:h-8"
         />
-        <button type="submit" disabled={update.isPending} aria-label="Zapisz cenę" className="flex size-8 items-center justify-center bg-foreground text-background hover:bg-ink-2 disabled:bg-ink-2">
+        <button type="submit" disabled={update.isPending} aria-label="Zapisz cenę" className="flex size-10 items-center justify-center bg-foreground text-background hover:bg-ink-2 disabled:bg-ink-2 md:size-8">
           <Check aria-hidden className="size-4" strokeWidth={1.5} />
         </button>
-        <button type="button" onClick={cancel} aria-label="Anuluj" className="flex size-8 items-center justify-center text-ink-3 hover:text-foreground">
+        <button type="button" onClick={cancel} aria-label="Anuluj" className="flex size-10 items-center justify-center text-ink-3 hover:text-foreground md:size-8">
           <X aria-hidden className="size-4" strokeWidth={1.5} />
         </button>
       </div>

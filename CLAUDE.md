@@ -28,6 +28,7 @@ etapów niżej; zmiana systemu wizualnego → `DESIGN.md`. Po zakończeniu etapu
 | 6a | Konta kupców — backend (D23): rejestracja + akceptacja, ceny/EAN/PDF tylko po zalogowaniu, e-maile transakcyjne (migracja V3) | ✅ |
 | 6b | Konta kupców — frontend: logowanie/rejestracja, ceny z `/api/v1/buyer/catalog/pricing`, „Moje zestawienia”, panel „Kupcy” | ✅ |
 | — | Regulamin i polityka prywatności z wersjami (moduł `legal`, migracja V4), rejestr zgód, brama regulaminu, eksport danych i usunięcie konta (D25) | ✅ — treść do weryfikacji prawnej |
+| — | Wersja mobilna: katalog na telefonie, panel (kupcy, zestawienia, szybkie zmiany modeli) z dolnym paskiem, PWA (D26) | ✅ |
 
 Pracujemy etapami — nie piszemy całego systemu naraz. Przed startem etapu zadajemy pytania doprecyzowujące,
 jeśli decyzja zmienia kształt rozwiązania.

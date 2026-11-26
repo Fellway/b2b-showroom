@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { ClipboardList } from "lucide-react";
 import { useSelection } from "@/store/selection";
 import { useHydrated } from "@/lib/use-hydrated";
 import { cn } from "@/lib/utils";
@@ -17,12 +18,15 @@ export function SelectionButton() {
       type="button"
       onClick={() => setDrawerOpen(true)}
       aria-haspopup="dialog"
+      // na telefonie ikona zamiast słowa — nagłówek mieści logo, język, konto i licznik bez łamania
       className={cn(
-        "flex h-10 items-center gap-2 px-3 text-small transition-colors",
+        "flex h-11 items-center gap-2 px-2 text-small transition-colors sm:h-10 sm:px-3",
         visibleCount > 0 ? "text-foreground" : "text-ink-2 hover:text-foreground",
       )}
     >
-      {t("selection")}
+      <ClipboardList aria-hidden className="size-[18px] sm:hidden" strokeWidth={1.5} />
+      <span className="hidden sm:inline">{t("selection")}</span>
+      <span className="sr-only sm:hidden">{t("selection")}</span>
       <span
         key={visibleCount}
         className={cn(

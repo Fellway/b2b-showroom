@@ -14,7 +14,8 @@
 | 5 | Wdrożenie: obrazy Docker, `deploy/` (Caddy + compose + kopie), CI i obrazy w GHCR (D22) | 🟡 przygotowane 2026-11-24, czeka na serwer i domenę |
 | 6 | Konta kupców: ceny/EAN/PDF po zalogowaniu, rejestracja z akceptacją, e-maile przez Brevo (D23) | ✅ 2026-11-25 |
 | — | Telefon z numerem kierunkowym i podpowiedź kraju (D24) | ✅ 2026-11-25 |
-| — | Regulamin i polityka prywatności z wersjami, rejestr zgód, prawa z RODO w 
+| — | Regulamin i polityka prywatności z wersjami, rejestr zgód, prawa z RODO w „Moim koncie” (D25) | ✅ 2026-11-26 — treść do weryfikacji prawnej |
+| — | Wersja mobilna: katalog na telefonie, kluczowe akcje panelu (kupcy, zestawienia, szybkie zmiany modeli), PWA (D26) | ✅ 2026-11-26 |
 
 Aplikacja działa lokalnie end-to-end na danych demonstracyjnych (z kontami kupców i wysyłką e-maili przez Brevo).
 CI na GitHubie: testy backendu (z bazą w Testcontainers), typy/lint/build frontendu, obrazy w GHCR z `main`. Repozytorium: [github.com/Fellway/b2b-showroom](https://github.com/Fellway/b2b-showroom).
@@ -48,7 +49,8 @@ Priorytet biznesowy od 2026-11-24 — przed importem/eksportem Excela.
    uzupełnić pola w `[nawiasach]` we wzorach (panel → Dokumenty prawne), zatwierdzenie przez prawnika, okresy
    przechowywania danych (potem ewentualnie automatyczne usuwanie starych kont i zestawień).
 3. **Import prawdziwych danych produktów** i packshotów (zamiast danych demonstracyjnych; potem `NEXT_PUBLIC_DEMO_NOTICE=false`).
-4. **Wersja mobilna** katalogu i panelu, potem aplikacja mobilna (API jest gotowe).
+4. ~~Wersja mobilna~~ — zrobione jako strona responsywna + PWA (D26, 2026-11-26). Dalej ewentualnie: powiadomienia
+   push (nowy wniosek kupca, nowe zestawienie), edytor modelu na telefonie (zdjęcia z aparatu), aplikacja natywna.
 
 ## Backlog pomysłów (2026-10-09)
 
@@ -77,7 +79,6 @@ i zapisz decyzje w `decisions.md`.
 
 ### Marka i prawo
 - **Strona „O marce”** — szyte w Polsce, autorski design, warunki współpracy (ważne dla nowych kupców z Instagrama).
-- **Wersja mobilna** katalogu i panelu, potem aplikacja mobilna.
 
 Rekomendowana kolejność (z rozmowy 2026-10-09): wdrożenie → import z Excela + eksport zestawienia do Excela →
 zestawienia jako mini-CRM.
@@ -98,7 +99,7 @@ zestawienia jako mini-CRM.
 - [ ] Dane marki w PDF: `SHOWROOM_BRAND_*` (nazwa, firma, adres, kontakt), opcjonalnie logo
 - [ ] Prawdziwy opiekun handlowy w panelu (zamiast przykładowego)
 - [ ] `NEXT_PUBLIC_DEMO_NOTICE=false` po imporcie prawdziwych danych
-- [ ] Regulamin i polityka prywatności: pola `[…]` uzupełnione, treść zatwierdzona przez prawnika, uwaga 
+- [ ] Regulamin i polityka prywatności: pola `[…]` uzupełnione, treść zatwierdzona przez prawnika, uwaga „Wzór do weryfikacji” usunięta, nowa wersja opublikowana w panelu
 
 ## Czeka na markę / właściciela
 

@@ -16,7 +16,7 @@ export function PageHeader({
 }) {
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-background">
-      <div className="flex min-h-(--header-height) flex-wrap items-center gap-x-6 gap-y-2 px-8 py-3">
+      <div className="flex min-h-14 flex-wrap items-center gap-x-6 gap-y-2 px-5 py-3 md:min-h-(--header-height) md:px-8">
         <div className="min-w-0 flex-1">
           {back && (
             <Link href={back.href} className="mb-0.5 inline-flex items-center gap-1.5 text-meta text-ink-3 hover:text-foreground">
@@ -37,5 +37,5 @@ export function PageHeader({
 
 /** Treść strony panelu z marginesem i maksymalną szerokością czytelną dla tabel i formularzy. */
 export function PageBody({ children, narrow }: { children: ReactNode; narrow?: boolean }) {
-  return <div className={narrow ? "max-w-3xl px-8 py-8" : "max-w-[1400px] px-8 py-8"}>{children}</div>;
+  return <div className={narrow ? "max-w-3xl px-5 py-6 md:px-8 md:py-8" : "max-w-[1400px] px-5 py-6 md:px-8 md:py-8"}>{children}</div>;
 }

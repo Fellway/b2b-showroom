@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Golos_Text } from "next/font/google";
 import type { ReactNode } from "react";
 import { AdminProviders } from "@/components/admin/providers";
@@ -14,8 +14,13 @@ const golos = Golos_Text({
 export const metadata: Metadata = {
   title: { default: "Panel · Fabian's Style", template: "%s · Panel · Fabian's Style" },
   robots: { index: false, follow: false },
-  icons: { icon: "/brand/favicon.png" },
+  icons: { icon: "/brand/favicon.png", apple: "/pwa/apple-touch-icon.png" },
+  // panel instalowany na telefonie otwiera się na zestawieniach (osobny manifest, zakres /admin/)
+  manifest: "/admin.webmanifest",
+  appleWebApp: { capable: true, title: "FS Panel", statusBarStyle: "default" },
 };
+
+export const viewport: Viewport = { themeColor: "#ffffff", viewportFit: "cover" };
 
 export default function AdminRootLayout({ children }: { children: ReactNode }) {
   return (
